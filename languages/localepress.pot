@@ -1,0 +1,1679 @@
+# Copyright (C) 2026 LocalePress
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: LocalePress 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/localepress\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-22T06:56:47+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: localepress\n"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#: localepress.php
+#: src/Admin/class-adminmodule.php:129
+#: src/Switcher/class-navigationmenuintegration.php:74
+msgid "LocalePress"
+msgstr ""
+
+#. Description of the plugin
+#: localepress.php
+msgid "A lightweight multilingual foundation for WordPress."
+msgstr ""
+
+#: includes/functions.php:27
+msgid "Register LocalePress strings on init or later."
+msgstr ""
+
+#. translators: 1: required PHP version, 2: current PHP version.
+#: localepress.php:36
+#, php-format
+msgid "LocalePress requires PHP %1$s or newer. This site is running PHP %2$s."
+msgstr ""
+
+#. translators: 1: required WordPress version, 2: current WordPress version.
+#: localepress.php:70
+#, php-format
+msgid "LocalePress requires WordPress %1$s or newer. This site is running WordPress %2$s."
+msgstr ""
+
+#: src/Admin/class-adminmodule.php:128
+msgid "LocalePress Languages"
+msgstr ""
+
+#: src/Admin/class-adminmodule.php:255
+#: src/Admin/class-languagespage.php:53
+msgid "You are not allowed to manage LocalePress languages."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:129
+#: src/Admin/class-languagespage.php:103
+#: src/Admin/class-languagespage.php:154
+#: src/Admin/class-settingspage.php:412
+#: src/Admin/class-setupwizardpage.php:125
+#: src/Admin/class-termtranslationfields.php:74
+#: src/Admin/class-termtranslationfields.php:100
+#: src/Admin/class-termtranslationlisttable.php:93
+#: src/Admin/class-termtranslationlisttable.php:99
+#: src/Admin/class-translationlisttable.php:111
+#: src/Admin/class-translationlisttable.php:117
+msgid "Language"
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:202
+msgid "You are not allowed to create this translation."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:242
+msgid "Translated draft created and linked."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:259
+msgid "LocalePress could not complete the translation action."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:311
+#: src/Content/class-posttranslationmanager.php:684
+msgid "The requested post could not be found."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:312
+#: src/Content/class-posttranslationmanager.php:690
+msgid "That post type is not supported by LocalePress."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:313
+#: src/Admin/class-termtranslationmodule.php:336
+#: src/Content/class-posttranslationmanager.php:708
+#: src/Taxonomy/class-termtranslationmanager.php:777
+msgid "Select a registered language."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:314
+#: src/Admin/class-termtranslationmodule.php:337
+#: src/Content/class-posttranslationmanager.php:712
+#: src/StringTranslation/class-stringmanager.php:230
+#: src/Taxonomy/class-termtranslationmanager.php:781
+msgid "Select an enabled language."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:315
+msgid "A translation for that language already exists."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:316
+msgid "This post is already assigned to a different language."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:317
+msgid "Posts from different translation groups cannot be linked."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:318
+#: src/Content/class-posttranslationmanager.php:307
+msgid "Translations in one group must use the same post type."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:319
+msgid "Assign a language to the source post first."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:320
+#: src/Content/class-posttranslationmanager.php:582
+msgid "Configure an enabled default language before translating content."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:321
+#: src/Content/class-posttranslationmanager.php:439
+msgid "A trashed post cannot be used as a translation source."
+msgstr ""
+
+#: src/Admin/class-contenttranslationmodule.php:322
+#: src/Content/class-posttranslationmanager.php:803
+msgid "LocalePress could not save the translation relationship."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:94
+#: src/Admin/class-setupwizardpage.php:197
+msgid "Languages"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:96
+#: src/Admin/class-languagespage.php:281
+#: src/Admin/class-languagespage.php:395
+msgid "Add Language"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:104
+#: src/Admin/class-languagespage.php:184
+#: src/Admin/class-languagespage.php:326
+msgid "Locale"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:105
+#: src/Admin/class-languagespage.php:187
+msgid "Code"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:106
+#: src/Admin/class-languagespage.php:190
+#: src/Admin/class-languagespage.php:340
+msgid "URL slug"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:107
+#: src/Admin/class-languagespage.php:193
+msgid "Direction"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:108
+#: src/Admin/class-languagespage.php:196
+#: src/Admin/class-languagespage.php:363
+msgid "Status"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:109
+#: src/Admin/class-languagespage.php:226
+msgid "Order"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:115
+msgid "No languages have been added yet."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:139
+#: src/Admin/class-languagespage.php:379
+#: src/Admin/class-settingspage.php:387
+msgid "Enabled"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:139
+msgid "Disabled"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:140
+msgid "RTL"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:140
+msgid "LTR"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:141
+msgid "Disable"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:141
+msgid "Enable"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:142
+msgid "Delete this language? This does not delete site content."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:161
+#: src/Admin/class-translationdashboardlisttable.php:331
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:176
+msgid "Delete"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:181
+msgid "Show more details"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:201
+msgid "Default"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:220
+msgid "Make default"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:258
+#: src/Admin/class-languagespage.php:651
+#: src/Language/class-languagemanager.php:177
+#: src/Language/class-languagemanager.php:224
+#: src/Language/class-languagemanager.php:279
+#: src/Language/class-languagemanager.php:309
+#: src/Language/class-languagemanager.php:344
+msgid "The requested language could not be found."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:281
+msgid "Edit Language"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:285
+#: src/Admin/class-setupwizardmodule.php:77
+#: src/Admin/class-setupwizardpage.php:64
+msgid "Set Up LocalePress"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:312
+msgid "Name"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:314
+msgid "The administrative display name, for example French."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:319
+#: src/Admin/class-settingspage.php:258
+#: src/Admin/class-setupwizardpage.php:166
+#: src/Switcher/class-navigationmenuintegration.php:143
+#: blocks/language-switcher/index.js:31
+msgid "Native name"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:321
+msgid "The language name as written by native speakers, for example Français."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:328
+msgid "A WordPress locale such as en_US, fr_FR, or de_DE_formal."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:333
+#: src/Admin/class-settingspage.php:260
+#: src/Admin/class-setupwizardpage.php:166
+#: src/Switcher/class-navigationmenuintegration.php:145
+#: blocks/language-switcher/index.js:33
+msgid "Language code"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:335
+msgid "A two- or three-letter ISO 639 language code, such as en or fra."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:342
+msgid "The unique path segment reserved for this language, such as en or french."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:347
+msgid "Text direction"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:358
+msgid "Right-to-left (RTL)"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:382
+msgid "The default language must remain enabled."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:391
+msgid "Update Language"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:393
+msgid "Save and Continue"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:402
+msgid "Cancel"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:423
+msgid "Choose a language"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:427
+#: src/Admin/class-termtranslationfields.php:127
+#: src/Admin/class-translationmetabox.php:81
+msgid "Select a language"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:453
+msgid "Selecting a preset fills the editable language fields below."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:568
+msgid "Move up"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:568
+msgid "Move down"
+msgstr ""
+
+#: src/Admin/class-languagespage.php:626
+#: src/Admin/class-setupwizardpage.php:273
+msgid "LocalePress setup is complete."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:627
+msgid "Language added."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:628
+msgid "Language updated."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:629
+msgid "Language deleted."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:630
+msgid "Default language updated."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:631
+msgid "Language status updated."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:632
+msgid "Language order updated."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:643
+#: src/Language/class-languagevalidator.php:41
+msgid "Language name is required."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:644
+#: src/Language/class-languagevalidator.php:45
+msgid "Native name is required."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:645
+#: src/Language/class-languagevalidator.php:49
+msgid "Language names must be 100 characters or fewer."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:646
+#: src/Language/class-languagevalidator.php:55
+msgid "Enter a valid WordPress locale, such as en_US or pt_BR."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:647
+#: src/Language/class-languagevalidator.php:62
+msgid "Language code must contain two or three lowercase letters."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:648
+#: src/Language/class-languagevalidator.php:69
+msgid "URL slug is required and must be 80 characters or fewer."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:649
+#: src/Language/class-languagevalidator.php:86
+msgid "That locale is already registered."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:650
+#: src/Language/class-languagevalidator.php:90
+msgid "That URL slug is already in use."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:652
+#: src/Language/class-languagemanager.php:285
+msgid "Enable a language before making it the default."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:653
+#: src/Language/class-languagemanager.php:193
+#: src/Language/class-languagemanager.php:313
+msgid "The default language cannot be disabled."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:654
+#: src/Language/class-languagemanager.php:340
+msgid "Invalid language ordering direction."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:655
+msgid "Language data is invalid."
+msgstr ""
+
+#: src/Admin/class-languagespage.php:656
+#: src/Content/class-translationlifecyclemodule.php:151
+#: src/Language/class-languagemanager.php:246
+msgid "This language is assigned to content and cannot be deleted."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:137
+#: src/Admin/class-settingspage.php:110
+msgid "LocalePress Settings"
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:138
+#: src/Admin/class-setupwizardpage.php:197
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:184
+msgid "The requested settings section is invalid."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:202
+msgid "LocalePress could not encode the settings export."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:261
+msgid "Choose at least one enabled language and make an enabled language the default."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:335
+msgid "A selected post type or taxonomy is not available."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:440
+msgid "The settings file upload failed."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:448
+msgid "Choose a JSON settings file no larger than 1 MB."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:452
+msgid "WordPress could not verify the uploaded settings file."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:459
+msgid "WordPress could not read the uploaded settings file."
+msgstr ""
+
+#: src/Admin/class-settingsmodule.php:477
+#: src/Admin/class-settingspage.php:104
+msgid "You are not allowed to manage LocalePress settings."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:119
+msgid "Save Changes"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:148
+#: src/Admin/class-settingspage.php:488
+msgid "General"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:151
+msgid "Add a language before configuring LocalePress."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:152
+msgid "Run setup"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:157
+#: src/Admin/class-setupwizardpage.php:93
+#: src/Admin/class-setupwizardpage.php:149
+msgid "Default language"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:166
+msgid "Unassigned content and unprefixed requests use this language."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:170
+#: src/Admin/class-settingspage.php:173
+msgid "Enabled languages"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:181
+msgid "Disabling a language hides its routes and switcher entry but does not delete its translations."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:185
+msgid "Manage language details and ordering"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:194
+#: src/Admin/class-settingspage.php:489
+msgid "URL"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:195
+msgid "Changing URL behavior changes public canonical URLs."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:195
+msgid "Update navigation links and clear page or CDN caches after saving."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:197
+msgid "Language directories require pretty permalinks. Choose a permalink structure in WordPress before enabling frontend routing."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:201
+msgid "Language URL behavior"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:203
+msgid "Language directories (/en/)"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:204
+msgid "LocalePress Free supports directory-based language URLs."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:208
+msgid "Default language prefix"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:210
+msgid "Prefix every language, including the default"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:211
+msgid "Hide the prefix for the default language"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:225
+#: src/Admin/class-settingspage.php:490
+#: src/Admin/class-translationdashboardlisttable.php:164
+msgid "Content"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:228
+msgid "Translatable post types"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:232
+msgid "Translatable taxonomies"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:236
+msgid "New translated drafts"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:238
+msgid "Copy source content and excerpt"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:239
+msgid "Reuse the source featured image"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:254
+#: src/Admin/class-settingspage.php:491
+#: src/Admin/class-setupwizardpage.php:239
+msgid "Switcher"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:256
+#: src/Admin/class-setupwizardpage.php:166
+msgid "Label"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:259
+#: src/Admin/class-setupwizardpage.php:166
+#: src/Switcher/class-navigationmenuintegration.php:144
+#: blocks/language-switcher/index.js:32
+msgid "Language name"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:263
+#: src/Admin/class-setupwizardpage.php:167
+#: src/Switcher/class-navigationmenuintegration.php:151
+#: blocks/language-switcher/index.js:40
+msgid "Layout"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:265
+#: src/Admin/class-setupwizardpage.php:167
+#: src/Switcher/class-navigationmenuintegration.php:154
+#: blocks/language-switcher/index.js:43
+msgid "Horizontal list"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:266
+#: src/Admin/class-setupwizardpage.php:167
+#: src/Switcher/class-navigationmenuintegration.php:155
+#: blocks/language-switcher/index.js:44
+msgid "Vertical list"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:267
+#: src/Admin/class-setupwizardpage.php:167
+#: src/Switcher/class-navigationmenuintegration.php:153
+#: blocks/language-switcher/index.js:45
+msgid "Dropdown"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:270
+msgid "Missing translation"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:272
+msgid "Show as unavailable"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:273
+msgid "Link to language homepage"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:274
+#: src/Switcher/class-navigationmenuintegration.php:166
+#: blocks/language-switcher/index.js:73
+msgid "Keep current URL"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:277
+msgid "Visibility"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:278
+#: src/Switcher/class-navigationmenuintegration.php:170
+#: blocks/language-switcher/index.js:52
+msgid "Hide current language"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:279
+#: src/Switcher/class-navigationmenuintegration.php:171
+#: blocks/language-switcher/index.js:59
+msgid "Hide languages without a translation"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:280
+#: src/Switcher/class-navigationmenuintegration.php:173
+#: blocks/language-switcher/index.js:87
+msgid "Show disabled languages as unavailable"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:281
+msgid "Show flags supplied by an integration"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:285
+msgid "Navigation Menus"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:287
+msgid "Theme Locations"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:296
+#: src/Admin/class-settingspage.php:492
+msgid "SEO"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:298
+msgid "Alternate language URLs"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:300
+msgid "Output hreflang links for available translations"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:301
+msgid "Include x-default using the default language URL"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:302
+msgid "Canonical URL integration remains active when hreflang output is disabled."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:311
+#: src/Admin/class-settingspage.php:493
+msgid "Advanced"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:313
+msgid "Uninstall behavior"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:314
+msgid "Enabling this option will permanently delete LocalePress data when the plugin is uninstalled. Continue?"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:314
+msgid "Delete all LocalePress data when the plugin is uninstalled"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:315
+msgid "Deactivation never deletes data. This option applies only to uninstalling the plugin."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:332
+msgid "All eligible types"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:333
+msgid "Only selected types"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:348
+msgid "Settings Export"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:349
+msgid "The export includes language locales and portable plugin settings. Navigation menu IDs are excluded."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:353
+msgid "Download Settings JSON"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:356
+msgid "Settings Import"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:357
+msgid "Import replaces portable settings and enabled-language choices. Every imported locale must already be registered on this site."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:362
+msgid "JSON file"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:363
+msgid "Or paste JSON"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:365
+msgid "Import Settings"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:365
+msgid "Import these settings and replace the current portable configuration?"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:382
+msgid "LocalePress version"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:383
+msgid "WordPress version"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:384
+msgid "PHP version"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:385
+msgid "Pretty permalinks"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:385
+#: src/Admin/class-settingspage.php:391
+msgid "Yes"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:385
+#: src/Admin/class-settingspage.php:391
+msgid "No"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:386
+msgid "URL mode"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:387
+msgid "Default prefix"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:387
+msgid "Hidden"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:388
+msgid "Registered / enabled languages"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:389
+msgid "Post type policy"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:390
+msgid "Taxonomy policy"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:391
+msgid "Routing conflict detected"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:394
+msgid "Debug Information"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:412
+msgid "Menu"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:416
+msgid "No navigation menus exist for this site."
+msgstr ""
+
+#. translators: %s: navigation menu name.
+#: src/Admin/class-settingspage.php:422
+#, php-format
+msgid "Language for %s"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:426
+#: src/Admin/class-termtranslationlisttable.php:187
+#: src/Admin/class-translationlisttable.php:198
+msgid "Not assigned"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:447
+msgid "Theme location"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:455
+msgid "The active theme has no registered menu locations."
+msgstr ""
+
+#. translators: 1: theme location label, 2: language native name.
+#: src/Admin/class-settingspage.php:467
+#, php-format
+msgid "%1$s menu for %2$s"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:472
+msgid "Use WordPress default"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:496
+msgid "LocalePress settings sections"
+msgstr ""
+
+#: src/Admin/class-settingspage.php:521
+msgid "LocalePress settings saved."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:522
+msgid "URL behavior changed. Review public links and clear page or CDN caches."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:523
+msgid "LocalePress settings imported."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:524
+msgid "Settings imported and URL behavior changed. Review public links and clear caches."
+msgstr ""
+
+#: src/Admin/class-settingspage.php:531
+msgid "LocalePress could not save these settings."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:78
+msgid "Setup Wizard"
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:102
+#: src/Admin/class-setupwizardpage.php:58
+msgid "You are not allowed to set up LocalePress."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:134
+msgid "Choose a registered site language."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:182
+msgid "Choose a different second language."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:246
+msgid "The selected navigation menu is not available."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:265
+#: src/Switcher/class-navigationmenuintegration.php:96
+#: src/Switcher/class-navigationmenuintegration.php:101
+msgid "Language switcher"
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:325
+msgid "Choose a language from the LocalePress catalog."
+msgstr ""
+
+#: src/Admin/class-setupwizardmodule.php:329
+msgid "That language is already registered."
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:89
+#: src/Admin/class-setupwizardpage.php:239
+msgid "Site Language"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:90
+msgid "Choose the language used by your existing content."
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:108
+#: src/Admin/class-setupwizardpage.php:136
+#: src/Admin/class-setupwizardpage.php:154
+#: src/Admin/class-setupwizardpage.php:174
+msgid "Continue"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:121
+#: src/Admin/class-setupwizardpage.php:239
+msgid "Second Language"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:122
+msgid "Add the next language you plan to translate. You can add more languages later."
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:126
+msgid "Not now"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:144
+msgid "Language URLs"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:145
+msgid "This choice sets public URLs and canonical links. Changing it later may require link and cache updates."
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:148
+msgid "URL format"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:148
+msgid "Language directories"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:150
+msgid "Use a language prefix"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:151
+msgid "Use the site root without a prefix"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:163
+msgid "Language Switcher"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:168
+msgid "Add to menu"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:168
+msgid "Do not add to a menu"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:172
+msgid "The switcher can also be added later with the block, shortcode, or Appearance > Menus."
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:182
+msgid "Ready to Translate"
+msgstr ""
+
+#. translators: %d: number of enabled languages.
+#: src/Admin/class-setupwizardpage.php:188
+#, php-format
+msgid "%d language is enabled."
+msgid_plural "%d languages are enabled."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/class-setupwizardpage.php:196
+msgid "Finish Setup"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:197
+#: src/Admin/class-termtranslationfields.php:108
+#: src/Admin/class-termtranslationlisttable.php:94
+#: src/Admin/class-termtranslationlisttable.php:100
+#: src/Admin/class-translationdashboardmodule.php:73
+#: src/Admin/class-translationdashboardmodule.php:150
+#: src/Admin/class-translationlisttable.php:112
+#: src/Admin/class-translationlisttable.php:118
+#: src/Admin/class-translationmetabox.php:95
+msgid "Translations"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:227
+msgid "Back"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:239
+msgid "URL Format"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:239
+msgid "Finish"
+msgstr ""
+
+#: src/Admin/class-setupwizardpage.php:271
+msgid "LocalePress could not save this setup step."
+msgstr ""
+
+#: src/Admin/class-stringtranslationlisttable.php:131
+msgid "Registered string"
+msgstr ""
+
+#: src/Admin/class-stringtranslationlisttable.php:132
+msgid "Original string"
+msgstr ""
+
+#: src/Admin/class-stringtranslationlisttable.php:133
+msgid "Translation"
+msgstr ""
+
+#: src/Admin/class-stringtranslationlisttable.php:211
+msgid "No enabled language"
+msgstr ""
+
+#. translators: 1: native language name, 2: original string.
+#: src/Admin/class-stringtranslationlisttable.php:216
+#, php-format
+msgid "%1$s translation for %2$s"
+msgstr ""
+
+#: src/Admin/class-stringtranslationlisttable.php:249
+msgid "No registered strings matched the current filters."
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:71
+msgid "LocalePress String Translation"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:72
+#: src/Admin/class-stringtranslationmodule.php:154
+msgid "String Translation"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:92
+msgid "Strings per page"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:159
+msgid "Enable at least one language before translating registered strings."
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:173
+msgid "Save translations"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:216
+msgid "Filter by string group"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:218
+msgid "All string groups"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:230
+msgid "Select translation language"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:234
+msgid "No enabled languages"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:247
+#: src/Admin/class-translationdashboardlisttable.php:550
+msgid "Filter"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:248
+msgid "Search strings"
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:325
+msgid "String translations saved."
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:327
+msgid "The string translations could not be saved."
+msgstr ""
+
+#: src/Admin/class-stringtranslationmodule.php:342
+msgid "You are not allowed to manage string translations."
+msgstr ""
+
+#: src/Admin/class-termtranslationfields.php:76
+#: src/Admin/class-termtranslationfields.php:104
+msgid "Language assigned to this term."
+msgstr ""
+
+#: src/Admin/class-termtranslationfields.php:152
+msgid "Update the term to assign its language before adding translations."
+msgstr ""
+
+#. translators: %s: native language name.
+#: src/Admin/class-termtranslationfields.php:182
+#: src/Admin/class-termtranslationlisttable.php:286
+#: src/Admin/class-translationdashboardlisttable.php:475
+#: src/Admin/class-translationlisttable.php:295
+#: src/Admin/class-translationmetabox.php:126
+#, php-format
+msgid "Add %s translation"
+msgstr ""
+
+#: src/Admin/class-termtranslationfields.php:190
+#: src/Admin/class-termtranslationfields.php:192
+#: src/Admin/class-translationmetabox.php:134
+#: src/Admin/class-translationmetabox.php:136
+msgid "Current language"
+msgstr ""
+
+#: src/Admin/class-termtranslationfields.php:202
+#: src/Admin/class-termtranslationfields.php:204
+#: src/Admin/class-translationmetabox.php:146
+#: src/Admin/class-translationmetabox.php:148
+#: src/Switcher/class-languageswitcher.php:411
+msgid "Unavailable"
+msgstr ""
+
+#. translators: %s: language name.
+#: src/Admin/class-termtranslationfields.php:226
+#: src/Admin/class-termtranslationlisttable.php:260
+#: src/Admin/class-translationlisttable.php:267
+#: src/Admin/class-translationmetabox.php:172
+#, php-format
+msgid "Edit %s translation"
+msgstr ""
+
+#: src/Admin/class-termtranslationfields.php:240
+#: src/Admin/class-translationmetabox.php:186
+msgid "Translation exists"
+msgstr ""
+
+#: src/Admin/class-termtranslationlisttable.php:213
+#: src/Admin/class-translationlisttable.php:223
+msgid "Assign language first"
+msgstr ""
+
+#. translators: %s: native language name.
+#: src/Admin/class-termtranslationlisttable.php:250
+#: src/Admin/class-translationlisttable.php:257
+#, php-format
+msgid "%s translation"
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:200
+msgid "You are not allowed to create this term translation."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:238
+msgid "Translated term created and linked."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:249
+msgid "LocalePress could not complete the term translation action."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:334
+#: src/Taxonomy/class-termtranslationmanager.php:760
+msgid "The requested term could not be found."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:335
+#: src/Taxonomy/class-termtranslationmanager.php:753
+msgid "That taxonomy is not supported by LocalePress."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:338
+msgid "A term translation for that language already exists."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:339
+msgid "This term is already assigned to a different language."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:340
+msgid "Terms from different translation groups cannot be linked."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:341
+msgid "Assign a language to the source term first."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:342
+#: src/Taxonomy/class-termtranslationmanager.php:609
+msgid "Configure an enabled default language before translating terms."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:343
+#: src/Taxonomy/class-termtranslationmanager.php:967
+msgid "LocalePress could not save the term translation relationship."
+msgstr ""
+
+#: src/Admin/class-termtranslationmodule.php:344
+msgid "A term with that generated name already exists. Rename it or create the translation manually."
+msgstr ""
+
+#. translators: 1: native language name, 2: language code.
+#: src/Admin/class-translationdashboardlisttable.php:169
+#, php-format
+msgctxt "translation dashboard language heading"
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#. translators: %s: source content title.
+#: src/Admin/class-translationdashboardlisttable.php:291
+#, php-format
+msgid "Select %s"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:292
+#: src/Admin/class-translationdashboardlisttable.php:315
+msgid "(no title)"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:312
+msgid "Content unavailable"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:339
+msgid "View"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:392
+msgid "Translation unavailable"
+msgstr ""
+
+#. translators: %s: native language name.
+#: src/Admin/class-translationdashboardlisttable.php:432
+#, php-format
+msgid "%s translation is complete"
+msgstr ""
+
+#. translators: 1: native language name, 2: post status.
+#: src/Admin/class-translationdashboardlisttable.php:437
+#, php-format
+msgid "%1$s translation: %2$s"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:502
+msgid "All translation statuses"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:503
+msgid "Missing translations"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:504
+msgid "Completed translations"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:505
+msgid "Draft translations"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:509
+msgid "Filter by content type"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:511
+msgid "All content types"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:523
+msgid "Filter by translation language"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:525
+msgid "All languages"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:537
+msgid "Filter by translation status"
+msgstr ""
+
+#: src/Admin/class-translationdashboardlisttable.php:560
+msgid "No content matched the current translation filters."
+msgstr ""
+
+#: src/Admin/class-translationdashboardmodule.php:72
+msgid "LocalePress Translations"
+msgstr ""
+
+#: src/Admin/class-translationdashboardmodule.php:93
+msgid "Content per page"
+msgstr ""
+
+#: src/Admin/class-translationdashboardmodule.php:143
+msgid "You are not allowed to access this page."
+msgstr ""
+
+#: src/Admin/class-translationdashboardmodule.php:154
+msgid "The active translation storage does not provide dashboard reporting."
+msgstr ""
+
+#: src/Admin/class-translationdashboardmodule.php:179
+msgid "Search content"
+msgstr ""
+
+#: src/Admin/class-translationmetabox.php:77
+msgid "Post language"
+msgstr ""
+
+#: src/Admin/class-translationmetabox.php:98
+msgid "Save the post to assign its language before adding translations."
+msgstr ""
+
+#: src/Admin/class-translationmetabox.php:165
+msgid "In Trash"
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:237
+#: src/Content/class-posttranslationmanager.php:370
+#: src/Content/class-posttranslationmanager.php:463
+msgid "This translation group already contains a post for that language."
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:283
+msgid "Provide at least one post to link."
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:289
+msgid "A post cannot represent more than one language in a translation group."
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:319
+msgid "A post is already assigned to a different language."
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:339
+msgid "Posts from different translation groups cannot be linked implicitly."
+msgstr ""
+
+#: src/Content/class-posttranslationmanager.php:356
+msgid "The source post must belong to the new translation group."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:95
+msgid "The Elementor translation source and target must be different existing posts."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:102
+msgid "Elementor document data cannot be copied between different post types."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:109
+msgid "The translated post already contains Elementor document data."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:118
+msgid "The source Elementor document data is invalid and was not copied."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:156
+msgid "Filtered Elementor document data is invalid and was not copied."
+msgstr ""
+
+#: src/Integrations/Elementor/class-elementorcompatibility.php:177
+msgid "Elementor document metadata could not be copied to the translated post."
+msgstr ""
+
+#: src/Language/class-languagemanager.php:407
+msgid "Language data must be an array."
+msgstr ""
+
+#: src/Lifecycle/class-activator.php:37
+msgid "LocalePress could not be activated because the PHP requirement is not met."
+msgstr ""
+
+#: src/Lifecycle/class-activator.php:38
+#: src/Lifecycle/class-activator.php:46
+msgid "Plugin activation failed"
+msgstr ""
+
+#: src/Lifecycle/class-activator.php:45
+msgid "LocalePress could not be activated because the WordPress requirement is not met."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:82
+msgid "The selected navigation menu could not be found."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:92
+msgid "The selected menu language is not registered."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:200
+msgid "A selected menu language is not registered."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:226
+msgid "A selected navigation menu could not be found."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:236
+msgid "A menu cannot be assigned to a location for a different language."
+msgstr ""
+
+#: src/Navigation/class-menulanguagemanager.php:243
+msgid "The same menu cannot be assigned to more than one language."
+msgstr ""
+
+#: src/Navigation/class-navigationmodule.php:225
+msgid "This language is assigned to a navigation menu and cannot be deleted."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:152
+msgid "Choose a settings file or paste JSON to import."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:156
+msgid "The settings file is larger than 1 MB."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:162
+msgid "The settings file does not contain valid JSON."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:186
+msgid "A settings import filter returned invalid data."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:195
+msgid "A settings import filter removed required data."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:203
+msgid "A settings import filter returned data that failed validation."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:242
+msgid "This is not a LocalePress settings export."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:246
+msgid "This settings schema version is not supported."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:255
+msgid "The settings export is missing required sections."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:295
+msgid "The imported language configuration is invalid."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:310
+msgid "Register every language from the export before importing its settings."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:324
+msgid "The imported default language must be registered and enabled."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:345
+msgid "The imported plugin settings are incomplete."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:360
+msgid "The imported URL settings are invalid or unsupported."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:375
+msgid "The imported switcher settings are invalid."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:379
+msgid "The imported SEO settings are invalid."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:383
+msgid "The imported advanced settings are invalid."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:409
+msgid "The imported content settings are invalid."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:416
+msgid "The imported content settings contain invalid object names."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:423
+msgid "A selected post type or taxonomy is not available on this site."
+msgstr ""
+
+#: src/Settings/class-settingstransfer.php:442
+msgid "The imported translation workflow settings are invalid."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:56
+msgid "The original string must be plain text."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:62
+msgid "The original string cannot be empty."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:66
+msgid "The original string is too long."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:83
+msgid "String groups and keys must be plain text."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:90
+msgid "A string group is required."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:94
+msgid "A string key is required."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:98
+msgid "The string group is too long."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:102
+msgid "The string key is too long."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:119
+msgid "A translation must be plain text."
+msgstr ""
+
+#: src/StringTranslation/class-registeredstringvalidator.php:125
+msgid "The translation is too long."
+msgstr ""
+
+#: src/StringTranslation/class-stringmanager.php:234
+msgid "No valid string translations were submitted."
+msgstr ""
+
+#: src/Switcher/class-languageswitcher.php:136
+msgid "Language selector"
+msgstr ""
+
+#. translators: %s: language label.
+#: src/Switcher/class-languageswitcher.php:428
+#, php-format
+msgid "%s (translation unavailable)"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:111
+msgid "Add to Menu"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:141
+#: blocks/language-switcher/index.js:28
+msgid "Display"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:161
+#: blocks/language-switcher/index.js:66
+msgid "Unavailable translations"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:163
+#: blocks/language-switcher/index.js:70
+msgid "Show unavailable"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:164
+#: blocks/language-switcher/index.js:71
+msgid "Hide"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:165
+#: blocks/language-switcher/index.js:72
+msgid "Link to language home"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:172
+#: blocks/language-switcher/index.js:80
+msgid "Show flags when provided"
+msgstr ""
+
+#: src/Switcher/class-navigationmenuintegration.php:176
+#: blocks/language-switcher/index.js:94
+msgid "Accessible label"
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationlifecyclemodule.php:131
+msgid "This language is assigned to terms and cannot be deleted."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:262
+#: src/Taxonomy/class-termtranslationmanager.php:387
+#: src/Taxonomy/class-termtranslationmanager.php:493
+msgid "This translation group already contains a term for that language."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:311
+msgid "Provide at least one term to link."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:317
+msgid "A term cannot represent more than one language in a translation group."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:340
+msgid "A term is already assigned to a different language."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:360
+msgid "Terms from different translation groups cannot be linked implicitly."
+msgstr ""
+
+#: src/Taxonomy/class-termtranslationmanager.php:376
+msgid "The source term must belong to the new translation group."
+msgstr ""
+
+#. translators: 1: source term name, 2: target language native name.
+#: src/Taxonomy/class-termtranslationmanager.php:499
+#, php-format
+msgctxt "generated translated term name"
+msgid "%1$s (%2$s)"
+msgstr ""
+
+#: blocks/language-switcher/index.js:26
+msgid "Switcher settings"
+msgstr ""
+
+#: blocks/language-switcher/block.json
+msgctxt "block title"
+msgid "Language Switcher"
+msgstr ""
+
+#: blocks/language-switcher/block.json
+msgctxt "block description"
+msgid "Display links to available LocalePress languages."
+msgstr ""

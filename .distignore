@@ -1,0 +1,11 @@
+/.distignore
+/.git
+/.github
+/.phpunit.result.cache
+/README.md
+/RELEASE-CHECKLIST.md
+/phpcs.xml.dist
+/phpunit.xml.dist
+/tests
+/.DS_Store
+**/.DS_Store

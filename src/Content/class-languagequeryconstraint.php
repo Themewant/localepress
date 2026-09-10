@@ -1,0 +1,294 @@
+<?php
+/**
+ * Shared language constraint for post and term queries.
+ *
+ * @package LocalePress
+ */
+
+namespace LocalePress\Content;
+
+use LocalePress\Infrastructure\DatabaseTermTranslationRepository;
+use LocalePress\Infrastructure\DatabaseTranslationRepository;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Builds the indexed assignment join that limits a query to one language.
+ *
+ * Frontend routing and the REST API both need the same constraint, so the SQL
+ * lives here once. Queries for the default language also include content with no
+ * stored assignment, which keeps a site that installed LocalePress later working
+ * before every item has been assigned.
+ */
+final class LanguageQueryConstraint {
+
+	/**
+	 * SQL alias used for the post assignment join.
+	 *
+	 * @var string
+	 */
+	const POST_ALIAS = 'localepress_route_language';
+
+	/**
+	 * SQL alias used for the term assignment join.
+	 *
+	 * @var string
+	 */
+	const TERM_ALIAS = 'localepress_term_language';
+
+	/**
+	 * Constrains a post query to one language.
+	 *
+	 * @param array<string, string> $clauses             SQL clauses.
+	 * @param string                $language_id         Requested language identifier.
+	 * @param string                $default_language_id Default language identifier.
+	 * @return array<string, string>
+	 */
+	public function apply_to_posts( array $clauses, $language_id, $default_language_id ) {
+		global $wpdb;
+
+		if ( ! isset( $clauses['join'], $clauses['where'] ) || '' === (string) $language_id ) {
+			return $clauses;
+		}
+
+		$table = DatabaseTranslationRepository::assignments_table();
+		$alias = self::POST_ALIAS;
+
+		if ( false === strpos( $clauses['join'], $alias ) ) {
+			// The table name is generated exclusively by the repository and WordPress prefix.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON ({$wpdb->posts}.ID = {$alias}.post_id)";
+		}
+
+		if ( (string) $default_language_id === (string) $language_id ) {
+			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			$clauses['where'] .= $wpdb->prepare(
+				' AND (localepress_route_language.language_id = %s OR localepress_route_language.post_id IS NULL)',
+				$language_id
+			);
+		} else {
+			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			$clauses['where'] .= $wpdb->prepare(
+				' AND localepress_route_language.language_id = %s',
+				$language_id
+			);
+		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Constrains a post query to a set of languages, keeping unassigned posts.
+	 *
+	 * Used where "every publicly reachable language" is the rule rather than one
+	 * request language, so content assigned to a disabled language is excluded
+	 * while content that predates LocalePress still qualifies.
+	 *
+	 * @param array<string, string> $clauses      SQL clauses.
+	 * @param array<int, string>    $language_ids Allowed language identifiers.
+	 * @return array<string, string>
+	 */
+	public function restrict_posts_to_languages( array $clauses, array $language_ids ) {
+		global $wpdb;
+
+		$language_ids = array_values( array_unique( array_filter( array_map( 'strval', $language_ids ) ) ) );
+
+		if ( ! isset( $clauses['join'], $clauses['where'] ) || empty( $language_ids ) ) {
+			return $clauses;
+		}
+
+		$table = DatabaseTranslationRepository::assignments_table();
+		$alias = self::POST_ALIAS;
+
+		if ( false === strpos( $clauses['join'], $alias ) ) {
+			// The table name is generated exclusively by the repository and WordPress prefix.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON ({$wpdb->posts}.ID = {$alias}.post_id)";
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $language_ids ), '%s' ) );
+
+		// The SQL alias is a fixed LocalePress identifier; only the values are variable.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['where'] .= $wpdb->prepare(
+			" AND (localepress_route_language.language_id IN ({$placeholders}) OR localepress_route_language.post_id IS NULL)",
+			$language_ids
+		);
+
+		return $clauses;
+	}
+
+	/**
+	 * Constrains a term query to a set of languages, keeping unassigned terms.
+	 *
+	 * @param array<string, string> $clauses      SQL clauses.
+	 * @param array<int, string>    $language_ids Allowed language identifiers.
+	 * @return array<string, string>
+	 */
+	public function restrict_terms_to_languages( array $clauses, array $language_ids ) {
+		global $wpdb;
+
+		$language_ids = array_values( array_unique( array_filter( array_map( 'strval', $language_ids ) ) ) );
+
+		if ( ! isset( $clauses['join'], $clauses['where'] ) || empty( $language_ids ) ) {
+			return $clauses;
+		}
+
+		$table = DatabaseTermTranslationRepository::assignments_table();
+		$alias = self::TERM_ALIAS;
+
+		if ( false === strpos( $clauses['join'], $alias ) ) {
+			// The table name is generated exclusively by the repository and WordPress prefix.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON (tt.term_taxonomy_id = {$alias}.term_taxonomy_id)";
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $language_ids ), '%s' ) );
+
+		// The SQL alias is a fixed LocalePress identifier; only the values are variable.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['where'] .= $wpdb->prepare(
+			" AND (localepress_term_language.language_id IN ({$placeholders}) OR localepress_term_language.term_taxonomy_id IS NULL)",
+			$language_ids
+		);
+
+		return $clauses;
+	}
+
+	/**
+	 * Constrains a term query to one language.
+	 *
+	 * WP_Term_Query always aliases the term taxonomy table as `tt`, which carries
+	 * the identifier the term assignment table is keyed by.
+	 *
+	 * @param array<string, string> $clauses             SQL clauses.
+	 * @param string                $language_id         Requested language identifier.
+	 * @param string                $default_language_id Default language identifier.
+	 * @return array<string, string>
+	 */
+	public function apply_to_terms( array $clauses, $language_id, $default_language_id ) {
+		global $wpdb;
+
+		if ( ! isset( $clauses['join'], $clauses['where'] ) || '' === (string) $language_id ) {
+			return $clauses;
+		}
+
+		$table = DatabaseTermTranslationRepository::assignments_table();
+		$alias = self::TERM_ALIAS;
+
+		if ( false === strpos( $clauses['join'], $alias ) ) {
+			// The table name is generated exclusively by the repository and WordPress prefix.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON (tt.term_taxonomy_id = {$alias}.term_taxonomy_id)";
+		}
+
+		if ( (string) $default_language_id === (string) $language_id ) {
+			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			$clauses['where'] .= $wpdb->prepare(
+				' AND (localepress_term_language.language_id = %s OR localepress_term_language.term_taxonomy_id IS NULL)',
+				$language_id
+			);
+		} else {
+			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			$clauses['where'] .= $wpdb->prepare(
+				' AND localepress_term_language.language_id = %s',
+				$language_id
+			);
+		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Reports whether one language has anything to show for a set of post types.
+	 *
+	 * An archive is a route, not a translatable object: a language cannot be
+	 * offered one because a matching row exists, only because the archive would
+	 * hold something once the language filter runs. Asking that question here
+	 * keeps it on the same rule the filter itself applies, including the part
+	 * where unassigned content answers for the default language.
+	 *
+	 * Existence is all the caller needs, so the query stops at the first row
+	 * rather than counting every one of them.
+	 *
+	 * @param array<int, string> $post_types          Post types the archive lists.
+	 * @param string             $language_id         Language being offered.
+	 * @param string             $default_language_id Default language identifier.
+	 * @return bool
+	 */
+	public function has_posts_in_language( array $post_types, $language_id, $default_language_id ) {
+		global $wpdb;
+
+		$post_types = array_values( array_unique( array_filter( array_map( 'sanitize_key', $post_types ) ) ) );
+
+		if ( empty( $post_types ) || '' === (string) $language_id ) {
+			return false;
+		}
+
+		$table        = DatabaseTranslationRepository::assignments_table();
+		$alias        = self::POST_ALIAS;
+		$placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+		$language     = (string) $language_id === (string) $default_language_id
+			? "({$alias}.language_id = %s OR {$alias}.post_id IS NULL)"
+			: "{$alias}.language_id = %s";
+
+		// The table name and the alias are generated by the repository and by this
+		// class; every value reaching the statement is a placeholder.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT {$wpdb->posts}.ID FROM {$wpdb->posts}
+			LEFT JOIN {$table} AS {$alias} ON ({$wpdb->posts}.ID = {$alias}.post_id)
+			WHERE {$wpdb->posts}.post_status = 'publish'
+			AND {$wpdb->posts}.post_type IN ({$placeholders})
+			AND {$language}
+			LIMIT 1",
+			array_merge( $post_types, array( (string) $language_id ) )
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return null !== $wpdb->get_var( $sql );
+	}
+
+	/**
+	 * Reports whether the site publishes anything at all in one language.
+	 *
+	 * This asks a wider question than has_posts_in_language(): not "is there
+	 * something here", but "does this site speak this language". A reader on an
+	 * untranslated cart page is still served by a switcher that offers a language
+	 * the site genuinely publishes in, while a language nothing has been written
+	 * in yet has nothing to offer and can leave.
+	 *
+	 * @param string $language_id         Target language identifier.
+	 * @param string $default_language_id Default language identifier.
+	 * @return bool
+	 */
+	public function has_any_post_in_language( $language_id, $default_language_id ) {
+		global $wpdb;
+
+		if ( '' === (string) $language_id ) {
+			return false;
+		}
+
+		// Everything written before a language was ever assigned belongs to the
+		// default one, so the site always speaks it.
+		if ( (string) $language_id === (string) $default_language_id ) {
+			return true;
+		}
+
+		$table = DatabaseTranslationRepository::assignments_table();
+
+		// The table name is generated by the repository; the language is a placeholder.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT assignment.post_id FROM {$table} AS assignment
+			INNER JOIN {$wpdb->posts} AS post ON (post.ID = assignment.post_id)
+			WHERE assignment.language_id = %s
+			AND post.post_status = 'publish'
+			LIMIT 1",
+			(string) $language_id
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return null !== $wpdb->get_var( $sql );
+	}
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	colors="true"
+	cacheResult="false"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+>
+	<testsuites>
+		<testsuite name="LocalePress">
+			<directory suffix=".php">./tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

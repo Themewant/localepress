@@ -1,0 +1,16 @@
+/**
+ * Editor preview for the navigation language switcher.
+ *
+ * The block stands in for several menu items, so the preview lays its labels out
+ * the way the Navigation block lays out its own children.
+ */
+.wp-block-localepress-navigation-language-switcher {
+	display: flex;
+	align-items: center;
+	gap: var( --wp--style--block-gap, 0.5rem );
+	flex-wrap: wrap;
+}
+
+.wp-block-localepress-navigation-language-switcher .localepress-switcher__item {
+	opacity: 0.75;
+}
