@@ -56,6 +56,7 @@ use LocalePress\Navigation\MenuLanguageManager;
 use LocalePress\Navigation\MenuLocationsModule;
 use LocalePress\Navigation\NavigationModule;
 use LocalePress\Rest\RestLanguageModule;
+use LocalePress\Routing\HostOriginModule;
 use LocalePress\Routing\LanguageDetectionModule;
 use LocalePress\Routing\LanguageUrlManager;
 use LocalePress\Routing\RoutingModule;
@@ -380,6 +381,9 @@ final class Plugin {
 				new BrowserLanguageDetector(),
 				$this->plugin_settings
 			),
+			// Host routing serves the document from one host; this keeps every URL
+			// the document loads on that same host.
+			new HostOriginModule( $this->language_url_manager ),
 			// After routing: the request language has to be resolved before a
 			// query's identifiers can be rewritten to it.
 			new QueryIdTranslationModule(

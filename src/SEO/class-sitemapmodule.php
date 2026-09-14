@@ -150,7 +150,15 @@ final class SitemapModule implements ModuleInterface {
 	}
 
 	/**
-	 * Returns the identifiers of every enabled language.
+	 * Returns the identifiers of the languages this sitemap may list.
+	 *
+	 * One sitemap covers every language while they share a host, because they
+	 * share an address to be listed under. Host routing gives each language its
+	 * own, and a sitemap may only list URLs on the host that served it — a
+	 * search engine treats anything else as a cross-domain submission and needs
+	 * the other host verified separately before it will read it. So each host
+	 * answers for itself, which is also the form a site owner submits: one
+	 * sitemap per property, exactly as the property is registered.
 	 *
 	 * @return array<int, string>
 	 */
@@ -161,9 +169,14 @@ final class SitemapModule implements ModuleInterface {
 
 		$ids = array();
 
-		foreach ( $this->language_manager->get_languages( true ) as $language ) {
-			if ( is_array( $language ) && isset( $language['id'] ) && is_scalar( $language['id'] ) ) {
-				$ids[] = (string) $language['id'];
+		if ( $this->url_manager->uses_host_routing() ) {
+			$current = $this->url_manager->get_current_language();
+			$ids     = null === $current ? array() : array( (string) $current['id'] );
+		} else {
+			foreach ( $this->language_manager->get_languages( true ) as $language ) {
+				if ( is_array( $language ) && isset( $language['id'] ) && is_scalar( $language['id'] ) ) {
+					$ids[] = (string) $language['id'];
+				}
 			}
 		}
 

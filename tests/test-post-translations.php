@@ -412,6 +412,49 @@ class Test_LocalePress_Post_Translations extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A replacement translation releases the slot without taking the language.
+	 *
+	 * Restoring the old post runs wp_update_post(), which is where an assignment
+	 * row that no longer exists used to be recreated with the default language.
+	 *
+	 * @return void
+	 */
+	public function test_released_translation_keeps_its_language_after_restore() {
+		$source = $this->create_post();
+		$this->translations->set_post_language( $source, $this->language_ids['en'] );
+
+		$original = $this->translations->create_translation( $source, $this->language_ids['de'] );
+		$this->assertNotWPError( $original );
+		$this->post_ids[] = $original;
+
+		$group_id = $this->translations->get_group_id( $source );
+
+		wp_trash_post( $original );
+
+		$replacement = $this->translations->create_translation( $source, $this->language_ids['de'] );
+		$this->assertNotWPError( $replacement );
+		$this->post_ids[] = $replacement;
+
+		// The replacement holds the slot; the trashed post keeps German on its own.
+		$this->assertSame( $replacement, $this->translations->get_translation( $source, $this->language_ids['de'] ) );
+		$this->assertSame( $this->language_ids['de'], $this->translations->get_post_language_id( $original ) );
+		$this->assertNotSame( $group_id, $this->translations->get_group_id( $original ) );
+		$this->assertNotSame( '', $this->translations->get_group_id( $original ) );
+
+		$lifecycle = new TranslationLifecycleModule( $this->translations );
+		$lifecycle->register();
+		remove_filter( 'localepress_auto_assign_default_post_language', array( $this, 'disable_automatic_default_assignment' ) );
+
+		wp_untrash_post( $original );
+
+		add_filter( 'localepress_auto_assign_default_post_language', array( $this, 'disable_automatic_default_assignment' ) );
+
+		$this->assertSame( $this->language_ids['de'], $this->translations->get_post_language_id( $original ) );
+		$this->assertSame( $original, $this->translations->get_source_post_id( $original ) );
+		$this->assertSame( $replacement, $this->translations->get_translation( $source, $this->language_ids['de'] ) );
+	}
+
+	/**
 	 * Languages assigned to content cannot be deleted.
 	 *
 	 * @return void

@@ -59,6 +59,20 @@ final class LanguageHostResolver {
 	private $settings;
 
 	/**
+	 * Configured URL mode, once read.
+	 *
+	 * @var string|null
+	 */
+	private $mode = null;
+
+	/**
+	 * Number of settings saves the held mode was read after.
+	 *
+	 * @var int
+	 */
+	private $mode_generation = -1;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param PluginSettings $settings Central plugin settings.
@@ -82,10 +96,30 @@ final class LanguageHostResolver {
 	 * @return string
 	 */
 	public function get_mode() {
+		/*
+		 * Held for the request because nearly every URL the plugin touches asks
+		 * this first, and answering it means normalizing and filtering the whole
+		 * settings array. A page carrying a menu and a switcher would do that
+		 * hundreds of times to learn something that cannot change while the page
+		 * is being built.
+		 *
+		 * The one moment it does change is a settings save, and counting those is
+		 * both cheap and exact — cheaper than re-reading, and unlike a cleared
+		 * cache it needs nothing to have been wired up in advance.
+		 */
+		$generation = (int) did_action( 'localepress_settings_updated' );
+
+		if ( null !== $this->mode && $generation === $this->mode_generation ) {
+			return $this->mode;
+		}
+
 		$url  = $this->settings->get_section( 'url' );
 		$mode = isset( $url['mode'] ) && is_scalar( $url['mode'] ) ? (string) $url['mode'] : self::MODE_DIRECTORY;
 
-		return in_array( $mode, self::modes(), true ) ? $mode : self::MODE_DIRECTORY;
+		$this->mode            = in_array( $mode, self::modes(), true ) ? $mode : self::MODE_DIRECTORY;
+		$this->mode_generation = $generation;
+
+		return $this->mode;
 	}
 
 	/**
@@ -95,6 +129,20 @@ final class LanguageHostResolver {
 	 */
 	public function uses_host_routing() {
 		return in_array( $this->get_mode(), array( self::MODE_SUBDOMAIN, self::MODE_DOMAIN ), true );
+	}
+
+	/**
+	 * Reports whether every language lives under one registrable domain.
+	 *
+	 * The two host modes differ in what they can share. Subdomains sit inside a
+	 * single domain, so a cookie or a certificate can cover all of them at once;
+	 * separate domains share nothing at all. Anything that spans languages has
+	 * to know which of the two it is looking at.
+	 *
+	 * @return bool
+	 */
+	public function uses_subdomain_routing() {
+		return self::MODE_SUBDOMAIN === $this->get_mode();
 	}
 
 	/**
@@ -113,6 +161,10 @@ final class LanguageHostResolver {
 	/**
 	 * Returns the host that serves one language.
 	 *
+	 * The answer is an address, not a comparison key, so it keeps the www prefix
+	 * the site is configured with. Callers that need to decide whether two hosts
+	 * name the same language run it through normalize() themselves.
+	 *
 	 * @param array<string, mixed> $language   Language record.
 	 * @param bool                 $is_default Whether this is the default language.
 	 * @return string Empty in directory mode, or when no host can be derived.
@@ -120,14 +172,14 @@ final class LanguageHostResolver {
 	public function get_host( array $language, $is_default = false ) {
 		switch ( $this->get_mode() ) {
 			case self::MODE_DOMAIN:
-				$domain = isset( $language['domain'] ) ? $this->normalize( $language['domain'] ) : '';
+				$domain = isset( $language['domain'] ) ? $this->host_value( $language['domain'] ) : '';
 
 				/*
 				 * A language with no domain of its own stays on the site host. That
 				 * keeps a half-configured site reachable instead of routing it to a
 				 * hostname nobody has pointed anywhere.
 				 */
-				return '' === $domain ? $this->get_site_host() : $domain;
+				return '' === $domain ? $this->get_canonical_site_host() : $domain;
 
 			case self::MODE_SUBDOMAIN:
 				$base = $this->get_base_host();
@@ -136,10 +188,15 @@ final class LanguageHostResolver {
 					return '';
 				}
 
-				// Reuses the directory mode's default-prefix choice: when the default
-				// language shows no prefix, it also takes the bare domain here.
+				/*
+				 * Reuses the directory mode's default-prefix choice: when the default
+				 * language shows no prefix, it also takes the site's own address here.
+				 * That address is the configured one rather than the registrable base,
+				 * so a site served from www stays on www instead of being moved to a
+				 * bare domain that may hold no certificate.
+				 */
 				if ( $is_default && ! $this->settings->should_prefix_default_language() ) {
-					return $base;
+					return $this->get_canonical_site_host();
 				}
 
 				$slug = sanitize_title( isset( $language['url_slug'] ) ? (string) $language['url_slug'] : '' );
@@ -183,14 +240,31 @@ final class LanguageHostResolver {
 	}
 
 	/**
-	 * Returns the host WordPress is configured to serve.
+	 * Returns the site host in comparable form.
 	 *
 	 * @return string
 	 */
 	public function get_site_host() {
+		return $this->normalize( $this->get_canonical_site_host() );
+	}
+
+	/**
+	 * Returns the site host exactly as WordPress is configured to serve it.
+	 *
+	 * normalize() answers "do these two hosts name the same language", and for
+	 * that question a leading www is noise. Addressing a host is the opposite
+	 * question: a site configured on www.example.com is reachable there and may
+	 * hold no certificate without it, so a URL built for it has to keep the
+	 * prefix. Both forms exist because comparing and addressing are not the same
+	 * operation, and answering one with the other is what silently moved every
+	 * internal link off www.
+	 *
+	 * @return string
+	 */
+	public function get_canonical_site_host() {
 		$parts = wp_parse_url( self::site_url() );
 
-		return is_array( $parts ) && isset( $parts['host'] ) ? $this->normalize( $parts['host'] ) : '';
+		return $this->host_value( is_array( $parts ) && isset( $parts['host'] ) ? $parts['host'] : '' );
 	}
 
 	/**
@@ -203,10 +277,30 @@ final class LanguageHostResolver {
 	 * @return string
 	 */
 	public static function site_url() {
-		$home = get_option( 'home' );
-		$home = is_string( $home ) && '' !== $home ? $home : home_url( '/' );
+		static $resolving = false;
 
-		return trailingslashit( $home );
+		$home = get_option( 'home' );
+
+		if ( is_string( $home ) && '' !== $home ) {
+			return trailingslashit( $home );
+		}
+
+		/*
+		 * Only an install with no home option reaches home_url(), and that call is
+		 * filtered by routing, which asks for this address again. One of the two
+		 * has to stop; the relative root is the answer that cannot recurse.
+		 */
+		if ( $resolving ) {
+			return '/';
+		}
+
+		$resolving = true;
+
+		try {
+			return trailingslashit( home_url( '/' ) );
+		} finally {
+			$resolving = false;
+		}
 	}
 
 	/**
@@ -215,31 +309,32 @@ final class LanguageHostResolver {
 	 * Host routing has to read the real request host: on a language domain the
 	 * configured site host names a different language entirely.
 	 *
+	 * Like get_host(), this is the addressable form: it keeps www, because the
+	 * current request URL is rebuilt from it and a reader who arrived on www
+	 * must not be quietly moved off it. Callers matching it against a language
+	 * run it through normalize() first.
+	 *
 	 * @return string
 	 */
 	public function get_request_host() {
 		$host = isset( $_SERVER['HTTP_HOST'] ) && is_scalar( $_SERVER['HTTP_HOST'] )
-			? $this->normalize( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) )
+			? $this->host_value( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) )
 			: '';
 
-		return '' === $host ? $this->get_site_host() : $host;
+		return '' === $host ? $this->get_canonical_site_host() : $host;
 	}
 
 	/**
 	 * Returns the registrable host that language subdomains are built on.
 	 *
+	 * A site served from www needs its language subdomains beside www, not
+	 * beneath it: bn.example.com, never bn.www.example.com. That is exactly the
+	 * www-free form, so the comparison host is the right base to build on.
+	 *
 	 * @return string
 	 */
 	public function get_base_host() {
 		$host = $this->get_site_host();
-
-		/*
-		 * A site served from www needs its language subdomains beside www, not
-		 * beneath it: bn.example.com, never bn.www.example.com.
-		 */
-		if ( 0 === strpos( $host, 'www.' ) ) {
-			$host = substr( $host, 4 );
-		}
 
 		/**
 		 * Filters the host that language subdomains are derived from.
@@ -261,6 +356,22 @@ final class LanguageHostResolver {
 	 * @return string
 	 */
 	public function normalize( $host ) {
+		$host = $this->host_value( $host );
+
+		return 0 === strpos( $host, 'www.' ) ? substr( $host, 4 ) : $host;
+	}
+
+	/**
+	 * Reduces a hostname to a bare, addressable form, www and all.
+	 *
+	 * This is normalize() without the one step that loses information. Accepts a
+	 * bare host, a host with a port, or a full URL, so a site owner can paste
+	 * "https://example.fr/" into the domain field and still be understood.
+	 *
+	 * @param mixed $host Candidate hostname.
+	 * @return string Empty when the value is not a usable hostname.
+	 */
+	private function host_value( $host ) {
 		if ( ! is_scalar( $host ) ) {
 			return '';
 		}
@@ -284,10 +395,6 @@ final class LanguageHostResolver {
 		// keeps matching stable behind proxies and local development ports.
 		$host = preg_replace( '/:\d+$/', '', $host );
 		$host = is_string( $host ) ? trim( $host, '.' ) : '';
-
-		if ( 0 === strpos( $host, 'www.' ) ) {
-			$host = substr( $host, 4 );
-		}
 
 		return 1 === preg_match( '/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/', $host ) ? $host : '';
 	}

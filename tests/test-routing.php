@@ -891,6 +891,209 @@ class Test_LocalePress_Routing extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A site served from www keeps www in the host it hands out.
+	 *
+	 * The comparison form of a host drops www, because www names no language.
+	 * The addressable form must not: a site configured on www.example.com may
+	 * hold no certificate for the bare domain, so building links without it
+	 * moves every internal link onto an address that need not answer at all.
+	 *
+	 * @return void
+	 */
+	public function test_www_site_keeps_www_in_host_routing() {
+		update_option( 'home', 'https://www.example.com' );
+		update_option( 'siteurl', 'https://www.example.com' );
+		$this->use_url_mode( 'subdomain' );
+
+		$hosts = $this->urls->hosts();
+
+		// The default language is the site itself, www and all.
+		$this->assertSame( 'www.example.com', $this->urls->get_language_host( 'en' ) );
+
+		// Language subdomains sit beside www rather than beneath it.
+		$this->assertSame( 'de.example.com', $this->urls->get_language_host( 'de' ) );
+		$this->assertSame( 'example.com', $hosts->get_base_host() );
+
+		// Both spellings still resolve to the language they name.
+		$this->assertSame( 'example.com', $hosts->normalize( 'www.example.com' ) );
+
+		$this->set_request_host( 'www.example.com' );
+		$current = $this->urls->get_current_language();
+		$this->assertNotNull( $current );
+		$this->assertSame( $this->language_ids['en'], $current['id'] );
+
+		// A link built for the default language stays on www.
+		$this->assertSame(
+			'https://www.example.com/sample-page/',
+			$this->urls->prefix_url( 'https://www.example.com/sample-page/', 'en' )
+		);
+		$this->assertSame(
+			'https://de.example.com/sample-page/',
+			$this->urls->prefix_url( 'https://www.example.com/sample-page/', 'de' )
+		);
+	}
+
+	/**
+	 * Domain routing keeps a configured domain exactly as it was entered.
+	 *
+	 * @return void
+	 */
+	public function test_domain_mode_keeps_the_configured_spelling() {
+		$languages = new LanguageManager( new OptionsLanguageRepository(), new LanguageValidator() );
+		$german    = $languages->find( $this->language_ids['de'] );
+
+		$german['domain'] = 'www.example.de';
+		$this->assertNotWPError( $languages->update( $this->language_ids['de'], $german ) );
+
+		$this->use_url_mode( 'domain' );
+
+		$this->assertSame( 'www.example.de', $this->urls->get_language_host( 'de' ) );
+
+		// Either spelling of the request host still finds the language.
+		$this->set_request_host( 'example.de' );
+		$current = $this->urls->get_current_language();
+		$this->assertNotNull( $current );
+		$this->assertSame( $this->language_ids['de'], $current['id'] );
+
+		// wp_safe_redirect() has to accept both spellings, and neither as www.www.
+		$allowed = $this->router->allow_language_hosts( array() );
+		$this->assertContains( 'example.de', $allowed );
+		$this->assertContains( 'www.example.de', $allowed );
+		$this->assertNotContains( 'www.www.example.de', $allowed );
+	}
+
+	/**
+	 * A host serving no language is sent to the one that answers for it.
+	 *
+	 * Prefixing the default language gives it a host of its own, which leaves
+	 * the site address serving a copy of it that nothing links to. Left alone,
+	 * every page on the site would have two addresses.
+	 *
+	 * @return void
+	 */
+	public function test_unrouted_host_is_redirected_to_the_default_language() {
+		$settings = new PluginSettings();
+		$settings->update_sections( array( 'url' => array( 'prefix_default' => true ) ) );
+		$this->use_url_mode( 'subdomain' );
+
+		$site = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+
+		$this->go_to( home_url( '/' ) );
+		$this->set_request_host( $site );
+
+		// The site address now names no language at all.
+		$this->assertTrue( $this->urls->request_host_serves_no_language() );
+		$this->assertSame(
+			'http://en.' . $site . '/',
+			$this->router->get_unrouted_host_redirect_url()
+		);
+
+		// On a language host there is nothing to correct.
+		$this->set_request_host( 'en.' . $site );
+		$this->assertFalse( $this->urls->request_host_serves_no_language() );
+		$this->assertSame( '', $this->router->get_unrouted_host_redirect_url() );
+	}
+
+	/**
+	 * An unprefixed default language leaves the site address serving it.
+	 *
+	 * @return void
+	 */
+	public function test_unprefixed_default_keeps_the_site_address() {
+		$this->use_url_mode( 'subdomain' );
+
+		$site = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+
+		$this->go_to( home_url( '/' ) );
+		$this->set_request_host( $site );
+
+		$this->assertFalse( $this->urls->request_host_serves_no_language() );
+		$this->assertSame( '', $this->router->get_unrouted_host_redirect_url() );
+	}
+
+	/**
+	 * A finished URL is read back for the language it was built for.
+	 *
+	 * This is what the redirect guard checks before sending anyone anywhere: a
+	 * target the router would read as some other language is a target the next
+	 * request would try to correct again, and a reader caught between two such
+	 * corrections sees a redirect loop rather than a page.
+	 *
+	 * @return void
+	 */
+	public function test_a_built_url_names_the_language_it_was_built_for() {
+		$home = home_url( '/' );
+
+		$this->assertSame(
+			$this->language_ids['de'],
+			$this->urls->get_url_language_id( $this->urls->prefix_url( $home . 'sample-page/', 'de' ) )
+		);
+
+		// The hidden default writes nothing a URL can be read back from.
+		$this->assertSame( '', $this->urls->get_url_language_id( $home . 'sample-page/' ) );
+
+		$this->use_url_mode( 'query' );
+		$this->assertSame(
+			$this->language_ids['de'],
+			$this->urls->get_url_language_id( $home . 'sample-page/?lang=de' )
+		);
+		$this->assertSame( '', $this->urls->get_url_language_id( $home . 'sample-page/' ) );
+
+		$this->use_url_mode( 'subdomain' );
+		$site = wp_parse_url( $home, PHP_URL_HOST );
+		$this->assertSame(
+			$this->language_ids['de'],
+			$this->urls->get_url_language_id( 'http://de.' . $site . '/sample-page/' )
+		);
+	}
+
+	/**
+	 * The theme's home link leads back into the language being read.
+	 *
+	 * A logo, a site title, and a "back to home" link are all built from the
+	 * site root, which no permalink filter reaches. Left alone they are the one
+	 * navigation step present on every page that drops the reader's language.
+	 *
+	 * @return void
+	 */
+	public function test_a_theme_home_link_stays_in_the_current_language() {
+		$this->router->register();
+		$this->set_request_language( 'de', '/de/' );
+
+		do_action( 'template_redirect' );
+
+		// Called the way core's Site Title block calls it.
+		$home = $this->call_as(
+			'render_block_core_site_title',
+			static function () {
+				return home_url( '/' );
+			}
+		);
+
+		$this->assertSame( home_url( '/' ) . 'de/', $home );
+
+		// Everything else keeps the address WordPress built for it.
+		$this->assertStringNotContainsString( '/de/', rest_url() );
+		$this->assertStringNotContainsString( '/de/', home_url( '/sample-page/' ) );
+	}
+
+	/**
+	 * Calls a closure through a named function so the caller can be recognized.
+	 *
+	 * @param string   $name     Function name the backtrace should show.
+	 * @param callable $callback Work to run.
+	 * @return mixed
+	 */
+	private function call_as( $name, $callback ) {
+		if ( ! function_exists( $name ) ) {
+			// phpcs:ignore Squiz.PHP.Eval.Discouraged -- Builds a named frame for the backtrace to find.
+			eval( 'function ' . $name . '( $callback ) { return $callback(); }' );
+		}
+
+		return call_user_func( $name, $callback );
+	}
+
+	/**
 	 * Switches the configured URL mode and rebuilds the router around it.
 	 *
 	 * @param string $mode URL mode.

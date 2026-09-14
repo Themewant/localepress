@@ -553,6 +553,16 @@ final class LanguageUrlManager {
 			return false;
 		}
 
+		/*
+		 * The site's own address is the site whether or not the www spelling
+		 * matches, and whether or not it currently serves a language. A request
+		 * that arrived on the bare host while every language lives on a subdomain
+		 * still has to be rewritable, or it could never be sent anywhere.
+		 */
+		if ( $this->hosts->normalize( $url_parts['host'] ) === $this->hosts->get_site_host() ) {
+			return true;
+		}
+
 		$this->load_languages();
 		$default = $this->get_default_language();
 
@@ -561,6 +571,88 @@ final class LanguageUrlManager {
 			$this->languages_by_id,
 			null === $default ? '' : $default['id']
 		);
+	}
+
+	/**
+	 * Returns the language one finished URL names, if any.
+	 *
+	 * This reads a URL the way the router will read it on the next request,
+	 * which is what lets a redirect be checked before it is issued: a target
+	 * that would not be understood as the language it was built for is a target
+	 * the next request would try to correct again.
+	 *
+	 * @param string $url URL to inspect.
+	 * @return string Language identifier, or empty when the URL names none.
+	 */
+	public function get_url_language_id( $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return '';
+		}
+
+		$this->load_languages();
+		$parts = wp_parse_url( $url );
+
+		if ( ! is_array( $parts ) ) {
+			return '';
+		}
+
+		if ( $this->hosts->uses_host_routing() ) {
+			$default  = $this->get_default_language();
+			$language = $this->hosts->match(
+				isset( $parts['host'] ) ? $parts['host'] : '',
+				$this->languages_by_id,
+				null === $default ? '' : $default['id']
+			);
+
+			return null === $language ? '' : (string) $language['id'];
+		}
+
+		if ( $this->hosts->uses_query_routing() ) {
+			return $this->get_query_string_language_id( isset( $parts['query'] ) ? $parts['query'] : '' );
+		}
+
+		$home_parts = wp_parse_url( LanguageHostResolver::site_url() );
+		$home_path  = is_array( $home_parts ) && isset( $home_parts['path'] )
+			? trailingslashit( $home_parts['path'] )
+			: '/';
+		$relative   = trim(
+			$this->get_home_relative_path( isset( $parts['path'] ) ? $parts['path'] : '/', $home_path ),
+			'/'
+		);
+		$first      = '' === $relative ? '' : sanitize_title( strtok( $relative, '/' ) );
+
+		return isset( $this->languages_by_slug[ $first ] )
+			? (string) $this->languages_by_slug[ $first ]['id']
+			: '';
+	}
+
+	/**
+	 * Returns the language named by one query string.
+	 *
+	 * @param string $query Query string without its leading question mark.
+	 * @return string Language identifier, or empty when none is named.
+	 */
+	private function get_query_string_language_id( $query ) {
+		if ( ! is_string( $query ) || '' === $query ) {
+			return '';
+		}
+
+		$arguments = array();
+		wp_parse_str( $query, $arguments );
+
+		foreach ( array( $this->get_public_query_var(), self::QUERY_VAR ) as $variable ) {
+			if ( ! isset( $arguments[ $variable ] ) || ! is_scalar( $arguments[ $variable ] ) ) {
+				continue;
+			}
+
+			$slug = sanitize_title( (string) $arguments[ $variable ] );
+
+			if ( isset( $this->languages_by_slug[ $slug ] ) ) {
+				return (string) $this->languages_by_slug[ $slug ]['id'];
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -1240,9 +1332,36 @@ final class LanguageUrlManager {
 			return $this->request_has_language_prefix();
 		}
 
-		$request_host = $this->hosts->get_request_host();
+		// Both sides go through normalize(): www names no language, so arriving on
+		// www.example.com is the same undecided request as example.com.
+		$request_host = $this->hosts->normalize( $this->hosts->get_request_host() );
 
 		return '' !== $request_host && $request_host !== $this->hosts->get_site_host();
+	}
+
+	/**
+	 * Reports whether the request arrived on a host that serves no language.
+	 *
+	 * Under host routing every language has an address of its own, and the site
+	 * host is one of them only while the default language is unprefixed. When it
+	 * is not, the bare address answers in the default language while every link
+	 * on the page names a language host, which is the same page at two addresses.
+	 *
+	 * @return bool
+	 */
+	public function request_host_serves_no_language() {
+		if ( ! $this->uses_host_routing() ) {
+			return false;
+		}
+
+		$this->load_languages();
+		$default = $this->get_default_language();
+
+		return null === $this->hosts->match(
+			$this->hosts->get_request_host(),
+			$this->languages_by_id,
+			null === $default ? '' : $default['id']
+		);
 	}
 
 	/**
@@ -1567,28 +1686,17 @@ final class LanguageUrlManager {
 	private function get_request_query_language_slug() {
 		$parts = wp_parse_url( $this->get_current_request_url() );
 
-		if ( ! is_array( $parts ) || empty( $parts['query'] ) ) {
-			return '';
-		}
+		// One reader for the query argument, shared with get_url_language_id(),
+		// so what the router accepts and what a redirect check expects cannot
+		// drift apart. The internal variable is accepted everywhere the public
+		// one is, so a search form or a hand-built link can use either name.
+		$language_id = $this->get_query_string_language_id(
+			is_array( $parts ) && isset( $parts['query'] ) ? $parts['query'] : ''
+		);
 
-		$arguments = array();
-		wp_parse_str( $parts['query'], $arguments );
-
-		// The internal variable is accepted everywhere the public one is, so a
-		// search form or a hand-built link can use either name.
-		foreach ( array( $this->get_public_query_var(), self::QUERY_VAR ) as $variable ) {
-			if ( ! isset( $arguments[ $variable ] ) || ! is_scalar( $arguments[ $variable ] ) ) {
-				continue;
-			}
-
-			$slug = sanitize_title( (string) $arguments[ $variable ] );
-
-			if ( '' !== $slug && isset( $this->languages_by_slug[ $slug ] ) ) {
-				return $slug;
-			}
-		}
-
-		return '';
+		return isset( $this->languages_by_id[ $language_id ] )
+			? sanitize_title( $this->languages_by_id[ $language_id ]['url_slug'] )
+			: '';
 	}
 
 	/**

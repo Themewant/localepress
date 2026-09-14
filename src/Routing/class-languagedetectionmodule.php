@@ -59,6 +59,13 @@ final class LanguageDetectionModule implements ModuleInterface {
 	private $settings;
 
 	/**
+	 * Whether this response has already announced what it varies on.
+	 *
+	 * @var bool
+	 */
+	private $varied = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param LanguageUrlManager      $url_manager      Language URL API.
@@ -82,9 +89,77 @@ final class LanguageDetectionModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
+		/*
+		 * First of all, because every path out of this request needs it: the
+		 * detection redirect exits, and so does the canonical one at priority 1.
+		 * A response that says nothing about what it varies on is a response a
+		 * shared cache will hand to the next reader whatever their language.
+		 */
+		add_action( 'template_redirect', array( $this, 'protect_detected_response' ), 0 );
+
 		// Runs before RoutingModule::redirect_unprefixed_request() at priority 1.
 		add_action( 'template_redirect', array( $this, 'redirect_preferred_language' ), 0 );
 		add_action( 'template_redirect', array( $this, 'remember_current_language' ), 5 );
+	}
+
+	/**
+	 * Keeps a shared cache from serving one visitor's language to everyone.
+	 *
+	 * Detection answers the same URL differently for two readers, which is the
+	 * one thing a page cache is built to assume never happens. Announcing what
+	 * the answer varies on is the correct fix, and enough for a well-behaved
+	 * proxy. Full-page cache plugins largely ignore Vary on a cookie, so the
+	 * request where detection can actually fire is additionally marked
+	 * uncacheable — one URL on the site, and only while detection is on.
+	 *
+	 * @return void
+	 */
+	public function protect_detected_response() {
+		if ( ! $this->is_detection_enabled() || ! $this->is_public_frontend_request() ) {
+			return;
+		}
+
+		$undecided = is_front_page() && ! $this->url_manager->request_names_language();
+
+		if ( ! $undecided && ! $this->url_manager->request_has_language_prefix() ) {
+			return;
+		}
+
+		$this->vary_response();
+
+		if ( $undecided && ! defined( 'DONOTCACHEPAGE' ) ) {
+			/**
+			 * Filters whether the undecided site root may be page-cached.
+			 *
+			 * Detection makes this one URL reader-dependent, so it is excluded
+			 * from full-page caching by default. Return false on a site that
+			 * varies its cache by cookie itself.
+			 *
+			 * @param bool $exclude Whether to mark the response uncacheable.
+			 */
+			if ( apply_filters( 'localepress_exclude_detected_root_from_cache', true ) ) {
+				define( 'DONOTCACHEPAGE', true );
+			}
+		}
+	}
+
+	/**
+	 * Announces what a language-dependent response varies on.
+	 *
+	 * @return void
+	 */
+	private function vary_response() {
+		if ( $this->varied || headers_sent() ) {
+			return;
+		}
+
+		$this->varied = true;
+
+		// The header answers a first visit; the cookie answers every one after
+		// it, and a cache that knows only about the first serves the wrong
+		// language to the second.
+		header( 'Vary: Accept-Language', false );
+		header( 'Vary: Cookie', false );
 	}
 
 	/**
@@ -125,9 +200,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		}
 
 		$this->store_language_cookie( $language );
-
-		// Tell shared caches that this response depends on the request header.
-		header( 'Vary: Accept-Language', false );
+		$this->vary_response();
 
 		/**
 		 * Fires immediately before a detected visitor is redirected.
@@ -277,27 +350,58 @@ final class LanguageDetectionModule implements ModuleInterface {
 
 		$_COOKIE[ self::COOKIE_NAME ] = $slug;
 
-		/*
-		 * COOKIE_DOMAIN names the site's own host. Under host routing this request
-		 * may be on a language host that does not fall under it, and a browser
-		 * silently discards a cookie scoped to a domain it is not visiting — which
-		 * would leave detection re-running on every page. A host-only cookie is
-		 * always accepted, at the cost of not being shared between language hosts.
-		 */
-		$domain = $this->url_manager->uses_host_routing() ? '' : COOKIE_DOMAIN;
-
-		setcookie(
-			self::COOKIE_NAME,
-			$slug,
-			array(
-				'expires'  => $expires,
-				'path'     => COOKIEPATH ? COOKIEPATH : '/',
-				'domain'   => $domain,
-				'secure'   => is_ssl(),
-				'httponly' => false,
-				'samesite' => 'Lax',
-			)
+		$arguments = array(
+			'expires'  => $expires,
+			'path'     => COOKIEPATH ? COOKIEPATH : '/',
+			'domain'   => $this->get_cookie_domain(),
+			'secure'   => is_ssl(),
+			'httponly' => false,
+			'samesite' => 'Lax',
 		);
+
+		/**
+		 * Filters the arguments the visitor's language cookie is written with.
+		 *
+		 * Fires before the theme is loaded on a request that redirects.
+		 *
+		 * @param array<string, mixed> $arguments Arguments for setcookie().
+		 * @param array<string, mixed> $language  Language record.
+		 */
+		$filtered = apply_filters( 'localepress_language_cookie_args', $arguments, $language );
+
+		setcookie( self::COOKIE_NAME, $slug, is_array( $filtered ) ? $filtered : $arguments );
+	}
+
+	/**
+	 * Returns the domain the language cookie is written for.
+	 *
+	 * @return string
+	 */
+	private function get_cookie_domain() {
+		if ( ! $this->url_manager->uses_host_routing() ) {
+			return COOKIE_DOMAIN;
+		}
+
+		/*
+		 * Subdomain routing keeps every language under one registrable domain, so
+		 * scoping the cookie to that domain is what lets a reader who chose Bangla
+		 * on bn.example.com still be recognized at example.com. COOKIE_DOMAIN is
+		 * no help here: it names the site host, which under this mode is one
+		 * specific language rather than the family of them.
+		 */
+		if ( $this->url_manager->hosts()->uses_subdomain_routing() ) {
+			$base = $this->url_manager->hosts()->get_base_host();
+
+			return '' === $base ? '' : '.' . $base;
+		}
+
+		/*
+		 * Separate domains share nothing a cookie can span, and a browser
+		 * discards one scoped to a domain it is not visiting — which would leave
+		 * detection re-running on every page. A host-only cookie is always
+		 * accepted, at the cost of each domain remembering separately.
+		 */
+		return '';
 	}
 
 	/**

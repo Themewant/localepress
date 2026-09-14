@@ -88,6 +88,25 @@ final class RoutingModule implements ModuleInterface {
 	private $post_query_block_names = null;
 
 	/**
+	 * Language the last canonical URL was built for.
+	 *
+	 * get_unprefixed_redirect_url() answers with a URL because that is what its
+	 * callers and tests want from it, but a singular or term route is corrected
+	 * to the language its object belongs to rather than to the default one. The
+	 * loop check needs to know which, so the decision is recorded as it is made.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private $redirect_language = null;
+
+	/**
+	 * Caller rules deciding which home URL means the site's front door.
+	 *
+	 * @var array{allow: array<int, array<string, string>>, deny: array<int, array<string, string>>}|null
+	 */
+	private $front_door_callers = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param LanguageUrlManager     $url_manager       Language URL service.
@@ -268,21 +287,35 @@ final class RoutingModule implements ModuleInterface {
 		foreach ( $this->url_manager->get_language_slugs() as $slug ) {
 			$host = $this->url_manager->get_language_host( $slug );
 
-			if ( '' !== $host ) {
-				$hosts[] = $host;
-				$hosts[] = 'www.' . $host;
+			if ( '' === $host ) {
+				continue;
 			}
+
+			// Both spellings of the same host are the site's own, and a host that
+			// already carries www must not be offered as www.www.
+			$bare    = 0 === strpos( $host, 'www.' ) ? substr( $host, 4 ) : $host;
+			$hosts[] = $bare;
+			$hosts[] = 'www.' . $bare;
 		}
 
 		return array_values( array_unique( $hosts ) );
 	}
 
 	/**
-	 * Points home_url() at the host serving the current language.
+	 * Answers home_url() in the language the page is being read in.
 	 *
-	 * Permalink filters already localize post, term, and archive links. This
-	 * covers everything a theme builds from the site root itself — logo links,
-	 * search actions, hand-built URLs — so one page never mixes two hosts.
+	 * Permalink filters already localize post, term, and archive links. What they
+	 * cannot reach is the site root itself, which a theme builds its logo, its
+	 * site title, and its "back to home" link from. Left alone, those links take
+	 * a reader out of the language they chose — the one navigation step every
+	 * page offers, and the one most likely to be taken.
+	 *
+	 * Host routing rewrites the host on every home URL, because there a page and
+	 * its own front door must not disagree about which host they are on. Path and
+	 * query routing are narrower on purpose: `home_url()` is also how WordPress
+	 * and half the plugin directory build addresses that must stay canonical, so
+	 * only a bare site-root URL requested by something that plainly means "the
+	 * site's front door" is answered in the current language.
 	 *
 	 * @param string $url  Complete home URL.
 	 * @param string $path Path relative to the home URL.
@@ -290,13 +323,28 @@ final class RoutingModule implements ModuleInterface {
 	 */
 	public function filter_home_url( $url, $path ) {
 		if (
-			! $this->url_manager->uses_host_routing()
+			! is_string( $url )
 			|| is_admin()
 			|| wp_doing_cron()
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( defined( 'WP_CLI' ) && WP_CLI )
-			|| $this->url_manager->is_excluded_url( $url )
 		) {
+			return $url;
+		}
+
+		$host_mode = $this->url_manager->uses_host_routing();
+
+		/*
+		 * Asked before the language is resolved, and before the URL is parsed:
+		 * home_url() runs on almost every line of a rendered page, and all but a
+		 * handful of those calls carry a path, which settles the question with
+		 * one comparison.
+		 */
+		if ( ! $host_mode && ! $this->is_front_door_request( $url, $path ) ) {
+			return $url;
+		}
+
+		if ( $this->url_manager->is_excluded_url( $url ) ) {
 			return $url;
 		}
 
@@ -306,6 +354,19 @@ final class RoutingModule implements ModuleInterface {
 			return $url;
 		}
 
+		return $host_mode
+			? $this->apply_language_host( $url, $language )
+			: $this->front_door_url( $url, $path, $language );
+	}
+
+	/**
+	 * Moves one home URL onto the host serving a language.
+	 *
+	 * @param string               $url      Complete home URL.
+	 * @param array<string, mixed> $language Language record.
+	 * @return string
+	 */
+	private function apply_language_host( $url, array $language ) {
 		$host = $this->url_manager->get_language_host( $language );
 
 		if ( '' === $host ) {
@@ -318,10 +379,185 @@ final class RoutingModule implements ModuleInterface {
 			return $url;
 		}
 
-		unset( $path );
 		$parts['host'] = $host;
 
 		return $this->rebuild_url( $parts, $url );
+	}
+
+	/**
+	 * Reports whether this home_url() call is asking for the site's front door.
+	 *
+	 * Two cheap tests come first so the expensive one almost never runs: the call
+	 * has to name the site root and nothing below it, and it has to happen while
+	 * a page is being rendered rather than while WordPress is still deciding what
+	 * to render.
+	 *
+	 * @param string $url  Complete home URL.
+	 * @param mixed  $path Path relative to the home URL.
+	 * @return bool
+	 */
+	private function is_front_door_request( $url, $path ) {
+		if ( '' !== trim( (string) $path, '/' ) || ! did_action( 'template_redirect' ) ) {
+			return false;
+		}
+
+		if ( untrailingslashit( $url ) !== untrailingslashit( LanguageHostResolver::site_url() ) ) {
+			return false;
+		}
+
+		return $this->caller_means_front_door();
+	}
+
+	/**
+	 * Reports whether the code that asked for the home URL meant the front door.
+	 *
+	 * There is no argument that distinguishes "give me the site's front page as a
+	 * reader would visit it" from "give me the base address to build something
+	 * from", and the answer differs: the first belongs to a language, the second
+	 * must not. The caller is the only thing that separates them, so the caller
+	 * is what is asked. WordPress itself has no hook that carries this, and every
+	 * multilingual plugin that localizes the home link arrives at the same place.
+	 *
+	 * @return bool
+	 */
+	private function caller_means_front_door() {
+		/*
+		 * Unbounded on purpose. A theme template reached through the block
+		 * renderer sits deep, and a limit that stops short of it would answer
+		 * "not the front door" for exactly the link this exists to fix. The two
+		 * guards above have already reduced this to the handful of calls per page
+		 * that ask for the bare site root.
+		 */
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_debug_backtrace -- Inspected in memory, never output.
+		$traces = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+
+		// The first frames are this method, the filter callback, and the hook
+		// plumbing that reached it. None of them is the caller.
+		$traces = array_slice( $traces, 3 );
+		$rules  = $this->get_front_door_callers();
+		$match  = false;
+
+		foreach ( $traces as $trace ) {
+			$function = isset( $trace['function'] ) ? (string) $trace['function'] : '';
+			$file     = isset( $trace['file'] ) ? (string) $trace['file'] : '';
+
+			foreach ( $rules['deny'] as $rule ) {
+				if ( $this->trace_matches( $rule, $function, $file, false ) ) {
+					return false;
+				}
+			}
+
+			foreach ( $rules['allow'] as $rule ) {
+				if ( $this->trace_matches( $rule, $function, $file, true ) ) {
+					$match = true;
+				}
+			}
+		}
+
+		return $match;
+	}
+
+	/**
+	 * Reports whether one backtrace frame matches one rule.
+	 *
+	 * A file rule additionally requires the frame to be the home URL call itself.
+	 * Without that, merely being rendered from a theme file would qualify every
+	 * home URL a plugin builds while the theme is on screen.
+	 *
+	 * @param array<string, string> $rule     Rule with a function and/or file key.
+	 * @param string                $function Frame function name.
+	 * @param string                $file     Frame file path.
+	 * @param bool                  $entry    Whether a file rule needs a home URL call.
+	 * @return bool
+	 */
+	private function trace_matches( array $rule, $function, $file, $entry ) {
+		if ( ! empty( $rule['function'] ) && $rule['function'] === $function ) {
+			return true;
+		}
+
+		if ( empty( $rule['file'] ) || '' === $file || false === strpos( $file, $rule['file'] ) ) {
+			return false;
+		}
+
+		return ! $entry || in_array( $function, array( 'home_url', 'get_home_url', 'bloginfo', 'get_bloginfo' ), true );
+	}
+
+	/**
+	 * Returns the callers whose home URL is, or is not, the site's front door.
+	 *
+	 * @return array{allow: array<int, array<string, string>>, deny: array<int, array<string, string>>}
+	 */
+	private function get_front_door_callers() {
+		if ( null !== $this->front_door_callers ) {
+			return $this->front_door_callers;
+		}
+
+		// Windows theme roots mix separators; the backtrace only ever uses one.
+		$theme_root = get_theme_root();
+		$theme_root = false === strpos( $theme_root, '\\' ) ? $theme_root : str_replace( '/', '\\', $theme_root );
+
+		$allow = array(
+			array( 'file' => $theme_root ),
+			array( 'function' => 'get_custom_logo' ),
+			array( 'function' => 'render_block_core_site_title' ),
+			array( 'function' => 'render_block_core_site_logo' ),
+			array( 'function' => 'render_block_core_home_link' ),
+			array( 'function' => 'wp_nav_menu' ),
+		);
+
+		/*
+		 * A search form posts to the site root and carries the language as a
+		 * field, which SearchFormModule adds. Prefixing the action as well would
+		 * name the language twice and, in query routing, drop the argument when
+		 * the browser rebuilds the query string from the form.
+		 */
+		$deny = array(
+			array( 'function' => 'get_search_form' ),
+			array( 'file' => 'searchform.php' ),
+		);
+
+		/**
+		 * Filters the callers whose home_url() call means the site's front door.
+		 *
+		 * Each rule is an array with a `function` key, a `file` key, or both. A
+		 * `deny` match wins over an `allow` match anywhere in the call stack.
+		 *
+		 * @param array{allow: array<int, array<string, string>>, deny: array<int, array<string, string>>} $callers Caller rules.
+		 */
+		$callers = apply_filters(
+			'localepress_front_door_callers',
+			array(
+				'allow' => $allow,
+				'deny'  => $deny,
+			)
+		);
+
+		$this->front_door_callers = array(
+			'allow' => isset( $callers['allow'] ) && is_array( $callers['allow'] ) ? $callers['allow'] : $allow,
+			'deny'  => isset( $callers['deny'] ) && is_array( $callers['deny'] ) ? $callers['deny'] : $deny,
+		);
+
+		return $this->front_door_callers;
+	}
+
+	/**
+	 * Returns the language's front door, shaped like the URL that was asked for.
+	 *
+	 * @param string               $url      Complete home URL.
+	 * @param mixed                $path     Path relative to the home URL.
+	 * @param array<string, mixed> $language Language record.
+	 * @return string
+	 */
+	private function front_door_url( $url, $path, array $language ) {
+		$home = $this->url_manager->get_language_home_url( $language );
+
+		if ( '' === $home ) {
+			return $url;
+		}
+
+		// home_url() with no path at all answers without a trailing slash, and a
+		// theme comparing that string against the current URL depends on it.
+		return '' === (string) $path ? untrailingslashit( $home ) : $home;
 	}
 
 	/**
@@ -970,14 +1206,124 @@ final class RoutingModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function redirect_unprefixed_request() {
-		$redirect_url = $this->get_unprefixed_redirect_url();
+		$default = $this->url_manager->get_default_language();
 
-		if ( '' === $redirect_url ) {
+		/*
+		 * A host that serves no language is answered first, and temporarily. It
+		 * is the one correction a site can make while its DNS is still spreading,
+		 * so a permanent redirect browsers would keep replaying is the wrong tool
+		 * for it.
+		 */
+		$this->redirect_to( $this->get_unrouted_host_redirect_url(), $default, 302 );
+
+		// Read after the call: the canonical URL decides which language it names.
+		$canonical = $this->get_unprefixed_redirect_url();
+
+		$this->redirect_to( $canonical, $this->redirect_language, 301 );
+	}
+
+	/**
+	 * Sends the reader to a URL, but only once it is known to be settled.
+	 *
+	 * Several corrections run on one request, and each builds its target from a
+	 * different question: which language the object belongs to, which one the
+	 * URL claims, which one the site defaults to. A target that the next request
+	 * would read back as some other language is one the next request would try
+	 * to correct again, and a reader caught between two such corrections sees a
+	 * redirect loop rather than a page. Checking the target the way the router
+	 * will read it is what makes that impossible instead of merely unlikely.
+	 *
+	 * @param string                    $url      Target URL, empty to do nothing.
+	 * @param array<string, mixed>|null $language Language the target should name.
+	 * @param int                       $status   HTTP status code.
+	 * @return void
+	 */
+	private function redirect_to( $url, $language, $status ) {
+		if ( ! is_string( $url ) || '' === $url || ! $this->is_settled_redirect( $url, $language ) ) {
 			return;
 		}
 
-		wp_safe_redirect( $redirect_url, 301, 'LocalePress' );
+		wp_safe_redirect( $url, $status, 'LocalePress' );
 		exit;
+	}
+
+	/**
+	 * Reports whether a redirect target names the language it was built for.
+	 *
+	 * @param string                    $url      Target URL.
+	 * @param array<string, mixed>|null $language Language the target should name.
+	 * @return bool
+	 */
+	private function is_settled_redirect( $url, $language ) {
+		$expected = is_array( $language ) && isset( $language['id'] ) ? (string) $language['id'] : '';
+		$found    = $this->url_manager->get_url_language_id( $url );
+
+		if ( $found === $expected ) {
+			return true;
+		}
+
+		/*
+		 * A hidden default language writes nothing into the URL it can be read
+		 * back from, so naming no language is the correct answer for it. Host
+		 * routing is the exception: there the default still has an address of its
+		 * own, and a target missing it really is unsettled.
+		 */
+		$default = $this->url_manager->get_default_language();
+
+		return '' === $found
+			&& '' !== $expected
+			&& null !== $default
+			&& $expected === (string) $default['id']
+			&& ! $this->url_manager->should_prefix_default_language()
+			&& ! $this->url_manager->uses_host_routing();
+	}
+
+	/**
+	 * Returns the redirect for a request that arrived on an unrouted host.
+	 *
+	 * Under host routing the site address itself stops naming a language the
+	 * moment the default one is given a prefix of its own. Left alone it keeps
+	 * answering in that language, so every page on the site has a second address
+	 * nothing links to and search engines index twice. Sending it on is the same
+	 * correction the directory mode makes for an unprefixed path.
+	 *
+	 * @return string Empty when the request is already on a language host.
+	 */
+	public function get_unrouted_host_redirect_url() {
+		if (
+			! $this->url_manager->uses_host_routing()
+			|| $this->is_excluded_request()
+			|| is_404()
+			|| is_preview()
+			|| $this->url_manager->is_builder_preview_request()
+			|| ! $this->url_manager->request_host_serves_no_language()
+		) {
+			return '';
+		}
+
+		$default = $this->url_manager->get_default_language();
+
+		if ( null === $default ) {
+			return '';
+		}
+
+		$current = $this->url_manager->get_current_request_url();
+		$url     = $this->url_manager->prefix_url( $current, $default );
+
+		/**
+		 * Filters where a request on a host serving no language is sent.
+		 *
+		 * Returning an empty string cancels the redirect, which is what a site
+		 * wants while a new language host is still being pointed at the server
+		 * and the site address has to keep answering on its own.
+		 *
+		 * @param string               $url     Target URL.
+		 * @param array<string, mixed> $default Default language record.
+		 * @param string               $current Current request URL.
+		 */
+		$url = apply_filters( 'localepress_unrouted_host_redirect_url', $url, $default, $current );
+
+		return is_string( $url ) && '' !== $url && ! $this->same_url( $url, $current ) ? $url : '';
 	}
 
 	/**
@@ -1021,17 +1367,29 @@ final class RoutingModule implements ModuleInterface {
 		 * An empty language is how the URL builders ask for exactly that, and it
 		 * falls back to the requested language for an object holding none.
 		 */
+		$target = $language;
+
 		if ( is_singular() ) {
-			$url = $this->url_manager->get_post_url( get_queried_object_id(), '' );
+			$url    = $this->url_manager->get_post_url( get_queried_object_id(), '' );
+			$target = $this->object_language(
+				$this->post_translations->get_post_language_id( get_queried_object_id() ),
+				$language
+			);
 
 			if ( '' === $url ) {
-				$url = $this->url_manager->get_post_url( get_queried_object_id(), $language );
+				$url    = $this->url_manager->get_post_url( get_queried_object_id(), $language );
+				$target = $language;
 			}
 		} elseif ( $queried instanceof WP_Term ) {
-			$url = $this->url_manager->get_term_url( $queried, $queried->taxonomy, '' );
+			$url    = $this->url_manager->get_term_url( $queried, $queried->taxonomy, '' );
+			$target = $this->object_language(
+				$this->term_translations->get_term_language_id( $queried->term_id, $queried->taxonomy ),
+				$language
+			);
 
 			if ( '' === $url ) {
-				$url = $this->url_manager->get_term_url( $queried, $queried->taxonomy, $language );
+				$url    = $this->url_manager->get_term_url( $queried, $queried->taxonomy, $language );
+				$target = $language;
 			}
 		} elseif ( is_home() && $queried instanceof WP_Post && 0 < $this->url_manager->get_posts_page_id() ) {
 			/*
@@ -1055,8 +1413,22 @@ final class RoutingModule implements ModuleInterface {
 			return;
 		}
 
-		wp_safe_redirect( $url, 301, 'LocalePress' );
-		exit;
+		$this->redirect_to( $url, $target, 301 );
+	}
+
+	/**
+	 * Resolves the language an object belongs to, or the one that asked for it.
+	 *
+	 * @param string                    $language_id Stored language identifier.
+	 * @param array<string, mixed>|null $fallback    Language to use when unassigned.
+	 * @return array<string, mixed>|null
+	 */
+	private function object_language( $language_id, $fallback ) {
+		$language = '' === (string) $language_id
+			? null
+			: $this->url_manager->resolve_language( $language_id );
+
+		return null === $language ? $fallback : $language;
 	}
 
 	/**
@@ -1089,7 +1461,8 @@ final class RoutingModule implements ModuleInterface {
 			return '';
 		}
 
-		$default = $this->url_manager->get_default_language();
+		$default                 = $this->url_manager->get_default_language();
+		$this->redirect_language = $default;
 
 		if ( null === $default ) {
 			return '';
@@ -1130,27 +1503,37 @@ final class RoutingModule implements ModuleInterface {
 			 * The two redirects run on the same request and have to agree, or
 			 * each would keep undoing the other.
 			 */
-			$url = $this->url_manager->get_post_url( get_queried_object_id(), '' );
+			$url                        = $this->url_manager->get_post_url( get_queried_object_id(), '' );
+			$this->redirect_language    = $this->object_language(
+				$this->post_translations->get_post_language_id( get_queried_object_id() ),
+				$default
+			);
 
 			if ( '' === $url ) {
-				$url = $this->url_manager->get_post_url( get_queried_object_id(), $default );
+				$url                     = $this->url_manager->get_post_url( get_queried_object_id(), $default );
+				$this->redirect_language = $default;
 			}
 		} else {
 			$queried_object = get_queried_object();
 
 			if ( $queried_object instanceof WP_Term ) {
-				$url = $this->url_manager->get_term_url(
+				$url                     = $this->url_manager->get_term_url(
 					$queried_object,
 					$queried_object->taxonomy,
 					''
 				);
+				$this->redirect_language = $this->object_language(
+					$this->term_translations->get_term_language_id( $queried_object->term_id, $queried_object->taxonomy ),
+					$default
+				);
 
 				if ( '' === $url ) {
-					$url = $this->url_manager->get_term_url(
+					$url                     = $this->url_manager->get_term_url(
 						$queried_object,
 						$queried_object->taxonomy,
 						$default
 					);
+					$this->redirect_language = $default;
 				}
 			} else {
 				$url = $this->url_manager->prefix_url(

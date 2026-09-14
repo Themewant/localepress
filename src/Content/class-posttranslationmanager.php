@@ -483,10 +483,11 @@ final class PostTranslationManager {
 			 * thrown away — so the group releases the slot instead of refusing the
 			 * request. Releasing also repoints a group whose source was that
 			 * member, which gives the remaining translations a resolvable route
-			 * again. Restoring the old post from the trash afterwards returns it
-			 * without a language, because the slot it used to hold is taken.
+			 * again. The released post keeps the language it was written in and moves
+			 * into a group of its own, so restoring it from the trash afterwards
+			 * returns it unlinked rather than in the wrong language.
 			 */
-			$this->remove_post( $stored_translations[ $language_id ] );
+			$this->release_language_slot( $stored_translations[ $language_id ] );
 		}
 
 		$copy_options = $this->workflow_settings->resolve_copy_options( $source, $language, $options );
@@ -702,7 +703,12 @@ final class PostTranslationManager {
 	}
 
 	/**
-	 * Removes a deleted post and repairs or removes its translation group.
+	 * Removes a post from its translation group and repairs the group.
+	 *
+	 * The assignment row is dropped entirely, so the post is left with no
+	 * language at all. That is only correct for content WordPress is deleting for
+	 * good. A post that survives the call must be handed to detach_from_group()
+	 * instead, which keeps its language.
 	 *
 	 * @param int $post_id Post identifier.
 	 * @return void
@@ -715,27 +721,112 @@ final class PostTranslationManager {
 			return;
 		}
 
-		$group_id = $assignment['group_id'];
-		$members  = $this->repository->get_group_members( $group_id );
+		$this->repair_group( $assignment['group_id'], $post_id );
+
+		/**
+		 * Fires after a post is removed from its translation group.
+		 *
+		 * @param int                  $post_id    Removed post identifier.
+		 * @param array<string, mixed> $assignment Previous assignment.
+		 */
+		do_action( 'localepress_post_translation_unlinked', $post_id, $assignment );
+	}
+
+	/**
+	 * Moves a post out of its translation group while keeping its language.
+	 *
+	 * The post becomes the source of a group of its own, which is the state every
+	 * untranslated post is already in. Deleting the assignment instead would take
+	 * the language with it, and the post would silently pick the default one back
+	 * up the next time WordPress saved it. Restoring from the trash runs
+	 * wp_update_post(), so a post written in German would return in English.
+	 *
+	 * @param int $post_id Post identifier.
+	 * @return bool Whether the post was detached.
+	 */
+	public function detach_from_group( $post_id ) {
+		$post_id    = absint( $post_id );
+		$assignment = $this->repository->find_by_post( $post_id );
+
+		if ( null === $assignment ) {
+			return false;
+		}
+
+		$previous_group_id = $assignment['group_id'];
+		$language_id       = $assignment['language_id'];
+		$group_id          = wp_generate_uuid4();
+
+		if ( ! $this->repository->create_group( $group_id, $post_id ) ) {
+			return false;
+		}
+
+		if ( ! $this->repository->remove_assignment( $post_id ) ) {
+			$this->repository->delete_group( $group_id );
+
+			return false;
+		}
+
+		if ( ! $this->repository->add_assignment( $post_id, $group_id, $language_id ) ) {
+			// A storage failure must not be the reason a post loses its language.
+			$this->repository->add_assignment( $post_id, $previous_group_id, $language_id );
+			$this->repository->delete_group( $group_id );
+
+			return false;
+		}
+
+		$this->repair_group( $previous_group_id, $post_id );
+
+		/** This action is documented in src/Content/class-posttranslationmanager.php */
+		do_action( 'localepress_post_translation_unlinked', $post_id, $assignment );
+
+		return true;
+	}
+
+	/**
+	 * Repairs a translation group one of its members has just left.
+	 *
+	 * An emptied group is deleted. A group that lost the member its source
+	 * pointer named is repointed at a surviving member, which keeps the remaining
+	 * translations reachable.
+	 *
+	 * @param string $group_id        Translation group identifier.
+	 * @param int    $removed_post_id Post that left the group.
+	 * @return void
+	 */
+	private function repair_group( $group_id, $removed_post_id ) {
+		$members = $this->repository->get_group_members( $group_id );
 
 		if ( empty( $members ) ) {
 			$this->repository->delete_group( $group_id );
 			do_action( 'localepress_translation_group_deleted', $group_id );
-		} else {
-			$group = $this->repository->find_group( $group_id );
 
-			if ( null !== $group && $post_id === $group['source_post_id'] ) {
-				$this->repository->update_group_source( $group_id, $members[0]['post_id'] );
-			}
+			return;
 		}
 
-		/**
-		 * Fires after a permanently deleted post is removed from its group.
-		 *
-		 * @param int                  $post_id    Deleted post identifier.
-		 * @param array<string, mixed> $assignment Removed assignment.
-		 */
-		do_action( 'localepress_post_translation_unlinked', $post_id, $assignment );
+		$group = $this->repository->find_group( $group_id );
+
+		if ( null !== $group && absint( $removed_post_id ) === $group['source_post_id'] ) {
+			$this->repository->update_group_source( $group_id, $members[0]['post_id'] );
+		}
+	}
+
+	/**
+	 * Frees the language slot a post holds in its translation group.
+	 *
+	 * A row naming a post that no longer exists has no language worth keeping, so
+	 * it is dropped outright. Anything else is detached and keeps its own.
+	 *
+	 * @param int $post_id Post holding the slot.
+	 * @return void
+	 */
+	private function release_language_slot( $post_id ) {
+		if ( get_post( absint( $post_id ) ) instanceof WP_Post ) {
+			$this->detach_from_group( $post_id );
+
+			return;
+		}
+
+		$this->remove_post( $post_id );
 	}
 
 	/**
@@ -886,7 +977,8 @@ final class PostTranslationManager {
 	 * Dropping a trashed member does not unlink it: the assignment row stays, so
 	 * restoring the post restores the translation. It is only released if the
 	 * editor replaces it in the meantime, which is the same bargain the trash
-	 * makes everywhere else in WordPress.
+	 * makes everywhere else in WordPress. A released post keeps its language and
+	 * comes back unlinked, never in the wrong one.
 	 *
 	 * @param array<string, int> $translations Stored translation map.
 	 * @return array<string, int>

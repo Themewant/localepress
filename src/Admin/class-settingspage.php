@@ -248,6 +248,12 @@ final class SettingsPage {
 						</option>
 					</select>
 					<p class="description"><?php esc_html_e( 'Subdomains are built from each language URL slug. Separate domains are set on each language in Languages, and every host must already point at this WordPress installation with its own certificate.', 'localepress' ); ?></p>
+					<?php if ( in_array( $mode, array( 'subdomain', 'domain' ), true ) ) : ?>
+						<p class="description"><?php esc_html_e( 'A page served from a language host also loads its images, scripts, and search results from that host, so nothing is blocked as a cross-origin request. Logging in and the admin stay on the site address, which is where the session lives.', 'localepress' ); ?></p>
+						<?php if ( ! empty( $url['prefix_default'] ) ) : ?>
+							<p class="description"><?php esc_html_e( 'While every language is prefixed, the site address itself serves no language and forwards to the default one. Point each language host at this server before saving.', 'localepress' ); ?></p>
+						<?php endif; ?>
+					<?php endif; ?>
 					<p class="description"><?php esc_html_e( 'The query argument leaves every address exactly as WordPress builds it and names the language beside it, so it is the one format that also works without pretty permalinks. Directories read better and are the better choice when the site has them.', 'localepress' ); ?></p>
 					<?php if ( 'domain' === $mode ) : ?>
 						<?php
