@@ -103,6 +103,7 @@ final class PluginSettings {
 				'unavailable_behavior' => 'hide',
 				'show_flags'           => false,
 				'show_disabled'        => false,
+				'floater'              => self::floater_defaults(),
 			),
 			'seo'            => array(
 				'hreflang_enabled'  => true,
@@ -115,6 +116,56 @@ final class PluginSettings {
 				'complete' => false,
 				'step'     => 1,
 			),
+		);
+	}
+
+	/**
+	 * Returns the unfiltered floating switcher defaults.
+	 *
+	 * A site that has just registered its second language has placed no
+	 * switcher anywhere yet: no shortcode, no block, no menu item. Until it
+	 * does, that language is registered and routed and reachable by nobody
+	 * reading the site. The floating switcher is the way in, which is why it
+	 * starts on, and it is one checkbox away from gone the moment a theme
+	 * carries a switcher of its own.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function floater_defaults() {
+		return array(
+			'enabled'    => true,
+			'position'   => 'middle-right',
+			'layout'     => 'vertical',
+			/*
+			 * Flags are the floater's own answer rather than the site-wide one,
+			 * and the answer is yes. Everywhere else a switcher sits in running
+			 * text and a flag is decoration the site owner opts into; in a strip
+			 * at the edge of the screen the flag is what identifies the language
+			 * before the label is read at all, and on a phone the labels are
+			 * dropped and the flags are the only thing left.
+			 */
+			'show_flags' => true,
+		);
+	}
+
+	/**
+	 * Returns the screen edges a floating switcher may be pinned to.
+	 *
+	 * The two middle edges come first because they are what the floater is for:
+	 * a strip halfway down the side of the screen is in view wherever the reader
+	 * has scrolled to, while a corner competes with the cookie notices, chat
+	 * bubbles, and back-to-top buttons that every site already puts there.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function floater_positions() {
+		return array(
+			'middle-right',
+			'middle-left',
+			'bottom-right',
+			'bottom-left',
+			'top-right',
+			'top-left',
 		);
 	}
 
@@ -286,7 +337,32 @@ final class PluginSettings {
 	 * @return array<string, mixed>
 	 */
 	public function get_switcher_defaults() {
-		return $this->get_section( 'switcher' );
+		$switcher = $this->get_section( 'switcher' );
+
+		/*
+		 * The floater is a placement, not a rendering default: it says where one
+		 * switcher goes, never how every switcher looks. Left in, it would ride
+		 * into the arguments of every switcher on the site — shortcode, block,
+		 * menu item, template tag — as a key no renderer reads and every
+		 * argument filter would have to step around.
+		 */
+		unset( $switcher['floater'] );
+
+		return $switcher;
+	}
+
+	/**
+	 * Returns the normalized floating switcher configuration.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function get_floater_settings() {
+		$switcher = $this->get_section( 'switcher' );
+		$floater  = isset( $switcher['floater'] ) && is_array( $switcher['floater'] )
+			? $switcher['floater']
+			: array();
+
+		return array_merge( self::floater_defaults(), $floater );
 	}
 
 	/**
@@ -398,6 +474,10 @@ final class PluginSettings {
 				'unavailable_behavior' => $this->enum_value( $switcher, 'unavailable_behavior', array( 'disabled', 'hide', 'home', 'current' ), $defaults['switcher']['unavailable_behavior'] ),
 				'show_flags'           => $this->boolean_value( $switcher, 'show_flags', $defaults['switcher']['show_flags'] ),
 				'show_disabled'        => $this->boolean_value( $switcher, 'show_disabled', $defaults['switcher']['show_disabled'] ),
+				'floater'              => $this->floater_values(
+					isset( $switcher['floater'] ) && is_array( $switcher['floater'] ) ? $switcher['floater'] : array(),
+					isset( $defaults['switcher']['floater'] ) ? $defaults['switcher']['floater'] : array()
+				),
 			),
 			'seo'            => array(
 				'hreflang_enabled'  => $this->boolean_value( $seo, 'hreflang_enabled', $defaults['seo']['hreflang_enabled'] ),
@@ -410,6 +490,32 @@ final class PluginSettings {
 				'complete' => $this->boolean_value( $setup, 'complete', $defaults['setup']['complete'] ),
 				'step'     => min( 5, max( 1, isset( $setup['step'] ) ? absint( $setup['step'] ) : $defaults['setup']['step'] ) ),
 			),
+		);
+	}
+
+	/**
+	 * Returns the normalized floating switcher configuration.
+	 *
+	 * The stored value predates this setting on any site upgrading into it, so
+	 * a missing sub-array is the normal case rather than an error: every key
+	 * falls back to the shipped default, which is what turns the floater on for
+	 * a site that never saw the checkbox.
+	 *
+	 * @param array<string, mixed> $floater  Stored floater settings.
+	 * @param mixed                $defaults Default floater settings.
+	 * @return array<string, mixed>
+	 */
+	private function floater_values( array $floater, $defaults ) {
+		$defaults = array_merge(
+			self::floater_defaults(),
+			is_array( $defaults ) ? $defaults : array()
+		);
+
+		return array(
+			'enabled'    => $this->boolean_value( $floater, 'enabled', $defaults['enabled'] ),
+			'position'   => $this->enum_value( $floater, 'position', self::floater_positions(), $defaults['position'] ),
+			'layout'     => $this->enum_value( $floater, 'layout', array( 'dropdown', 'horizontal', 'vertical' ), $defaults['layout'] ),
+			'show_flags' => $this->boolean_value( $floater, 'show_flags', $defaults['show_flags'] ),
 		);
 	}
 

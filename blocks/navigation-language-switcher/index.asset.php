@@ -14,5 +14,8 @@ return array(
 		'wp-element',
 		'wp-i18n',
 	),
-	'version'      => '1.0.0',
+	/** This versioning is explained in blocks/language-switcher/index.asset.php */
+	'version'      => class_exists( 'LocalePress\Assets' )
+		? LocalePress\Assets::version( 'blocks/navigation-language-switcher/index.js' )
+		: '1.0.0',
 );

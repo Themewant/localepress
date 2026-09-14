@@ -499,12 +499,20 @@ final class SettingsModule implements ModuleInterface {
 		$menu_languages = isset( $_POST['menu_languages'] ) && is_array( $_POST['menu_languages'] ) ? map_deep( wp_unslash( $_POST['menu_languages'] ), 'sanitize_text_field' ) : array();
 		$menu_locations = isset( $_POST['menu_locations'] ) && is_array( $_POST['menu_locations'] ) ? map_deep( wp_unslash( $_POST['menu_locations'] ), 'sanitize_text_field' ) : array();
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		$result = $this->menu_manager->update_configuration( $menu_languages, $menu_locations );
+		$floater = isset( $switcher['floater'] ) && is_array( $switcher['floater'] ) ? $switcher['floater'] : array();
 
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
+		/*
+		 * Stored before the menus are touched, and deliberately so. These two
+		 * halves of the tab are independent — one is how a switcher looks, the
+		 * other is which menu belongs to which language — but they share a
+		 * screen and therefore a single Save. Validating the menus first meant
+		 * that any conflict between two menu assignments returned early and
+		 * discarded every switcher change made alongside it, without the notice
+		 * ever mentioning them: the controls simply came back as they were.
+		 * The location matrix re-posts whatever it is currently showing on
+		 * every save, so a conflict already sitting in the theme's assignments
+		 * was enough to make this tab look like it had stopped saving at all.
+		 */
 		$this->settings->update_sections(
 			array(
 				'switcher' => array(
@@ -515,9 +523,28 @@ final class SettingsModule implements ModuleInterface {
 					'unavailable_behavior' => isset( $switcher['unavailable_behavior'] ) ? $switcher['unavailable_behavior'] : '',
 					'show_flags'           => isset( $switcher['show_flags'] ),
 					'show_disabled'        => isset( $switcher['show_disabled'] ),
+					/*
+					 * Written whole rather than merged into what is stored: an
+					 * unchecked checkbox posts nothing at all, so a floater
+					 * merged key by key could never be turned back off.
+					 */
+					'floater'              => array(
+						'enabled'    => isset( $floater['enabled'] ),
+						'position'   => isset( $floater['position'] ) ? $floater['position'] : '',
+						'layout'     => isset( $floater['layout'] ) ? $floater['layout'] : '',
+						'show_flags' => isset( $floater['show_flags'] ),
+					),
 				),
 			)
 		);
+
+		// Reported after the switcher settings are safely stored, so the notice
+		// names the menu problem without the rest of the tab being lost to it.
+		$result = $this->menu_manager->update_configuration( $menu_languages, $menu_locations );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
 
 		return array( 'url_changed' => false );
 	}

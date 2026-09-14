@@ -24,8 +24,7 @@ defined( 'LOCALEPRESS_PATH' ) || define( 'LOCALEPRESS_PATH', plugin_dir_path( __
 defined( 'LOCALEPRESS_URL' ) || define( 'LOCALEPRESS_URL', plugin_dir_url( __FILE__ ) );
 defined( 'LOCALEPRESS_BASENAME' ) || define( 'LOCALEPRESS_BASENAME', plugin_basename( __FILE__ ) );
 
-// Site-owned configuration read alongside what plugins and themes ship. It is
-// outside the plugin directory so it survives an update.
+
 defined( 'LOCALEPRESS_LOCAL_DIR' ) || define( 'LOCALEPRESS_LOCAL_DIR', WP_CONTENT_DIR . '/localepress' );
 
 if ( version_compare( PHP_VERSION, LOCALEPRESS_MINIMUM_PHP_VERSION, '<' ) ) {

@@ -245,7 +245,7 @@ final class ContentTranslationModule implements ModuleInterface {
 
 		if ( isset( $notices[ $notice_code ] ) ) {
 			printf(
-				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-success is-dismissible"><p>%s</p></div>',
 				esc_html( $notices[ $notice_code ] )
 			);
 		}
@@ -260,7 +260,7 @@ final class ContentTranslationModule implements ModuleInterface {
 				: __( 'LocalePress could not complete the translation action.', 'localepress' );
 
 			printf(
-				'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-error is-dismissible"><p>%s</p></div>',
 				esc_html( $error_message )
 			);
 		}

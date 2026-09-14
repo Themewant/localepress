@@ -151,7 +151,7 @@ final class TranslationDashboardModule implements ModuleInterface {
 		echo '<h1>' . esc_html__( 'Translations', 'localepress' ) . '</h1>';
 
 		if ( ! $this->dashboard_query->is_available() ) {
-			echo '<div class="notice notice-warning inline"><p>';
+			echo '<div class="localepress-notice notice notice-warning inline"><p>';
 			esc_html_e( 'The active translation storage does not provide dashboard reporting.', 'localepress' );
 			echo '</p></div></div>';
 			return;

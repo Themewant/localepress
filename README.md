@@ -797,6 +797,38 @@ Use the shortcode or dynamic block:
 
 LocalePress > Settings > Switcher prints the shortcode under the controls, built from whatever those controls are currently set to and rebuilt as they change, with a copy button beside it. A placement that needs its own settings can be copied from there rather than written from memory.
 
+### Elementor widget
+
+**LocalePress > Language Switcher** in the Elementor panel, filed under its own category. It is a control surface and nothing else: every language it lists, every URL it links to, and every element of the markup comes from the same `LanguageSwitcher` service the shortcode, the block, the menu item, and the floating switcher render through, so a fix to how a switcher resolves a translation reaches an Elementor header without being ported there.
+
+Content controls cover layout, the label, flags, which languages to list, hiding the current one, what a missing translation does, disabled languages, and the accessible label. The label is one choice rather than a set of checkboxes, because a switcher showing a name and a code together has to say which is the link and which is the annotation, in every language at once, and no answer to that reads well in all of them; the renderer takes a single label mode and the widget offers exactly that. Leaving Languages empty lists every enabled language, including ones registered later — a selection is a fixed list, and a selection naming only languages that have since been deleted is ignored rather than emptying the widget.
+
+Style controls are Elementor's own: typography and normal/hover/current colors for a language, size, spacing and radius for a flag, background, border, radius, shadow and padding for the open dropdown panel, and gap, padding and alignment under Spacing. The gap writes `--localepress-switcher-gap`, which the core stylesheet already spaces the list with, so one control covers a row and a column alike. The dropdown section appears only for the dropdown layout and the flag section only when flags are on.
+
+A widget that would render nothing — a site with one language, or a page where every other language is unavailable and set to hide — draws a dashed placeholder while the editor is open, so it stays selectable, and nothing at all on the published page.
+
+### Floating switcher
+
+One switcher the plugin places by itself, and the only one it does. A site that has just registered its second language has put no switcher anywhere yet — no shortcode, no block, no menu item — and until it does, that language is registered and routed and reachable by nobody reading the site. So the floating switcher starts on: LocalePress > Settings > Switcher > Floating switcher is where it is turned off again, which is what a theme that already carries a switcher of its own does.
+
+It is printed in `wp_footer`, because that is the one hook every theme has, but it is not in the footer: it is `position: fixed`, drawn over the page rather than inside it, so no theme has to make room for it and its position owes nothing to where in the markup it was written. It defaults to `middle-right` — a vertical strip halfway down the right edge, flush against it — because that is the one part of the screen that is in view however far the reader has scrolled. `middle-left` is the same strip on the other side, and the four corners are there for a site whose sides are already taken by a chat bubble or a cookie notice; a corner keeps a margin rather than sitting flush, and the two top ones account for a logged-in visitor's admin bar. Every position is physical rather than logical, so a switcher put on the right stays on the right in a right-to-left language rather than crossing the screen.
+
+Each language is a pill of its own rather than a row in a shared panel, and the language being read is filled in rather than merely marked, because a strip at the edge of the screen is read from the corner of the eye where a border would not survive. Flags are cropped to circles here and nowhere else — in a menu or a post a flag sits beside body text at its own proportions, while in the strip it is the marker read before the label is. On a phone the labels are dropped and the flags carry the strip alone, but only where flags are switched on; a site running the floater without them keeps its labels rather than being left with empty pills. Four custom properties carry the colors, so a theme that wants the strip in its own palette overrides those rather than fighting the rules.
+
+Flags and layout are the floater's own settings rather than inherited ones, and flags start on here while the site-wide checkbox starts off. The two are answering different questions: elsewhere a switcher sits in running text and a flag is decoration a site opts into, while in the strip it is what identifies a language before its label is read, and on a phone it is the only thing left. Layout is separate for the same reason — a site can keep dropdowns everywhere else and still show every language at once in the strip, or the reverse. Labels and missing-translation handling do come from the switcher settings above, because those describe what a switcher says rather than where it goes. The dropdown layout loads the same measuring script every dropdown does, so a panel pinned low on the screen opens upward. Nothing renders at all where a switcher would be empty: a single-language site, or a URL mode that carries no language prefixes.
+
+It also stands down inside a page builder. A builder renders the real front end in its canvas, so everything `wp_footer` prints turns up while editing — correct for most of what a plugin adds, and wrong for this one: the strip is not part of the page being edited, cannot be selected or moved, and sits over the corner the builder needs for its own handles. Any builder that registers its preview argument through `localepress_builder_preview_query_args` is recognized, `elementor-preview` among them, and Elementor is additionally asked directly, because that argument names only the canvas frame while the editor renders template and popup previews that announce themselves nowhere in the URL. The assets are skipped along with the markup, so the editor does not load the stylesheet either.
+
+```php
+// Keep the floater on the site but off one template.
+add_filter(
+	'localepress_render_floating_switcher',
+	function ( $enabled ) {
+		return is_cart() ? false : $enabled;
+	}
+);
+```
+
 The block inspector and the LocalePress item in Appearance > Menus expose the same core controls. Themes use the template tags, which return or echo escaped HTML and are safe to call before LocalePress has booted:
 
 ```php
@@ -948,6 +980,7 @@ The same flags appear in the admin: the Language and Translations columns on pos
 | `localepress_switcher_item` | Filter | Adjust or omit one normalized switcher item. |
 | `localepress_switcher_items` | Filter | Adjust the complete normalized item collection. |
 | `localepress_switcher_html` | Filter | Replace final trusted switcher markup. |
+| `localepress_render_floating_switcher` | Filter | Keep the floating switcher off one template while leaving it on for the site. |
 | `localepress_switcher_menu_args` | Filter | Adjust settings for one classic menu switcher item. |
 | `localepress_post_language` | Filter | Filter a post's resolved language record for display/API consumers. |
 | `localepress_post_translations` | Filter | Filter a loaded language-to-post map for display/API consumers. |

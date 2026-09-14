@@ -57,19 +57,23 @@
 						} ),
 						createElement( ToggleControl, {
 							label: __( 'Hide languages the site has no content in', 'localepress' ),
+							help: __( 'The same choice as the Missing translation option of that name, and it wins. Leave it off to use any of the other three.', 'localepress' ),
 							checked: attributes.hideMissing,
 							onChange: function ( value ) {
 								setAttributes( { hideMissing: value } );
 							}
 						} ),
 						createElement( SelectControl, {
-							label: __( 'Unavailable translations', 'localepress' ),
+							label: __( 'Missing translation', 'localepress' ),
 							value: attributes.unavailableBehavior,
 							disabled: attributes.hideMissing,
+							help: attributes.hideMissing
+								? __( 'Turn off the checkbox above to choose one of these.', 'localepress' )
+								: __( 'What a language does on a page it has no translation of.', 'localepress' ),
 							options: [
-								{ label: __( 'Show unavailable', 'localepress' ), value: 'disabled' },
 								{ label: __( 'Hide languages the site has no content in', 'localepress' ), value: 'hide' },
-								{ label: __( 'Link to language home', 'localepress' ), value: 'home' },
+								{ label: __( 'Show as unavailable', 'localepress' ), value: 'disabled' },
+								{ label: __( 'Link to language homepage', 'localepress' ), value: 'home' },
 								{ label: __( 'Keep current URL', 'localepress' ), value: 'current' }
 							],
 							onChange: function ( value ) {

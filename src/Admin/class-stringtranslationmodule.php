@@ -156,7 +156,7 @@ final class StringTranslationModule implements ModuleInterface {
 		$this->render_notice();
 
 		if ( empty( $languages ) ) {
-			echo '<div class="notice notice-warning inline"><p>';
+			echo '<div class="localepress-notice notice notice-warning inline"><p>';
 			esc_html_e( 'Enable at least one language before translating registered strings.', 'localepress' );
 			echo '</p></div>';
 		}
@@ -354,9 +354,9 @@ final class StringTranslationModule implements ModuleInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( 'saved' === $notice ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'String translations saved.', 'localepress' ) . '</p></div>';
+			echo '<div class="localepress-notice notice notice-success is-dismissible"><p>' . esc_html__( 'String translations saved.', 'localepress' ) . '</p></div>';
 		} elseif ( 'invalid' === $notice ) {
-			echo '<div class="notice notice-error"><p>' . esc_html__( 'The string translations could not be saved.', 'localepress' ) . '</p></div>';
+			echo '<div class="localepress-notice notice notice-error"><p>' . esc_html__( 'The string translations could not be saved.', 'localepress' ) . '</p></div>';
 		}
 	}
 

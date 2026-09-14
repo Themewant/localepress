@@ -235,7 +235,7 @@ final class TermTranslationModule implements ModuleInterface {
 
 		if ( 'term_translation_created' === $notice_code ) {
 			printf(
-				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-success is-dismissible"><p>%s</p></div>',
 				esc_html__( 'Translated term created and linked.', 'localepress' )
 			);
 		}
@@ -250,7 +250,7 @@ final class TermTranslationModule implements ModuleInterface {
 				: __( 'LocalePress could not complete the term translation action.', 'localepress' );
 
 			printf(
-				'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-error is-dismissible"><p>%s</p></div>',
 				esc_html( $error_message )
 			);
 		}

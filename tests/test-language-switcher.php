@@ -13,6 +13,8 @@ use LocalePress\Infrastructure\OptionsLanguageRepository;
 use LocalePress\Language\LanguageManager;
 use LocalePress\Language\LanguageValidator;
 use LocalePress\Routing\LanguageUrlManager;
+use LocalePress\Settings\PluginSettings;
+use LocalePress\Switcher\FloatingSwitcher;
 use LocalePress\Switcher\LanguageSwitcher;
 use LocalePress\Switcher\NavigationMenuIntegration;
 use LocalePress\Switcher\SwitcherModule;
@@ -378,6 +380,106 @@ class Test_LocalePress_Language_Switcher extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The floating switcher prints itself, pinned to the edge it was given.
+	 *
+	 * @return void
+	 */
+	public function test_floating_switcher_renders_pinned_to_the_screen_edge() {
+		list( $source ) = $this->create_translated_posts( 'page', 'lp-floater', 'lp-floater-de' );
+		$this->set_singular_request( $source, 'page', '/en/lp-floater/' );
+
+		$settings = new PluginSettings();
+
+		ob_start();
+		( new FloatingSwitcher( $this->switcher, $settings ) )->render();
+		$html = (string) ob_get_clean();
+
+		// Out of the box: a vertical strip on the middle right, every language
+		// on screen at once rather than behind a control that has to be opened.
+		$this->assertStringContainsString( 'localepress-switcher--floating', $html );
+		$this->assertStringContainsString( 'localepress-switcher--at-middle-right', $html );
+		$this->assertStringContainsString( 'localepress-switcher--vertical', $html );
+		$this->assertStringNotContainsString( '<details ', $html );
+
+		// The language being read is the one the stylesheet fills in.
+		$this->assertStringContainsString( 'localepress-switcher__item is-current', $html );
+
+		// Flags are the floater's own setting, on even though the site-wide one
+		// is off, because the strip is read by its flags before its labels.
+		$this->assertStringContainsString( 'localepress-switcher__flag', $html );
+		$this->assertStringNotContainsString(
+			'localepress-switcher__flag',
+			$this->switcher->render( array( 'layout' => 'vertical' ) )
+		);
+
+		$settings->update_sections(
+			array(
+				'switcher' => array(
+					'floater' => array(
+						'enabled'    => true,
+						'position'   => 'middle-left',
+						'layout'     => 'dropdown',
+						'show_flags' => true,
+					),
+				),
+			)
+		);
+
+		ob_start();
+		( new FloatingSwitcher( $this->switcher, new PluginSettings() ) )->render();
+		$collapsed = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'localepress-switcher--at-middle-left', $collapsed );
+		$this->assertStringContainsString( '<details ', $collapsed );
+
+		// Turning it off is the whole point of the checkbox: nothing is printed.
+		$settings = new PluginSettings();
+		$settings->update_sections(
+			array(
+				'switcher' => array(
+					'floater' => array(
+						'enabled'    => false,
+						'position'   => 'middle-right',
+						'layout'     => 'vertical',
+						'show_flags' => true,
+					),
+				),
+			)
+		);
+
+		ob_start();
+		( new FloatingSwitcher( $this->switcher, new PluginSettings() ) )->render();
+
+		$this->assertSame( '', (string) ob_get_clean() );
+	}
+
+	/**
+	 * A page builder's canvas is the page being edited, not a page to float over.
+	 *
+	 * @return void
+	 */
+	public function test_floating_switcher_stands_down_in_a_builder_preview() {
+		list( $source ) = $this->create_translated_posts( 'page', 'lp-builder', 'lp-builder-de' );
+		$this->set_singular_request( $source, 'page', '/en/lp-builder/' );
+
+		$floater = new FloatingSwitcher( $this->switcher, new PluginSettings(), $this->urls );
+
+		ob_start();
+		$floater->render();
+		$this->assertNotSame( '', (string) ob_get_clean(), 'The floater renders on an ordinary request.' );
+
+		$_GET['elementor-preview'] = (string) $source;
+
+		ob_start();
+		$floater->render();
+		$rendered = (string) ob_get_clean();
+
+		unset( $_GET['elementor-preview'] );
+
+		$this->assertSame( '', $rendered );
+	}
+
+	/**
 	 * Flag filters and shortcode/block adapters share the same renderer.
 	 *
 	 * @return void
@@ -411,6 +513,85 @@ class Test_LocalePress_Language_Switcher extends WP_UnitTestCase {
 		$this->assertStringContainsString( '>DE<', $shortcode );
 		$this->assertStringContainsString( 'localepress-switcher--vertical', $block );
 		$this->assertStringContainsString( '>German<', $block );
+	}
+
+	/**
+	 * Every block attribute reaches the renderer and changes the output.
+	 *
+	 * The inspector, block.json, and the render callback each name these
+	 * separately, so an attribute can be added to one and missed in another and
+	 * still look right in the editor. This walks all of them.
+	 *
+	 * @return void
+	 */
+	public function test_block_attributes_reach_the_renderer() {
+		list( $source ) = $this->create_translated_posts( 'page', 'lp-block-attrs', 'lp-block-attrs-de' );
+		$this->set_singular_request( $source, 'page', '/en/lp-block-attrs/' );
+
+		$module = new SwitcherModule(
+			$this->switcher,
+			new NavigationMenuIntegration( $this->switcher ),
+			$this->languages
+		);
+
+		// Defaults: the current language is marked, the translated one links.
+		$default = $module->render_block( array() );
+		$this->assertStringContainsString( 'localepress-switcher--horizontal', $default );
+		$this->assertStringContainsString( 'aria-current="page"', $default );
+		$this->assertStringContainsString( 'hreflang="de-DE"', $default );
+		$this->assertStringNotContainsString( 'localepress-switcher__flag', $default );
+
+		// display + layout.
+		$labels = $module->render_block( array( 'display' => 'language_code', 'layout' => 'dropdown' ) );
+		$this->assertStringContainsString( 'localepress-switcher--dropdown', $labels );
+		$this->assertStringContainsString( '<details ', $labels );
+		$this->assertStringContainsString( '>EN<', $labels );
+
+		// hideCurrent.
+		$this->assertStringNotContainsString(
+			'aria-current="page"',
+			$module->render_block( array( 'hideCurrent' => true ) )
+		);
+
+		// showFlags.
+		$this->assertStringContainsString(
+			'localepress-switcher__flag',
+			$module->render_block( array( 'showFlags' => true ) )
+		);
+
+		// showDisabled surfaces the registered-but-disabled language.
+		$disabled = $module->render_block( array( 'showDisabled' => true ) );
+		$this->assertStringContainsString( 'aria-disabled="true"', $disabled );
+
+		// ariaLabel and className both land on the wrapper.
+		$labelled = $module->render_block(
+			array(
+				'ariaLabel' => 'Choose a language',
+				'className' => 'my-switcher',
+			)
+		);
+		$this->assertStringContainsString( 'aria-label="Choose a language"', $labelled );
+		$this->assertStringContainsString( 'my-switcher', $labelled );
+
+		/*
+		 * French has nothing published anywhere, so "hide" drops it while
+		 * "home" keeps it and sends it to its own front page. That difference
+		 * is the whole of unavailableBehavior, and it is what hideMissing
+		 * overrules.
+		 */
+		$home = $module->render_block( array( 'unavailableBehavior' => 'home' ) );
+		$this->assertStringContainsString( esc_url( home_url( '/fr/' ) ), $home );
+
+		$hidden = $module->render_block( array( 'unavailableBehavior' => 'hide' ) );
+		$this->assertStringNotContainsString( 'hreflang="fr-FR"', $hidden );
+
+		$overruled = $module->render_block(
+			array(
+				'unavailableBehavior' => 'home',
+				'hideMissing'         => true,
+			)
+		);
+		$this->assertStringNotContainsString( 'hreflang="fr-FR"', $overruled );
 	}
 
 	/**

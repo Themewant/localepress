@@ -167,7 +167,7 @@ final class SettingsPage {
 		?>
 		<h2><?php esc_html_e( 'General', 'localepress' ); ?></h2>
 		<?php if ( empty( $languages ) ) : ?>
-			<div class="notice notice-warning inline"><p>
+			<div class="localepress-notice notice notice-warning inline"><p>
 				<?php esc_html_e( 'Add a language before configuring LocalePress.', 'localepress' ); ?>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=localepress-setup' ) ); ?>"><?php esc_html_e( 'Run setup', 'localepress' ); ?></a>
 			</p></div>
@@ -213,9 +213,9 @@ final class SettingsPage {
 		$mode = isset( $url['mode'] ) ? (string) $url['mode'] : LanguageHostResolver::MODE_DIRECTORY;
 		?>
 		<h2><?php esc_html_e( 'URL', 'localepress' ); ?></h2>
-		<div class="notice notice-warning inline"><p><strong><?php esc_html_e( 'Changing URL behavior changes public canonical URLs.', 'localepress' ); ?></strong> <?php esc_html_e( 'Update navigation links and clear page or CDN caches after saving.', 'localepress' ); ?></p></div>
+		<div class="localepress-notice notice notice-warning inline"><p><strong><?php esc_html_e( 'Changing URL behavior changes public canonical URLs.', 'localepress' ); ?></strong> <?php esc_html_e( 'Update navigation links and clear page or CDN caches after saving.', 'localepress' ); ?></p></div>
 		<?php if ( '' === (string) get_option( 'permalink_structure' ) && LanguageHostResolver::MODE_QUERY !== $mode ) : ?>
-			<div class="notice notice-error inline"><p><?php esc_html_e( 'Language directories require pretty permalinks. Choose a permalink structure in WordPress, or select the query argument format below, which works without one.', 'localepress' ); ?></p></div>
+			<div class="localepress-notice notice notice-error inline"><p><?php esc_html_e( 'Language directories require pretty permalinks. Choose a permalink structure in WordPress, or select the query argument format below, which works without one.', 'localepress' ); ?></p></div>
 		<?php endif; ?>
 		<table class="form-table" role="presentation"><tbody>
 			<tr>
@@ -293,7 +293,7 @@ final class SettingsPage {
 			</tr>
 		</tbody></table>
 		<?php if ( ! empty( $url['detect_browser'] ) ) : ?>
-			<div class="notice notice-warning inline"><p><?php esc_html_e( 'A full page cache that stores the site home page can serve one visitor\'s detected language to everyone. Exclude the home page from caching, or make the cache vary on the Accept-Language header.', 'localepress' ); ?></p></div>
+			<div class="localepress-notice notice notice-warning inline"><p><?php esc_html_e( 'A full page cache that stores the site home page can serve one visitor\'s detected language to everyone. Exclude the home page from caching, or make the cache vary on the Accept-Language header.', 'localepress' ); ?></p></div>
 		<?php endif; ?>
 		<?php
 	}
@@ -378,6 +378,7 @@ final class SettingsPage {
 	/** Renders language switcher defaults and menu configuration. */
 	private function render_switcher() {
 		$switcher   = $this->settings->get_section( 'switcher' );
+		$floater    = $this->settings->get_floater_settings();
 		$languages  = $this->language_manager->get_languages();
 		$menus      = wp_get_nav_menus();
 		$locations  = get_registered_nav_menus();
@@ -422,12 +423,78 @@ final class SettingsPage {
 			</td></tr>
 		</tbody></table>
 
+		<?php $this->render_floating_switcher( $floater ); ?>
+
 		<?php $this->render_switcher_usage( $switcher ); ?>
 
 		<h2><?php esc_html_e( 'Navigation Menus', 'localepress' ); ?></h2>
 		<?php $this->render_menu_languages( $menus, $languages ); ?>
 		<h2><?php esc_html_e( 'Theme Locations', 'localepress' ); ?></h2>
 		<?php $this->render_location_matrix( $locations, $languages, $menus, $assignment ); ?>
+		<?php
+	}
+
+	/**
+	 * Renders the floating switcher controls.
+	 *
+	 * The one switcher the plugin places by itself, so that a site whose theme
+	 * carries none is still navigable between its languages. Everything else on
+	 * this screen describes how a switcher looks; these three say whether this
+	 * particular one is printed at all and which corner it is pinned to.
+	 *
+	 * @param array<string, mixed> $floater Saved floating switcher settings.
+	 * @return void
+	 */
+	private function render_floating_switcher( array $floater ) {
+		$positions = array(
+			'middle-right' => __( 'Middle right', 'localepress' ),
+			'middle-left'  => __( 'Middle left', 'localepress' ),
+			'bottom-right' => __( 'Bottom right', 'localepress' ),
+			'bottom-left'  => __( 'Bottom left', 'localepress' ),
+			'top-right'    => __( 'Top right', 'localepress' ),
+			'top-left'     => __( 'Top left', 'localepress' ),
+		);
+		?>
+		<h2><?php esc_html_e( 'Floating switcher', 'localepress' ); ?></h2>
+		<table class="form-table" role="presentation"><tbody>
+			<tr><th scope="row"><?php esc_html_e( 'Display', 'localepress' ); ?></th><td><fieldset class="localepress-option-list">
+				<label>
+					<input type="checkbox" name="switcher[floater][enabled]" value="1" <?php checked( ! empty( $floater['enabled'] ) ); ?> />
+					<?php esc_html_e( 'Show a floating switcher on the site', 'localepress' ); ?>
+				</label>
+				<label>
+					<input type="checkbox" name="switcher[floater][show_flags]" value="1" <?php checked( ! empty( $floater['show_flags'] ) ); ?> />
+					<?php esc_html_e( 'Show flags', 'localepress' ); ?>
+				</label>
+			</fieldset>
+			<p class="description">
+				<?php esc_html_e( 'Fixed to the edge of the screen on every page, over the content rather than inside it. On by default, so a new language is reachable before you have placed a switcher yourself; turn it off once one sits in your menu or template.', 'localepress' ); ?>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Flags here are separate from the Show flags checkbox above, which covers every other switcher.', 'localepress' ); ?>
+			</p>
+			</td></tr>
+			<tr><th scope="row"><label for="localepress-floater-position"><?php esc_html_e( 'Position', 'localepress' ); ?></label></th><td>
+				<select id="localepress-floater-position" name="switcher[floater][position]">
+					<?php foreach ( $positions as $value => $label ) : ?>
+						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( isset( $floater['position'] ) ? $floater['position'] : '', $value ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<p class="description">
+					<?php esc_html_e( 'A middle edge sits halfway down the side of the screen, flush against it. A corner keeps a margin instead, for a site whose sides are already taken. Right stays right in a right-to-left language.', 'localepress' ); ?>
+				</p>
+			</td></tr>
+			<tr><th scope="row"><label for="localepress-floater-layout"><?php esc_html_e( 'Layout', 'localepress' ); ?></label></th><td>
+				<select id="localepress-floater-layout" name="switcher[floater][layout]">
+					<option value="vertical" <?php selected( isset( $floater['layout'] ) ? $floater['layout'] : '', 'vertical' ); ?>><?php esc_html_e( 'Vertical list', 'localepress' ); ?></option>
+					<option value="horizontal" <?php selected( isset( $floater['layout'] ) ? $floater['layout'] : '', 'horizontal' ); ?>><?php esc_html_e( 'Horizontal list', 'localepress' ); ?></option>
+					<option value="dropdown" <?php selected( isset( $floater['layout'] ) ? $floater['layout'] : '', 'dropdown' ); ?>><?php esc_html_e( 'Dropdown', 'localepress' ); ?></option>
+				</select>
+				<p class="description">
+					<?php esc_html_e( 'A list shows every language at once, the current one filled in. A dropdown collapses it to one control, which suits a site with many languages. Labels and missing-translation handling still come from the settings above.', 'localepress' ); ?>
+				</p>
+			</td></tr>
+		</tbody></table>
 		<?php
 	}
 
@@ -645,7 +712,7 @@ final class SettingsPage {
 		</form>
 
 		<h2><?php esc_html_e( 'Settings Import', 'localepress' ); ?></h2>
-		<div class="notice notice-warning inline"><p><?php esc_html_e( 'Import replaces portable settings and enabled-language choices. Every imported locale must already be registered on this site.', 'localepress' ); ?></p></div>
+		<div class="localepress-notice notice notice-warning inline"><p><?php esc_html_e( 'Import replaces portable settings and enabled-language choices. Every imported locale must already be registered on this site.', 'localepress' ); ?></p></div>
 		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="localepress_import_settings" />
 			<?php wp_nonce_field( 'localepress_import_settings' ); ?>
@@ -795,6 +862,6 @@ final class SettingsPage {
 			return;
 		}
 
-		printf( '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $notices[ $notice ][0] ), esc_html( $notices[ $notice ][1] ) );
+		printf( '<div class="localepress-notice notice notice-%1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $notices[ $notice ][0] ), esc_html( $notices[ $notice ][1] ) );
 	}
 }

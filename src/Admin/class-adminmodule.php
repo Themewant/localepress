@@ -77,7 +77,6 @@ final class AdminModule implements ModuleInterface {
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_setup' ) );
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'in_admin_header', array( $this, 'hide_foreign_admin_notices' ), 999 );
 		add_action( 'admin_post_localepress_save_language', array( $this, 'save_language' ) );
 		add_action( 'admin_post_localepress_delete_language', array( $this, 'delete_language' ) );
 		add_action( 'admin_post_localepress_set_default_language', array( $this, 'set_default_language' ) );
@@ -162,58 +161,6 @@ final class AdminModule implements ModuleInterface {
 			Assets::version( 'assets/js/admin.js' ),
 			true
 		);
-	}
-
-	/**
-	 * Removes unrelated admin notices from LocalePress screens.
-	 *
-	 * LocalePress prints its own feedback inside each page rather than on the
-	 * notice hooks, so nothing of its own is lost. This runs on `in_admin_header`
-	 * because every plugin has registered its notices by then and WordPress has
-	 * not printed them yet.
-	 *
-	 * @return void
-	 */
-	public function hide_foreign_admin_notices() {
-		$page = $this->get_current_admin_page();
-
-		if ( '' === $page ) {
-			return;
-		}
-
-		/**
-		 * Filters whether LocalePress hides unrelated notices on its own screens.
-		 *
-		 * @param bool   $hide Whether unrelated admin notices should be removed.
-		 * @param string $page Current LocalePress admin page slug.
-		 */
-		if ( ! apply_filters( 'localepress_hide_foreign_admin_notices', true, $page ) ) {
-			return;
-		}
-
-		remove_all_actions( 'admin_notices' );
-		remove_all_actions( 'all_admin_notices' );
-	}
-
-	/**
-	 * Returns the LocalePress admin page slug for the current request.
-	 *
-	 * The page query variable is used instead of the screen identifier because
-	 * WordPress derives that identifier from the translated menu title.
-	 *
-	 * @return string Empty when this is not a LocalePress screen.
-	 */
-	private function get_current_admin_page() {
-		if ( wp_doing_ajax() || is_network_admin() || is_user_admin() ) {
-			return '';
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only screen check.
-		$page = isset( $_GET['page'] ) && is_scalar( $_GET['page'] )
-			? sanitize_key( wp_unslash( $_GET['page'] ) )
-			: '';
-
-		return 'localepress' === $page || 0 === strpos( $page, 'localepress-' ) ? $page : '';
 	}
 
 	/**

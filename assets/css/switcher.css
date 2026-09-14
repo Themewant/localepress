@@ -43,6 +43,34 @@
 	align-items: center;
 }
 
+/*
+ * A switcher is a set of controls, not prose, so the underline a theme puts on
+ * every link reads as a defect here — and doubly so beside a flag, where it
+ * runs under the image as well as the label.
+ *
+ * The selector is built up to three classes and an element deliberately. A
+ * theme's underline lives on a content-scoped rule rather than on a bare `a` —
+ * Astra's is `.ast-single-post .entry-content a`, two classes and an element —
+ * and a switcher dropped into a post sits inside exactly that scope. Matching
+ * that shape and going one class further is what decides it; anything shorter
+ * loses on specificity and leaves the underline on screen.
+ *
+ * It stops short of `!important`, which would also beat the Decoration field in
+ * the Elementor widget's own typography controls. A theme that still wins from
+ * here is answered with a rule, not with an escalation nobody can undo.
+ *
+ * Removing it costs nothing in affordance. Each language is a discrete control
+ * that names itself, the current one carries `aria-current`, and the focus ring
+ * below is untouched, so a keyboard still shows exactly where it is.
+ */
+.localepress-switcher .localepress-switcher__list a.localepress-switcher__link,
+.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:hover,
+.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:focus,
+.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:visited,
+.localepress-switcher .localepress-switcher__dropdown > summary {
+	text-decoration: none;
+}
+
 .localepress-switcher__link:focus-visible,
 .localepress-switcher__dropdown > summary:focus-visible {
 	outline: 2px solid currentColor;

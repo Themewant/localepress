@@ -268,7 +268,7 @@ final class LanguagesPage {
 			$stored_language = $this->language_manager->find( $language_id );
 
 			if ( null === $stored_language ) {
-				echo '<div class="notice notice-error"><p>';
+				echo '<div class="localepress-notice notice notice-error"><p>';
 				esc_html_e( 'The requested language could not be found.', 'localepress' );
 				echo '</p></div>';
 				$this->render_list();
@@ -628,14 +628,14 @@ final class LanguagesPage {
 
 		if ( isset( $notices[ $notice_code ] ) ) {
 			printf(
-				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-success is-dismissible"><p>%s</p></div>',
 				esc_html( $notices[ $notice_code ] )
 			);
 		}
 
 		if ( isset( $errors[ $error_code ] ) ) {
 			printf(
-				'<div class="notice notice-error"><p>%s</p></div>',
+				'<div class="localepress-notice notice notice-error"><p>%s</p></div>',
 				esc_html( $errors[ $error_code ] )
 			);
 		}

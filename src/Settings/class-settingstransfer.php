@@ -376,6 +376,28 @@ final class SettingsTransfer {
 			return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
 		}
 
+		/*
+		 * An export taken before the floating switcher existed carries no
+		 * floater at all, and that is not an incomplete file: the importing site
+		 * fills it from its own defaults the way a fresh install does. Only a
+		 * floater that is present and wrong is rejected.
+		 */
+		if ( isset( $switcher['floater'] ) ) {
+			if ( ! is_array( $switcher['floater'] ) ) {
+				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
+			}
+
+			$floater = $switcher['floater'];
+
+			if (
+				! $this->boolean_keys( $floater, array( 'enabled', 'show_flags' ) )
+				|| ! $this->valid_enum( $floater, 'position', PluginSettings::floater_positions() )
+				|| ! $this->valid_enum( $floater, 'layout', array( 'dropdown', 'horizontal', 'vertical' ) )
+			) {
+				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
+			}
+		}
+
 		if ( ! $this->boolean_keys( $seo, array( 'hreflang_enabled', 'x_default_enabled' ) ) ) {
 			return new WP_Error( 'invalid_import_seo', __( 'The imported SEO settings are invalid.', 'localepress' ) );
 		}

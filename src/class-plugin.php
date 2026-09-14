@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use LocalePress\Admin\AdminLanguageFilter;
 use LocalePress\Admin\AdminLanguageFilterModule;
 use LocalePress\Admin\AdminModule;
+use LocalePress\Admin\AdminNoticeGate;
 use LocalePress\Admin\ContentTranslationModule;
 use LocalePress\Admin\SetupWizardModule;
 use LocalePress\Admin\SettingsModule;
@@ -38,6 +39,7 @@ use LocalePress\Infrastructure\DatabaseTranslationRepository;
 use LocalePress\Infrastructure\OptionsLanguageRepository;
 use LocalePress\Integrations\Elementor\ElementorCompatibility;
 use LocalePress\Integrations\Elementor\ElementorModule;
+use LocalePress\Integrations\Elementor\ElementorWidgetModule;
 use LocalePress\Integrations\Wpml\WpmlConfigModule;
 use LocalePress\Integrations\Wpml\WpmlConfigReader;
 use LocalePress\Language\BrowserLanguageDetector;
@@ -399,7 +401,9 @@ final class Plugin {
 			new SwitcherModule(
 				$this->language_switcher,
 				new NavigationMenuIntegration( $this->language_switcher ),
-				$this->language_manager
+				$this->language_manager,
+				$this->plugin_settings,
+				$this->language_url_manager
 			),
 			new RestLanguageModule(
 				$this->post_translation_manager,
@@ -409,6 +413,9 @@ final class Plugin {
 			new SeoModule( $this->seo_metadata ),
 			new SitemapModule( $this->language_url_manager, $this->language_manager ),
 			new ElementorModule( $this->elementor_compatibility ),
+			// Its hooks exist only while Elementor is drawing its panel, so the
+			// module costs a site without Elementor two listeners that never run.
+			new ElementorWidgetModule(),
 			new SyncModule(
 				$this->translation_synchronizer,
 				$this->post_translation_manager,
@@ -418,6 +425,7 @@ final class Plugin {
 		);
 
 		if ( is_admin() ) {
+			$modules[] = new AdminNoticeGate();
 			$modules[] = new AdminModule( $this->language_manager, new LanguageCatalog() );
 			$modules[] = new AdminLanguageFilterModule(
 				new AdminLanguageFilter( $this->language_manager ),

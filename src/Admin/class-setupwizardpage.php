@@ -242,7 +242,7 @@ final class SetupWizardPage {
 		$scheme    = 0 === strpos( $site, 'https://' ) ? 'https://' : 'http://';
 		?>
 		<h2><?php esc_html_e( 'Language URLs', 'localepress' ); ?></h2>
-		<div class="notice notice-warning inline"><p><?php esc_html_e( 'This choice sets public URLs and canonical links. Changing it later may require link and cache updates.', 'localepress' ); ?></p></div>
+		<div class="localepress-notice notice notice-warning inline"><p><?php esc_html_e( 'This choice sets public URLs and canonical links. Changing it later may require link and cache updates.', 'localepress' ); ?></p></div>
 		<?php $this->form_start( 3 ); ?>
 		<table class="form-table" role="presentation"><tbody>
 			<tr>
@@ -431,9 +431,9 @@ final class SetupWizardPage {
 			$key     = 'localepress_setup_error_' . get_current_user_id();
 			$message = get_transient( $key );
 			delete_transient( $key );
-			printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html( is_string( $message ) ? $message : __( 'LocalePress could not save this setup step.', 'localepress' ) ) );
+			printf( '<div class="localepress-notice notice notice-error"><p>%s</p></div>', esc_html( is_string( $message ) ? $message : __( 'LocalePress could not save this setup step.', 'localepress' ) ) );
 		} elseif ( 'setup_complete' === $notice ) {
-			echo '<div class="notice notice-success"><p>' . esc_html__( 'LocalePress setup is complete.', 'localepress' ) . '</p></div>';
+			echo '<div class="localepress-notice notice notice-success"><p>' . esc_html__( 'LocalePress setup is complete.', 'localepress' ) . '</p></div>';
 		}
 	}
 }

@@ -10,6 +10,8 @@ namespace LocalePress\Switcher;
 use LocalePress\Assets;
 use LocalePress\Contracts\ModuleInterface;
 use LocalePress\Language\LanguageManager;
+use LocalePress\Routing\LanguageUrlManager;
+use LocalePress\Settings\PluginSettings;
 use WP_Block_Type;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +43,13 @@ final class SwitcherModule implements ModuleInterface {
 	private $navigation_block;
 
 	/**
+	 * Floating switcher renderer.
+	 *
+	 * @var FloatingSwitcher
+	 */
+	private $floating_switcher;
+
+	/**
 	 * Language manager.
 	 *
 	 * @var LanguageManager
@@ -53,16 +62,21 @@ final class SwitcherModule implements ModuleInterface {
 	 * @param LanguageSwitcher          $switcher         Switcher service.
 	 * @param NavigationMenuIntegration $navigation_menu  Navigation menu integration.
 	 * @param LanguageManager           $language_manager Language manager.
+	 * @param PluginSettings|null       $settings         Optional central settings service.
+	 * @param LanguageUrlManager|null   $url_manager      Optional language URL service.
 	 */
 	public function __construct(
 		LanguageSwitcher $switcher,
 		NavigationMenuIntegration $navigation_menu,
-		LanguageManager $language_manager
+		LanguageManager $language_manager,
+		?PluginSettings $settings = null,
+		?LanguageUrlManager $url_manager = null
 	) {
-		$this->switcher         = $switcher;
-		$this->navigation_menu  = $navigation_menu;
-		$this->language_manager = $language_manager;
-		$this->navigation_block = new NavigationSwitcherBlock( $switcher );
+		$this->switcher          = $switcher;
+		$this->navigation_menu   = $navigation_menu;
+		$this->language_manager  = $language_manager;
+		$this->navigation_block  = new NavigationSwitcherBlock( $switcher );
+		$this->floating_switcher = new FloatingSwitcher( $switcher, $settings, $url_manager );
 	}
 
 	/**
@@ -72,6 +86,7 @@ final class SwitcherModule implements ModuleInterface {
 		add_shortcode( 'localepress_switcher', array( $this, 'render_shortcode' ) );
 		add_action( 'init', array( $this, 'register_assets_and_block' ) );
 		$this->navigation_menu->register();
+		$this->floating_switcher->register();
 	}
 
 	/**
@@ -99,6 +114,18 @@ final class SwitcherModule implements ModuleInterface {
 			array(),
 			Assets::version( 'assets/js/switcher.js' ),
 			true
+		);
+
+		/*
+		 * Only the floating switcher loads this, and it says nothing about how a
+		 * switcher looks — only where that one is pinned. A site that placed its
+		 * switcher itself never fetches it.
+		 */
+		wp_register_style(
+			'localepress-floating-switcher',
+			LOCALEPRESS_URL . 'assets/css/floating-switcher.css',
+			array( 'localepress-switcher' ),
+			Assets::version( 'assets/css/floating-switcher.css' )
 		);
 
 		if ( ! function_exists( 'register_block_type' ) ) {

@@ -100,6 +100,77 @@ class Test_LocalePress_Settings extends WP_UnitTestCase {
 		$this->assertFalse( $settings['setup']['complete'] );
 	}
 
+	/** A fresh install offers a floating switcher without anyone placing one. */
+	public function test_floating_switcher_is_enabled_by_default() {
+		$floater = $this->settings->get_floater_settings();
+
+		$this->assertTrue( $floater['enabled'] );
+		$this->assertSame( 'middle-right', $floater['position'] );
+		$this->assertSame( 'vertical', $floater['layout'] );
+
+		// Its own answer, and the opposite of the site-wide one: in a strip at
+		// the edge of the screen the flag is what identifies the language.
+		$this->assertTrue( $floater['show_flags'] );
+		$this->assertFalse( $this->settings->get_switcher_defaults()['show_flags'] );
+	}
+
+	/** A site stored before the setting existed reads the shipped default. */
+	public function test_floating_switcher_defaults_fill_a_stored_switcher_without_one() {
+		$stored = get_option( PluginSettings::OPTION_NAME );
+		unset( $stored['switcher']['floater'] );
+		update_option( PluginSettings::OPTION_NAME, $stored );
+
+		$settings = new PluginSettings();
+
+		$this->assertTrue( $settings->get_floater_settings()['enabled'] );
+	}
+
+	/** The floater is a placement, so it never reaches a switcher's arguments. */
+	public function test_switcher_defaults_exclude_the_floating_switcher() {
+		$this->assertArrayNotHasKey( 'floater', $this->settings->get_switcher_defaults() );
+	}
+
+	/** Turning the floater off and moving it survives a round trip. */
+	public function test_floating_switcher_settings_persist() {
+		$this->settings->update_sections(
+			array(
+				'switcher' => array(
+					'floater' => array(
+						'enabled'    => false,
+						'position'   => 'middle-left',
+						'layout'     => 'horizontal',
+						'show_flags' => false,
+					),
+				),
+			)
+		);
+
+		$floater = ( new PluginSettings() )->get_floater_settings();
+
+		$this->assertFalse( $floater['enabled'] );
+		$this->assertSame( 'middle-left', $floater['position'] );
+		$this->assertSame( 'horizontal', $floater['layout'] );
+		$this->assertFalse( $floater['show_flags'] );
+	}
+
+	/** An unsupported corner falls back rather than reaching the stylesheet. */
+	public function test_unknown_floating_switcher_position_falls_back() {
+		$normalized = $this->settings->normalize(
+			array(
+				'switcher' => array(
+					'floater' => array(
+						'enabled'  => true,
+						'position' => 'middle',
+						'layout'   => 'carousel',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 'middle-right', $normalized['switcher']['floater']['position'] );
+		$this->assertSame( 'vertical', $normalized['switcher']['floater']['layout'] );
+	}
+
 	/** Upgrading a configured site does not reopen first-run setup. */
 	public function test_install_marks_an_existing_language_registry_as_configured() {
 		delete_option( PluginSettings::OPTION_NAME );

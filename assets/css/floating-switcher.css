@@ -1,0 +1,272 @@
+/*
+ * The floating switcher, and nothing else. Loaded only on a page that prints
+ * one, so a site that placed its switcher in a menu or a template never pays
+ * for the strip it does not use.
+ *
+ * Everything here is scoped to `.localepress-switcher--floating`, because this
+ * is the one switcher that is not part of a theme's design. Every other
+ * placement sits inside a header, a footer, or a post and inherits the type and
+ * color around it; this one is drawn over the page and has nothing to inherit
+ * from, so it brings its own. The colors are custom properties rather than
+ * literals for exactly that reason — a theme overrides the four of them and the
+ * strip belongs to it again.
+ */
+
+.localepress-switcher--floating {
+	--localepress-floating-bg: #f0f0f2;
+	--localepress-floating-text: #1d1d1f;
+	--localepress-floating-current-bg: #101012;
+	--localepress-floating-current-text: #ffffff;
+	--localepress-floating-radius: 999px;
+
+	position: fixed;
+	z-index: 9990;
+	max-width: calc( 100vw - 1rem );
+	font-size: 0.875rem;
+	line-height: 1.2;
+}
+
+@media ( prefers-color-scheme: dark ) {
+	.localepress-switcher--floating {
+		--localepress-floating-bg: #2a2a2e;
+		--localepress-floating-text: #f2f2f4;
+		--localepress-floating-current-bg: #f2f2f4;
+		--localepress-floating-current-text: #101012;
+	}
+}
+
+/*
+ * Halfway down the side of the screen, flush against the edge it was given.
+ * `translateY` rather than a computed top, so the strip stays centred at any
+ * height without anything having to know how tall it is.
+ *
+ * The physical properties are deliberate. A right-hand strip is a choice about
+ * the screen, not about the text, so it stays on the right in a right-to-left
+ * language instead of crossing over to meet the writing direction.
+ */
+.localepress-switcher--floating.localepress-switcher--at-middle-right {
+	top: 50%;
+	right: 0;
+	bottom: auto;
+	left: auto;
+	transform: translateY( -50% );
+}
+
+.localepress-switcher--floating.localepress-switcher--at-middle-left {
+	top: 50%;
+	right: auto;
+	bottom: auto;
+	left: 0;
+	transform: translateY( -50% );
+}
+
+/*
+ * The corners keep a margin instead: a strip wedged into a corner reads as a
+ * rendering fault, and there is no edge for it to be flush against there.
+ */
+.localepress-switcher--floating.localepress-switcher--at-bottom-right {
+	inset: auto 1rem 1rem auto;
+}
+
+.localepress-switcher--floating.localepress-switcher--at-bottom-left {
+	inset: auto auto 1rem 1rem;
+}
+
+.localepress-switcher--floating.localepress-switcher--at-top-right {
+	inset: 1rem 1rem auto auto;
+}
+
+.localepress-switcher--floating.localepress-switcher--at-top-left {
+	inset: 1rem auto auto 1rem;
+}
+
+/*
+ * The admin bar is fixed over the top of the page for a logged-in visitor, and
+ * a switcher in a top corner lands underneath it. The two offsets are the two
+ * heights the admin bar itself uses, at the width where it changes.
+ */
+.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
+.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
+	top: calc( 1rem + 32px );
+}
+
+@media screen and ( max-width: 782px ) {
+	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
+	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
+		top: calc( 1rem + 46px );
+	}
+}
+
+/*
+ * No padding of its own: the pinned side of the strip has to reach the edge of
+ * the screen, and a list that held the pills away from it by even a few pixels
+ * would leave a seam. The gap between pills is the only spacing here, and the
+ * direction of the stack is the shared stylesheet's business, so a horizontal
+ * floater stays a row.
+ */
+.localepress-switcher--floating .localepress-switcher__list {
+	gap: 0.3rem;
+	align-items: stretch;
+}
+
+/*
+ * Each language is its own pill rather than a row in a shared box, so the
+ * current one can be filled in without a panel behind it, and so the strip has
+ * no edges of its own to line up against the page.
+ */
+.localepress-switcher--floating .localepress-switcher__link,
+.localepress-switcher--floating .localepress-switcher__unavailable,
+.localepress-switcher--floating .localepress-switcher__dropdown > summary {
+	gap: 0.5em;
+	padding: 0.5rem 0.85rem;
+	border-radius: var( --localepress-floating-radius );
+	background: var( --localepress-floating-bg );
+	color: var( --localepress-floating-text );
+	box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.14 );
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+	transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+/*
+ * The language being read is filled in rather than merely marked, because this
+ * strip is read at a glance from the corner of the eye and a border would not
+ * survive that. `is-current` is the renderer's own class, so this follows the
+ * same item every layout and every context calls current.
+ */
+.localepress-switcher--floating .localepress-switcher__item.is-current .localepress-switcher__link {
+	background: var( --localepress-floating-current-bg );
+	color: var( --localepress-floating-current-text );
+}
+
+.localepress-switcher--floating .localepress-switcher__link:hover,
+.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
+	transform: translateX( 0 ) scale( 1.03 );
+}
+
+.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__link:hover {
+	transform: translateX( -2px );
+}
+
+.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__link:hover {
+	transform: translateX( 2px );
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.localepress-switcher--floating .localepress-switcher__link,
+	.localepress-switcher--floating .localepress-switcher__dropdown > summary {
+		transition: none;
+	}
+
+	.localepress-switcher--floating .localepress-switcher__link:hover,
+	.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
+		transform: none;
+	}
+}
+
+/*
+ * The side against the screen is squared off so the strip reads as attached to
+ * the edge rather than as a row of pills that happen to be near it. Only the
+ * two middle positions touch an edge; a corner keeps its margin and stays
+ * round on all four sides.
+ */
+.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__link,
+.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__unavailable {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-right: 0.7rem;
+}
+
+.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__link,
+.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__unavailable {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	padding-left: 0.7rem;
+}
+
+/*
+ * Flags are square-cropped to a circle here and nowhere else. In a menu or a
+ * post a flag sits beside body text at its own proportions; in the strip it is
+ * a marker read before the label is, and a row of circles scans as a column in
+ * a way a row of differently shaped rectangles does not.
+ */
+.localepress-switcher--floating .localepress-switcher__flag {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 50%;
+	object-fit: cover;
+	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.12 );
+}
+
+/* An unreachable language is shown without pretending to be a button. */
+.localepress-switcher--floating .localepress-switcher__unavailable {
+	box-shadow: none;
+	font-weight: 500;
+}
+
+/*
+ * A dropdown is still offered, for a site that wants the strip collapsed to one
+ * control. Its panel is drawn by the shared stylesheet and positioned by the
+ * shared script, so only the summary needs the pill treatment above.
+ */
+.localepress-switcher--floating .localepress-switcher__dropdown[open] > .localepress-switcher__list {
+	padding: 0.4rem;
+	border: 0;
+	border-radius: 12px;
+	background: var( --localepress-floating-bg );
+	box-shadow: 0 8px 28px rgba( 0, 0, 0, 0.18 );
+}
+
+/*
+ * A phone has no room for a strip beside the content it is pinned over, so the
+ * labels go and the flags carry it alone. A site running the switcher without
+ * flags keeps its labels rather than being left with empty pills, which is what
+ * `:has()` is asking: drop the label only where something else identifies the
+ * language. Browsers without `:has()` keep the full labels, which is the same
+ * strip, only wider.
+ */
+@media screen and ( max-width: 600px ) {
+	.localepress-switcher--floating {
+		font-size: 0.8125rem;
+		max-height: 70vh;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	.localepress-switcher--floating .localepress-switcher__link:has( .localepress-switcher__flag ) .localepress-switcher__label,
+	.localepress-switcher--floating .localepress-switcher__unavailable:has( .localepress-switcher__flag ) .localepress-switcher__label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		border: 0;
+		clip: rect( 0 0 0 0 );
+		clip-path: inset( 50% );
+		white-space: nowrap;
+	}
+
+	.localepress-switcher--floating .localepress-switcher__link:has( .localepress-switcher__flag ),
+	.localepress-switcher--floating .localepress-switcher__unavailable:has( .localepress-switcher__flag ) {
+		padding: 0.4rem;
+	}
+}
+
+/*
+ * `overflow-y` above would clip an open dropdown panel, which is drawn outside
+ * the strip. A dropdown is one control tall and needs no scrolling of its own.
+ */
+@media screen and ( max-width: 600px ) {
+	.localepress-switcher--floating.localepress-switcher--dropdown {
+		overflow: visible;
+		max-height: none;
+	}
+}
+
+@media print {
+	.localepress-switcher--floating {
+		display: none;
+	}
+}

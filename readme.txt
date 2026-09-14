@@ -31,6 +31,8 @@ This free version does not include automated translation, WooCommerce-specific d
 == Changelog ==
 
 = 1.0.0 =
+* Added an Elementor widget, LocalePress > Language Switcher, so a header built in Elementor can carry a switcher with Elementor's own typography, color, flag, dropdown, and spacing controls. It renders through the same switcher service as the shortcode and the block rather than repeating it.
+* Added a floating language switcher, a vertical strip pinned halfway down the right edge of the screen on every page and on by default, so a newly registered language is reachable before anyone has placed a switcher in a menu or a template. Every language is shown at once with its flag, the one being read filled in. Settings > Switcher turns it off, hides the flags, moves it to the left edge or to any corner, or collapses it to a dropdown. It hides itself inside Elementor and other page builder editors, where it would only sit over the editing canvas.
 * Added a per-language default category, so a post saved without a category lands in the default term of its own language instead of the site-wide one. Translating Uncategorized is all it takes, and Settings > Content now offers a default term per language for sites that want a different one. Default terms of custom taxonomies follow the same rule.
 * Added translation of the post and term IDs stored by themes, page builders, and widgets, so a featured page, a listed category, or an excluded post follows the language being viewed instead of returning the original language or nothing at all.
 * Added a query argument URL format, so /about/?lang=de works on sites that cannot use language directories, including sites with plain permalinks.
