@@ -127,6 +127,13 @@ final class LanguageUrlManager {
 	private $hosts;
 
 	/**
+	 * Language resolver for requests that carry no page address.
+	 *
+	 * @var BackgroundLanguageResolver
+	 */
+	private $background;
+
+	/**
 	 * Language constraint, built the first time an archive asks.
 	 *
 	 * @var LanguageQueryConstraint|null
@@ -166,6 +173,7 @@ final class LanguageUrlManager {
 		$this->term_translations = $term_translations;
 		$this->settings          = null === $settings ? new PluginSettings() : $settings;
 		$this->hosts             = new LanguageHostResolver( $this->settings );
+		$this->background        = new BackgroundLanguageResolver( $this );
 		$this->front_page_id     = absint( get_option( 'page_on_front' ) );
 		$this->posts_page_id     = absint( get_option( 'page_for_posts' ) );
 	}
@@ -186,6 +194,18 @@ final class LanguageUrlManager {
 	 */
 	public function hosts() {
 		return $this->hosts;
+	}
+
+	/**
+	 * Returns the resolver for requests that carry no page address.
+	 *
+	 * AJAX and REST requests reach WordPress at an address that names no
+	 * language, so what they are answering in is decided separately.
+	 *
+	 * @return BackgroundLanguageResolver
+	 */
+	public function background() {
+		return $this->background;
 	}
 
 	/**
@@ -320,7 +340,30 @@ final class LanguageUrlManager {
 			}
 		}
 
+		/*
+		 * A WordPress locale is what a caller outside LocalePress is most likely
+		 * to have in hand — it is the identifier core itself uses — so a request
+		 * naming `bn_BD` means the same language as one naming `bn`.
+		 */
+		foreach ( $this->languages_by_id as $record ) {
+			if ( isset( $record['locale'] ) && sanitize_title( (string) $record['locale'] ) === $value ) {
+				return $record;
+			}
+		}
+
 		return null;
+	}
+
+	/**
+	 * Resolves a language reference to the identifier it is stored under.
+	 *
+	 * @param mixed $language Language identifier, URL slug, code, locale, or record.
+	 * @return string Empty when no enabled language answers to the reference.
+	 */
+	public function resolve_language_id( $language ) {
+		$record = $this->resolve_language( $language );
+
+		return is_array( $record ) && isset( $record['id'] ) ? (string) $record['id'] : '';
 	}
 
 	/**
@@ -898,9 +941,21 @@ final class LanguageUrlManager {
 		}
 
 		if ( is_home() ) {
-			return 0 < $this->posts_page_id
+			if ( 1 > $this->posts_page_id ) {
+				return $this->get_language_home_url( $language );
+			}
+
+			$posts_page_url = $this->get_translation_url( $this->posts_page_id, $language );
+
+			/*
+			 * An untranslated posts page still answers in every language: the
+			 * route keeps the source page and the archive under it is held to
+			 * the language asked for, so the reader is not sent home from an
+			 * archive that works.
+			 */
+			return '' === $posts_page_url
 				? $this->get_post_url( $this->posts_page_id, $language )
-				: $this->get_language_home_url( $language );
+				: $posts_page_url;
 		}
 
 		if ( is_singular() ) {
@@ -1099,48 +1154,32 @@ final class LanguageUrlManager {
 			return is_string( $raw_url ) ? $raw_url : '';
 		}
 
-		$source_id = $this->post_translations->get_source_post_id( $post->ID );
-		$source_id = 0 < $source_id ? $source_id : $post->ID;
-
 		/*
-		 * Translations share the source post's route, which only works while the
-		 * source has one. WordPress creates an `auto-draft` placeholder the moment
-		 * an editor opens Add New, and such a post has no slug, so its permalink
-		 * is the unresolvable `?p=<id>` form. Borrowing it would give every
-		 * translation in the group the same dead address, so the post falls back
-		 * to its own route instead.
-		 *
-		 * It also only works while the URL can still say which language it is
-		 * being asked in, because that is the only thing telling one member of the
-		 * group from another. Where the language cannot be written into the URL,
-		 * the shared route resolves to the source post and the translation would
-		 * be unreachable under its own permalink. A page builder asks for exactly
-		 * that: it builds its preview link with plain permalinks forced on, so no
-		 * prefix can be added, and a translation handed the source's address is
-		 * answered with the source. The builder then finds a document it did not
-		 * ask for, and the editor waits for a preview that never arrives.
+		 * A front page is the front page in whichever language it was written
+		 * for, and that address is the language root rather than the page's own
+		 * slug. WordPress records a single `page_on_front`, so only the
+		 * translation group can say that this page is that page in another
+		 * language.
 		 */
-		if (
-			$source_id !== $post->ID
-			&& (
-				! $this->has_routable_slug( $source_id )
-				|| ! $this->marks_language_in_url( $language )
-			)
-		) {
-			$source_id = $post->ID;
-		}
-
-		if ( $this->front_page_id === $source_id ) {
+		if ( $this->is_front_page_post( $post->ID ) ) {
 			return $this->get_language_home_url( $language );
 		}
 
-		if ( '' === $raw_url || $source_id !== $post->ID ) {
-			$raw_url = $this->get_raw_post_url( $source_id );
+		/*
+		 * Each translation is addressed by its own slug. Nothing is borrowed from
+		 * the rest of the group: a reader following a link into another language
+		 * lands on a URL written in that language, and a post is reachable under
+		 * one address rather than one per language of the site.
+		 */
+		if ( '' === $raw_url ) {
+			$raw_url = $this->get_raw_post_url( $post->ID );
 		}
 
-		// A post with no route of its own keeps WordPress's own URL. Prefixing a
-		// `?p=<id>` placeholder only produces a link that resolves to nothing.
-		if ( ! $this->has_routable_slug( $source_id ) ) {
+		// A post with no route of its own keeps WordPress's own URL. WordPress
+		// creates an `auto-draft` the moment an editor opens Add New, and such a
+		// post has no slug, so its permalink is the unresolvable `?p=<id>` form.
+		// Prefixing that only produces a link that resolves to nothing.
+		if ( ! $this->has_routable_slug( $post->ID ) ) {
 			return $raw_url;
 		}
 
@@ -1148,31 +1187,26 @@ final class LanguageUrlManager {
 	}
 
 	/**
-	 * Reports whether a URL built for one language will say so.
+	 * Reports whether a post is the front page of the language it is written in.
 	 *
-	 * Each routing mode writes the language somewhere: into the host, into a
-	 * query argument, or into the first path segment. The path is the one that
-	 * can be unavailable — it needs pretty permalinks to exist at all, and the
-	 * default language is written into it only where the site asked for that.
-	 *
-	 * @param array<string, mixed> $language Language record.
+	 * @param int $post_id Post identifier.
 	 * @return bool
 	 */
-	private function marks_language_in_url( array $language ) {
-		if ( ! $this->has_usable_permalinks() ) {
+	private function is_front_page_post( $post_id ) {
+		$post_id = absint( $post_id );
+
+		if ( 1 > $post_id || 1 > $this->front_page_id ) {
 			return false;
 		}
 
-		if ( $this->hosts->uses_host_routing() || $this->hosts->uses_query_routing() ) {
+		if ( $this->front_page_id === $post_id ) {
 			return true;
 		}
 
-		$default = $this->get_default_language();
+		$language_id = $this->post_translations->get_post_language_id( $post_id );
 
-		return $this->should_prefix_default_language()
-			|| null === $default
-			|| ! isset( $language['id'] )
-			|| $language['id'] !== $default['id'];
+		return '' !== $language_id
+			&& $post_id === $this->post_translations->get_translation( $this->front_page_id, $language_id );
 	}
 
 	/**
@@ -1308,7 +1342,11 @@ final class LanguageUrlManager {
 	}
 
 	/**
-	 * Reports whether the current request path starts with an enabled prefix.
+	 * Reports whether the current request named an enabled language.
+	 *
+	 * For a page that is the language its address carries. For an AJAX or REST
+	 * call, which has no address of its own, it is the language the call named
+	 * by other means.
 	 *
 	 * @return bool
 	 */
@@ -1635,6 +1673,20 @@ final class LanguageUrlManager {
 			);
 
 			return null === $language ? '' : sanitize_title( $language['url_slug'] );
+		}
+
+		/*
+		 * A request that has no page address of its own — admin-ajax.php, the
+		 * REST API — cannot be read from a path or from query vars, because
+		 * WordPress never routed a page to produce them. What such a request
+		 * named is answered from the signals it does carry.
+		 */
+		if ( $this->background->is_background_request() ) {
+			$language_id = $this->background->resolve_language_id();
+
+			return isset( $this->languages_by_id[ $language_id ] )
+				? sanitize_title( $this->languages_by_id[ $language_id ]['url_slug'] )
+				: '';
 		}
 
 		$slug = '';

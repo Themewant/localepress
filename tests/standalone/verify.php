@@ -199,9 +199,14 @@ lp_check( 'and is not marked again on a second exit path', $vary_probe['still_on
 echo "\n### 5. Bare-domain redirect under host routing\n";
 // =====================================================================
 
-function lp_router( $mode, $prefix_default = false ) {
+function lp_router( $mode, $prefix_default = false, $split_sitemaps = true ) {
 	$urls   = lp_urls( $mode, $prefix_default );
-	$router = new RoutingModule( $urls, new PostTranslationManager(), new TermTranslationManager() );
+	$router = new RoutingModule(
+		$urls,
+		new PostTranslationManager(),
+		new TermTranslationManager(),
+		new PluginSettings( $mode, $prefix_default, true, $split_sitemaps )
+	);
 	return array( $urls, $router );
 }
 
@@ -245,8 +250,14 @@ echo "\n### 6. Sitemap scope per host\n";
 function lp_sitemap_ids( $mode, $host ) {
 	$_SERVER['HTTP_HOST'] = $host;
 	$urls                 = lp_urls( $mode );
-	$module               = new SitemapModule( $urls, new LanguageManager( $GLOBALS['languages_default'] ) );
-	return lp_private( $module, 'get_enabled_language_ids' );
+	$module               = new SitemapModule(
+		$urls,
+		new LanguageManager( $GLOBALS['languages_default'] ),
+		new PostTranslationManager(),
+		new TermTranslationManager(),
+		new PluginSettings( $mode )
+	);
+	return $module->get_sitemap_language_ids();
 }
 
 lp_check( 'a language host lists only its own', lp_sitemap_ids( 'subdomain', 'bn.example.com' ), array( 'bn' ) );
@@ -347,5 +358,122 @@ lp_check(
 	lp_private( $router, 'is_settled_redirect', array( 'https://other.test/x/', $en ) ),
 	false
 );
+
+// =====================================================================
+echo "\n### 10. Which sitemap addresses gain a language\n";
+// =====================================================================
+
+// The rules WordPress registers for its own sitemaps, verbatim.
+$core_sitemap_rules = array(
+	'^wp-sitemap\.xml$'                                        => 'index.php?sitemap=index',
+	'^wp-sitemap\.xsl$'                                        => 'index.php?sitemap-stylesheet=sitemap',
+	'^wp-sitemap-index\.xsl$'                                  => 'index.php?sitemap-stylesheet=index',
+	'^wp-sitemap-([a-z]+?)-([a-z\d_-]+?)-(\d+?)\.xml$'         => 'index.php?sitemap=$matches[1]&sitemap-subtype=$matches[2]&paged=$matches[3]',
+	'^wp-sitemap-([a-z]+?)-(\d+?)\.xml$'                       => 'index.php?sitemap=$matches[1]&paged=$matches[2]',
+);
+
+$_SERVER['HTTP_HOST']  = 'example.com';
+list( $urls, $router ) = lp_router( 'directory' );
+$rules                 = $router->add_language_rewrite_rules( $core_sitemap_rules );
+$added                 = array_diff_key( $rules, $core_sitemap_rules );
+
+// The bare language rule is always added; ignore it when counting sitemaps.
+unset( $added['^(en|bn)/?$'] );
+
+lp_check( 'only the two page rules gain one', count( $added ), 2 );
+lp_check(
+	'the index keeps a single address',
+	isset( $added['^(en|bn)/wp-sitemap\.xml$'] ),
+	false
+);
+lp_check(
+	'and so do the stylesheets',
+	isset( $added['^(en|bn)/wp-sitemap\.xsl$'] ) || isset( $added['^(en|bn)/wp-sitemap-index\.xsl$'] ),
+	false
+);
+lp_check(
+	'a subtype page is served in its language',
+	isset( $added['^(en|bn)/wp-sitemap-([a-z]+?)-([a-z\d_-]+?)-(\d+?)\.xml$'] )
+		? $added['^(en|bn)/wp-sitemap-([a-z]+?)-([a-z\d_-]+?)-(\d+?)\.xml$']
+		: '',
+	'index.php?sitemap=$matches[2]&sitemap-subtype=$matches[3]&paged=$matches[4]&localepress_lang=$matches[1]'
+);
+lp_check(
+	'a subtype-less page too',
+	isset( $added['^(en|bn)/wp-sitemap-([a-z]+?)-(\d+?)\.xml$'] )
+		? $added['^(en|bn)/wp-sitemap-([a-z]+?)-(\d+?)\.xml$']
+		: '',
+	'index.php?sitemap=$matches[2]&paged=$matches[3]&localepress_lang=$matches[1]'
+);
+lp_check( 'the unprefixed rules are all kept', count( array_intersect_key( $rules, $core_sitemap_rules ) ), 5 );
+
+// With splitting off, no sitemap address gains a language at all.
+list( $urls, $router ) = lp_router( 'directory', false, false );
+$off                   = array_diff_key( $router->add_language_rewrite_rules( $core_sitemap_rules ), $core_sitemap_rules );
+unset( $off['^(en|bn)/?$'] );
+lp_check( 'turning the split off adds none', count( $off ), 0 );
+
+// =====================================================================
+echo "\n### 11. The unprefixed default language is reachable\n";
+// =====================================================================
+
+function lp_detection( $prefix_default ) {
+	return new LanguageDetectionModule(
+		lp_urls( 'directory', $prefix_default ),
+		new LanguageManager( array() ),
+		new BrowserLanguageDetector(),
+		new PluginSettings( 'directory', $prefix_default )
+	);
+}
+
+/*
+ * With no prefix of its own the default language has only the site root to be
+ * reached at, which is also the address detection answers. A cookie left by the
+ * page the visitor came from must not send them back to it.
+ */
+lp_set( 'referer', 'https://example.com/bn/' );
+lp_check( 'an internal link to the root is a choice', lp_private( lp_detection( false ), 'request_chose_unprefixed_default_language' ), true );
+lp_check( 'but not while that language is prefixed', lp_private( lp_detection( true ), 'request_chose_unprefixed_default_language' ), false );
+
+lp_set( 'referer', false );
+lp_check( 'and a bookmark is not a choice either', lp_private( lp_detection( false ), 'request_chose_unprefixed_default_language' ), false );
+
+// The end of it: a remembered language no longer outvotes the visitor.
+$_COOKIE['localepress_language'] = 'bn';
+lp_set( 'referer', 'https://example.com/bn/' );
+lp_check( 'so the root is left alone', lp_private( lp_detection( false ), 'resolve_preferred_language' ), null );
+
+lp_set( 'referer', false );
+$remembered = lp_private( lp_detection( false ), 'resolve_preferred_language' );
+lp_check( 'while a direct visit is still answered', is_array( $remembered ) ? $remembered['id'] : '', 'bn' );
+unset( $_COOKIE['localepress_language'] );
+
+// An unprefixed default-language page is what keeps the cookie current.
+lp_set( 'has_prefix', false );
+lp_set( 'current_language', 'en' );
+lp_check( 'the unprefixed page records its language', lp_private( lp_detection( false ), 'serves_unprefixed_default_language' ), true );
+lp_check( 'a prefixed site has no such page', lp_private( lp_detection( true ), 'serves_unprefixed_default_language' ), false );
+
+lp_set( 'current_language', 'bn' );
+lp_check( 'and no other language is mistaken for it', lp_private( lp_detection( false ), 'serves_unprefixed_default_language' ), false );
+lp_set( 'current_language', 'en' );
+
+// =====================================================================
+echo "\n### 12. One cookie, however it is written\n";
+// =====================================================================
+
+$arguments = lp_detection( false )->get_cookie_arguments( array( 'id' => 'bn', 'url_slug' => 'bn' ) );
+lp_check( 'the browser writer is given a path', $arguments['path'], COOKIEPATH );
+lp_check( 'the same domain PHP would use', $arguments['domain'], COOKIE_DOMAIN );
+lp_check( 'and the same SameSite policy', $arguments['samesite'], 'Lax' );
+lp_check( 'readable from script, which is the point', $arguments['httponly'], false );
+lp_check( 'a year out by default', $arguments['expires'] > time() + YEAR_IN_SECONDS - 60, true );
+
+// A page cache would store a Set-Cookie header and replay it to everyone.
+lp_check( 'no cache is assumed by default', LocalePress\Integrations\Cache\CacheCompatibility::is_active(), false );
+add_filter( 'localepress_is_cache_active', function () {
+	return true;
+} );
+lp_check( 'until the site says otherwise', LocalePress\Integrations\Cache\CacheCompatibility::is_active(), true );
 
 lp_report();

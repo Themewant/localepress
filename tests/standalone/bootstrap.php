@@ -93,7 +93,10 @@ namespace {
 		return false;
 	}
 	function wp_doing_ajax() {
-		return false;
+		return (bool) lp_state( 'doing_ajax' );
+	}
+	function wp_get_referer() {
+		return lp_state( 'referer', false );
 	}
 	function is_404() {
 		return (bool) lp_state( 'is_404' );
@@ -118,6 +121,8 @@ namespace {
 	// --- Real classes under test -------------------------------------------
 
 	require LP_SRC . 'Contracts/interface-module.php';
+	require LP_SRC . 'Integrations/Cache/class-cachecompatibility.php';
+	require LP_SRC . 'Routing/class-backgroundlanguageresolver.php';
 	require LP_SRC . 'Routing/class-languagehostresolver.php';
 	require LP_SRC . 'Routing/class-hostoriginmodule.php';
 	require LP_SRC . 'Routing/class-routingmodule.php';

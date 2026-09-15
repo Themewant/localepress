@@ -24,6 +24,34 @@ final class TaxonomySupport {
 	private $settings;
 
 	/**
+	 * Supported taxonomy names, once resolved.
+	 *
+	 * @var array<int, string>|null
+	 */
+	private $supported = null;
+
+	/**
+	 * Inputs the resolved supported list was built from.
+	 *
+	 * @var string
+	 */
+	private $supported_key = '';
+
+	/**
+	 * Eligible taxonomy names, once resolved.
+	 *
+	 * @var array<int, string>|null
+	 */
+	private $available = null;
+
+	/**
+	 * Registered taxonomies the resolved eligible list was built from.
+	 *
+	 * @var string
+	 */
+	private $available_key = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param PluginSettings|null $settings Optional central settings service.
@@ -38,15 +66,34 @@ final class TaxonomySupport {
 	 * Public taxonomies with an administrative UI use one generic term workflow.
 	 * No commerce, attribute, or other taxonomy-specific data is handled here.
 	 *
+	 * The answer is held for as long as it stays true. supports() is asked once
+	 * per term on a page that lists terms, and reading the taxonomy policy means
+	 * re-normalizing every settings section, so asking it each time spends the
+	 * whole configuration on a question whose answer cannot have changed. What
+	 * can change it is which taxonomies are registered, which taxonomies core
+	 * has finished registering at the moment of the call, and the stored
+	 * configuration itself; each of those is in the key, and each is cheap to
+	 * ask.
+	 *
 	 * @return array<int, string>
 	 */
 	public function get_taxonomies() {
-		$taxonomies = $this->get_available_taxonomies();
+		$available = $this->get_available_taxonomies();
+		$key       = $this->settings->revision() . '|' . implode( ',', $available );
+
+		if ( null !== $this->supported && $key === $this->supported_key ) {
+			return $this->supported;
+		}
+
+		$taxonomies = $available;
 		$content    = $this->settings->get_section( 'content' );
 
 		if ( 'selected' === $content['taxonomies_mode'] ) {
 			$taxonomies = array_values( array_intersect( $taxonomies, $content['taxonomies'] ) );
 		}
+
+		$this->supported_key = $key;
+		$this->supported     = $taxonomies;
 
 		return $taxonomies;
 	}
@@ -54,22 +101,36 @@ final class TaxonomySupport {
 	/**
 	 * Returns all taxonomies eligible for configuration.
 	 *
+	 * Taxonomies are still being registered while `init` runs, so the registered
+	 * set is what this is held against: a call made before a plugin registers
+	 * its own must not be the answer given after it has.
+	 *
 	 * @return array<int, string>
 	 */
 	public function get_available_taxonomies() {
-		$objects    = get_taxonomies(
+		$objects = get_taxonomies(
 			array(
 				'public'  => true,
 				'show_ui' => true,
 			),
 			'objects'
 		);
+		$key     = implode( ',', array_keys( $objects ) );
+
+		if ( null !== $this->available && $key === $this->available_key ) {
+			return $this->available;
+		}
+
 		$taxonomies = array_keys( $objects );
 
 		/**
 		 * Filters taxonomies supported by the core term translation engine.
 		 *
 		 * Returned taxonomies must remain public and expose an administrative UI.
+		 *
+		 * The filter is applied once for each set of registered taxonomies rather
+		 * than on every question asked of the result, so it must answer from the
+		 * taxonomies it is given rather than from the request around it.
 		 *
 		 * @param array<int, string>       $taxonomies Supported taxonomy names.
 		 * @param array<string, \WP_Taxonomy> $objects Taxonomy objects.
@@ -93,7 +154,10 @@ final class TaxonomySupport {
 			$supported[] = $taxonomy;
 		}
 
-		return array_values( array_unique( $supported ) );
+		$this->available_key = $key;
+		$this->available     = array_values( array_unique( $supported ) );
+
+		return $this->available;
 	}
 
 	/**

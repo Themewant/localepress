@@ -143,6 +143,33 @@ final class QueryIdTranslationModule implements ModuleInterface {
 			return $args;
 		}
 
+		/*
+		 * The same opt-outs a post query has. A term query that named several
+		 * languages on purpose — the one that collects a term's own translations
+		 * for the alternate links, most of all — is naming them because it wants
+		 * them, and rewriting every identifier to the language being read leaves
+		 * it holding the same term three times.
+		 */
+		if (
+			! empty( $args['localepress_skip_language_filter'] )
+			|| ! empty( $args[ self::SKIP_QUERY_VAR ] )
+		) {
+			return $args;
+		}
+
+		/**
+		 * Filters whether LocalePress may translate the identifiers in one term query.
+		 *
+		 * The counterpart of `localepress_translate_query_ids`, which answers the
+		 * same question for a post query.
+		 *
+		 * @param bool                 $translate Whether identifiers should be translated.
+		 * @param array<string, mixed> $args      Term query arguments.
+		 */
+		if ( ! apply_filters( 'localepress_translate_term_query_ids', true, $args ) ) {
+			return $args;
+		}
+
 		$language = $this->url_manager->get_current_language();
 
 		if ( null === $language ) {
@@ -254,11 +281,7 @@ final class QueryIdTranslationModule implements ModuleInterface {
 	 * @return bool
 	 */
 	private function is_translatable_request() {
-		return ! is_admin()
-			&& ! wp_doing_ajax()
-			&& ! wp_doing_cron()
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			&& ! ( defined( 'WP_CLI' ) && WP_CLI );
+		return $this->url_manager->background()->scopes_rendered_page();
 	}
 
 	/**

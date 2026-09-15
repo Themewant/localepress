@@ -12,6 +12,7 @@ use LocalePress\Content\LanguageQueryConstraint;
 use LocalePress\Content\PostTranslationManager;
 use LocalePress\Contracts\ModuleInterface;
 use LocalePress\Language\LanguageManager;
+use LocalePress\Routing\LanguageUrlManager;
 use LocalePress\Taxonomy\TermTranslationManager;
 use WP_Query;
 
@@ -74,11 +75,18 @@ final class RestLanguageModule implements ModuleInterface {
 	private $constraint;
 
 	/**
-	 * Language requested by the current REST call.
+	 * Language URL service, which owns the language of the running request.
 	 *
-	 * @var string
+	 * @var LanguageUrlManager
 	 */
-	private $request_language_id = '';
+	private $url_manager;
+
+	/**
+	 * Language each dispatch displaced, keyed by the request that displaced it.
+	 *
+	 * @var array<string, string>
+	 */
+	private $displaced = array();
 
 	/**
 	 * Constructor.
@@ -86,16 +94,28 @@ final class RestLanguageModule implements ModuleInterface {
 	 * @param PostTranslationManager $post_translations Post translation manager.
 	 * @param TermTranslationManager $term_translations Term translation manager.
 	 * @param LanguageManager        $language_manager  Language manager.
+	 * @param LanguageUrlManager     $url_manager       Language URL service.
 	 */
 	public function __construct(
 		PostTranslationManager $post_translations,
 		TermTranslationManager $term_translations,
-		LanguageManager $language_manager
+		LanguageManager $language_manager,
+		LanguageUrlManager $url_manager
 	) {
 		$this->post_translations = $post_translations;
 		$this->term_translations = $term_translations;
 		$this->language_manager  = $language_manager;
+		$this->url_manager       = $url_manager;
 		$this->constraint        = new LanguageQueryConstraint();
+	}
+
+	/**
+	 * Returns the language the running REST call is answering in.
+	 *
+	 * @return string Empty when the call named no language.
+	 */
+	private function request_language_id() {
+		return $this->url_manager->background()->resolve_language_id();
 	}
 
 	/**
@@ -104,6 +124,9 @@ final class RestLanguageModule implements ModuleInterface {
 	public function register() {
 		add_action( 'rest_api_init', array( $this, 'register_collection_filters' ) );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_request_language' ), 10, 3 );
+		// Last, so the language is still in place for everything else that reads
+		// the response on the way out.
+		add_filter( 'rest_request_after_callbacks', array( $this, 'release_request_language' ), 10000, 3 );
 		add_filter( 'posts_clauses', array( $this, 'filter_posts_by_language' ), 10, 2 );
 		add_filter( 'terms_clauses', array( $this, 'filter_terms_by_language' ), 10, 3 );
 		add_filter( 'block_editor_rest_api_preload_paths', array( $this, 'add_language_to_preload_paths' ), 50, 2 );
@@ -135,7 +158,18 @@ final class RestLanguageModule implements ModuleInterface {
 	}
 
 	/**
-	 * Stores the language requested by the current REST call.
+	 * Makes the language a REST call asked for the language it is answered in.
+	 *
+	 * The language is recorded where every other part of LocalePress already
+	 * looks for it, so a REST request answers the way a page in that language
+	 * does: its strings, its locale, its home URL, and the listings any block it
+	 * renders builds for itself.
+	 *
+	 * A dispatch that names no language leaves the one already in place alone.
+	 * Anything may dispatch a REST request of its own while one is running — a
+	 * block that hydrates itself, a controller that reads another route — and
+	 * clearing the language for that inner call would leave the outer request
+	 * unscoped for the rest of its life.
 	 *
 	 * @param mixed            $result  Response to replace the requested version with.
 	 * @param mixed            $server  REST server instance.
@@ -144,7 +178,6 @@ final class RestLanguageModule implements ModuleInterface {
 	 */
 	public function capture_request_language( $result, $server, $request ) {
 		unset( $server );
-		$this->request_language_id = '';
 
 		if ( ! is_object( $request ) || ! method_exists( $request, 'get_param' ) ) {
 			return $result;
@@ -152,11 +185,91 @@ final class RestLanguageModule implements ModuleInterface {
 
 		$requested = $request->get_param( 'lang' );
 
-		if ( is_scalar( $requested ) && '' !== (string) $requested ) {
-			$this->request_language_id = $this->resolve_language_id( (string) $requested );
+		if ( ! is_scalar( $requested ) || '' === (string) $requested ) {
+			return $result;
 		}
 
+		$language_id = $this->resolve_language_id( (string) $requested );
+
+		if ( '' === $language_id ) {
+			/*
+			 * A call that named a language and named it wrong is not a call that
+			 * named none. Answering it with every language at once would be a
+			 * wrong answer wearing the shape of a complete one, so it is answered
+			 * with the language the site answers in when nothing else is known.
+			 */
+			$language_id = $this->language_manager->get_default_id();
+		}
+
+		if ( '' === $language_id ) {
+			return $result;
+		}
+
+		$background = $this->url_manager->background();
+
+		if ( $language_id === $background->get_override() ) {
+			return $result;
+		}
+
+		$this->displaced[ spl_object_hash( $request ) ] = $background->set_override( $language_id );
+
+		$this->announce_language( $language_id );
+
 		return $result;
+	}
+
+	/**
+	 * Puts back the language the finished dispatch displaced.
+	 *
+	 * Restoration is keyed by the request itself rather than by nesting order,
+	 * so a dispatch that never reaches its callbacks cannot put back a language
+	 * that belongs to a different call.
+	 *
+	 * @param mixed            $response Response being returned.
+	 * @param mixed            $handler  Route handler that ran.
+	 * @param \WP_REST_Request $request  Request that has finished.
+	 * @return mixed Untouched response.
+	 */
+	public function release_request_language( $response, $handler, $request ) {
+		unset( $handler );
+
+		if ( ! is_object( $request ) ) {
+			return $response;
+		}
+
+		$key = spl_object_hash( $request );
+
+		if ( ! isset( $this->displaced[ $key ] ) ) {
+			return $response;
+		}
+
+		$restored = $this->displaced[ $key ];
+		unset( $this->displaced[ $key ] );
+
+		$this->url_manager->background()->set_override( $restored );
+		$this->announce_language( $restored );
+
+		return $response;
+	}
+
+	/**
+	 * Tells the rest of the plugin that the running request changed language.
+	 *
+	 * Most language lookups are answered on demand and need no warning. The
+	 * locale is the exception: WordPress loads its text domains once, long
+	 * before a REST body can be read, so whatever loaded them has to be told
+	 * when the answer changes underneath it.
+	 *
+	 * @param string $language_id Language the request now answers in.
+	 * @return void
+	 */
+	private function announce_language( $language_id ) {
+		/**
+		 * Fires when a REST dispatch changes the language the request answers in.
+		 *
+		 * @param string $language_id Language identifier, empty when cleared.
+		 */
+		do_action( 'localepress_request_language_changed', $language_id );
 	}
 
 	/**
@@ -166,11 +279,13 @@ final class RestLanguageModule implements ModuleInterface {
 	 * @return array<string, mixed>
 	 */
 	public function mark_collection_args( $args ) {
-		if ( ! is_array( $args ) || '' === $this->request_language_id ) {
+		$language_id = $this->request_language_id();
+
+		if ( ! is_array( $args ) || '' === $language_id ) {
 			return $args;
 		}
 
-		$args[ self::QUERY_VAR ] = $this->request_language_id;
+		$args[ self::QUERY_VAR ] = $language_id;
 
 		return $args;
 	}
@@ -182,7 +297,9 @@ final class RestLanguageModule implements ModuleInterface {
 	 * @return string
 	 */
 	public function filter_new_term_language( $language_id ) {
-		return '' === $this->request_language_id ? $language_id : $this->request_language_id;
+		$requested = $this->request_language_id();
+
+		return '' === $requested ? $language_id : $requested;
 	}
 
 	/**
@@ -431,27 +548,15 @@ final class RestLanguageModule implements ModuleInterface {
 	/**
 	 * Resolves a requested language to a stored identifier.
 	 *
-	 * The editor sends the identifier stored on the post, but a URL slug is
-	 * accepted too so the parameter is usable from other clients.
+	 * The editor sends the identifier stored on the post. A URL slug, a language
+	 * code, and a WordPress locale are accepted too, because a client that is
+	 * not the editor holds one of those rather than an identifier only
+	 * LocalePress knows about.
 	 *
-	 * @param string $requested Requested language identifier or URL slug.
+	 * @param string $requested Requested language identifier, slug, code, or locale.
 	 * @return string
 	 */
 	private function resolve_language_id( $requested ) {
-		$language = $this->language_manager->find( $requested );
-
-		if ( is_array( $language ) && isset( $language['id'] ) ) {
-			return (string) $language['id'];
-		}
-
-		$slug = sanitize_title( $requested );
-
-		foreach ( $this->language_manager->get_languages() as $candidate ) {
-			if ( isset( $candidate['url_slug'] ) && $slug === (string) $candidate['url_slug'] ) {
-				return (string) $candidate['id'];
-			}
-		}
-
-		return '';
+		return $this->url_manager->resolve_language_id( $requested );
 	}
 }

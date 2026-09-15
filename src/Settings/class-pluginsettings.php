@@ -46,6 +46,13 @@ final class PluginSettings {
 	private $cache_prefix = '';
 
 	/**
+	 * Counter advanced whenever the stored configuration changes.
+	 *
+	 * @var int
+	 */
+	private $revision = 0;
+
+	/**
 	 * Adds the non-autoloaded settings option when it does not exist.
 	 *
 	 * Existing sites with registered languages are considered configured so an
@@ -108,6 +115,7 @@ final class PluginSettings {
 			'seo'            => array(
 				'hreflang_enabled'  => true,
 				'x_default_enabled' => true,
+				'split_sitemaps'    => true,
 			),
 			'advanced'       => array(
 				'delete_data_on_uninstall' => false,
@@ -185,6 +193,24 @@ final class PluginSettings {
 		$filtered = apply_filters( 'localepress_settings', $settings );
 
 		return is_array( $filtered ) ? $this->normalize( $filtered ) : $settings;
+	}
+
+	/**
+	 * Returns a counter that advances whenever these settings change.
+	 *
+	 * Reading a section is not free: the stored option is cached, but every read
+	 * runs the filters and re-normalizes all six sections, which is the right
+	 * answer for a caller that asks once and the wrong one for a caller asked
+	 * hundreds of times per page. Such a caller can cache what it derived and
+	 * ask this instead, which costs one property read behind the same site check
+	 * get() makes, and tells it when what it cached stopped being true.
+	 *
+	 * @return int
+	 */
+	public function revision() {
+		$this->maybe_reset_cache_for_site();
+
+		return $this->revision;
 	}
 
 	/**
@@ -269,6 +295,7 @@ final class PluginSettings {
 		$this->maybe_reset_cache_for_site();
 		$this->settings = $this->normalize( $settings );
 		$result         = update_option( self::OPTION_NAME, $this->settings, false );
+		++$this->revision;
 
 		/**
 		 * Fires after LocalePress configuration has been stored.
@@ -388,6 +415,17 @@ final class PluginSettings {
 	}
 
 	/**
+	 * Reports whether the core sitemap is split into one file per language.
+	 *
+	 * @return bool
+	 */
+	public function is_sitemap_split_enabled() {
+		$seo = $this->get_section( 'seo' );
+
+		return ! empty( $seo['split_sitemaps'] );
+	}
+
+	/**
 	 * Reports whether plugin data should be removed during uninstall.
 	 *
 	 * @return bool
@@ -482,6 +520,7 @@ final class PluginSettings {
 			'seo'            => array(
 				'hreflang_enabled'  => $this->boolean_value( $seo, 'hreflang_enabled', $defaults['seo']['hreflang_enabled'] ),
 				'x_default_enabled' => $this->boolean_value( $seo, 'x_default_enabled', $defaults['seo']['x_default_enabled'] ),
+				'split_sitemaps'    => $this->boolean_value( $seo, 'split_sitemaps', $defaults['seo']['split_sitemaps'] ),
 			),
 			'advanced'       => array(
 				'delete_data_on_uninstall' => $this->boolean_value( $advanced, 'delete_data_on_uninstall', $defaults['advanced']['delete_data_on_uninstall'] ),
@@ -670,6 +709,7 @@ final class PluginSettings {
 		if ( $this->cache_prefix !== $prefix ) {
 			$this->cache_prefix = $prefix;
 			$this->settings     = null;
+			++$this->revision;
 		}
 	}
 }

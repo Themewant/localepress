@@ -11,6 +11,7 @@ use LocalePress\Content\LanguageQueryConstraint;
 use LocalePress\Content\PostTranslationManager;
 use LocalePress\Contracts\ModuleInterface;
 use LocalePress\SEO\SitemapModule;
+use LocalePress\Settings\PluginSettings;
 use LocalePress\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Query;
@@ -36,7 +37,7 @@ final class RoutingModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const REWRITE_SCHEMA_VERSION = '1';
+	const REWRITE_SCHEMA_VERSION = '2';
 
 	/**
 	 * Language URL service.
@@ -107,20 +108,30 @@ final class RoutingModule implements ModuleInterface {
 	private $front_door_callers = null;
 
 	/**
+	 * Central plugin settings.
+	 *
+	 * @var PluginSettings
+	 */
+	private $settings;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param LanguageUrlManager     $url_manager       Language URL service.
 	 * @param PostTranslationManager $post_translations Post translation manager.
 	 * @param TermTranslationManager $term_translations Term translation manager.
+	 * @param PluginSettings|null    $settings          Optional central settings service.
 	 */
 	public function __construct(
 		LanguageUrlManager $url_manager,
 		PostTranslationManager $post_translations,
-		TermTranslationManager $term_translations
+		TermTranslationManager $term_translations,
+		?PluginSettings $settings = null
 	) {
 		$this->url_manager       = $url_manager;
 		$this->post_translations = $post_translations;
 		$this->term_translations = $term_translations;
+		$this->settings          = null === $settings ? new PluginSettings() : $settings;
 		$this->constraint        = new LanguageQueryConstraint();
 	}
 
@@ -927,16 +938,18 @@ final class RoutingModule implements ModuleInterface {
 		}
 
 		/*
-		 * Only a rendered page is scoped by the language its URL names. REST and
-		 * AJAX carry their own language, and RestLanguageModule already applies
-		 * it: constraining those again would AND two languages together and
-		 * answer the editor with an empty list.
+		 * A term listing loaded into a page over AJAX belongs to that page, so it
+		 * is scoped the way the page is once the call has said which language it
+		 * is in.
+		 *
+		 * REST is left to RestLanguageModule, which constrains the collections a
+		 * request asked for and nothing else. Scoping every term query a REST
+		 * request makes would reach the ones WordPress runs on its own: since
+		 * WP 6.0 `term_exists()` asks through `get_terms()`, and a lookup narrowed
+		 * to one language answers "no" for a term that does exist, which is how a
+		 * write ends up creating a duplicate of it.
 		 */
-		if ( is_admin()
-			|| wp_doing_ajax()
-			|| wp_doing_cron()
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-		) {
+		if ( ! $this->url_manager->background()->scopes_rendered_page() ) {
 			return $clauses;
 		}
 
@@ -1393,15 +1406,15 @@ final class RoutingModule implements ModuleInterface {
 			}
 		} elseif ( is_home() && $queried instanceof WP_Post && 0 < $this->url_manager->get_posts_page_id() ) {
 			/*
-			 * A posts page is the one archive with a translated page behind it, so
-			 * a translation's own slug resolves here too. Send it to the source
-			 * route the rest of the site uses. A language root that merely falls
-			 * back to the archive has no queried page and is left alone.
+			 * A posts page is the one archive with a translated page behind it,
+			 * and each language's page carries its own slug, so the canonical
+			 * route is the address of the page actually being answered. Where
+			 * that page is untranslated the queried page is the source one and
+			 * this resolves to the route already being read. A language root
+			 * that merely falls back to the archive has no queried page and is
+			 * left alone.
 			 */
-			$url = $this->url_manager->get_post_url(
-				$this->url_manager->get_posts_page_id(),
-				$language
-			);
+			$url = $this->url_manager->get_post_url( $queried->ID, $language );
 		} else {
 			return;
 		}
@@ -1603,8 +1616,20 @@ final class RoutingModule implements ModuleInterface {
 			return false;
 		}
 
+		/*
+		 * A sitemap page gets an address of its own per language when the
+		 * sitemap is divided that way, and nothing else under wp-sitemap does.
+		 * The two rules that serve a page are the two naming their sitemap
+		 * through a match; the index and the stylesheets name theirs outright
+		 * and stay single, so one index keeps listing every language.
+		 */
+		if ( preg_match( '/wp-sitemap/i', $regex ) ) {
+			return false !== strpos( $query, 'sitemap=$matches[' )
+				&& $this->settings->is_sitemap_split_enabled();
+		}
+
 		return ! preg_match(
-			'/(?:wp-json|wp-sitemap|robots\\.txt|favicon\\.ico|wp-admin|wp-login)/i',
+			'/(?:wp-json|robots\\.txt|favicon\\.ico|wp-admin|wp-login)/i',
 			$regex
 		);
 	}
@@ -1660,6 +1685,10 @@ final class RoutingModule implements ModuleInterface {
 					'mode'                => $this->url_manager->hosts()->get_mode(),
 					'hosts'               => $hosts,
 					'permalink_structure' => (string) get_option( 'permalink_structure' ),
+					// Dividing the sitemap by language adds the rules that give
+					// each language's sitemap an address, and turning it off
+					// takes them away again.
+					'split_sitemaps'      => $this->settings->is_sitemap_split_enabled(),
 				)
 			)
 		);
@@ -1954,11 +1983,7 @@ final class RoutingModule implements ModuleInterface {
 	 * @return bool
 	 */
 	private function should_filter_query( WP_Query $query ) {
-		return ! is_admin()
-			&& ! wp_doing_ajax()
-			&& ! wp_doing_cron()
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			&& ! ( defined( 'WP_CLI' ) && WP_CLI )
+		return $this->url_manager->background()->scopes_request()
 			&& $query->is_main_query()
 			&& ! $query->get( 'suppress_filters' )
 			&& ! $query->get( 'localepress_skip_language_filter' );
@@ -1975,6 +2000,13 @@ final class RoutingModule implements ModuleInterface {
 	 * the page is, which is how the language reaches code that has never heard of
 	 * LocalePress.
 	 *
+	 * A listing loaded into that page afterwards is part of the same page and is
+	 * scoped the same way — a "load more" batch fetched over AJAX, a block the
+	 * editor renders through the REST API — but only once the request naming it
+	 * has said which language it is in. A REST collection nobody gave a language
+	 * to is an interface with no language in its contract, and keeps answering in
+	 * every one of them.
+	 *
 	 * Two things are never scoped. A query that reads a post type outside the
 	 * translation engine — navigation menus, templates, other non-public types —
 	 * holds no language assignment, so a constraint could only empty it. And a
@@ -1990,11 +2022,7 @@ final class RoutingModule implements ModuleInterface {
 	 */
 	private function should_filter_secondary_query( WP_Query $query ) {
 		if (
-			is_admin()
-			|| wp_doing_ajax()
-			|| wp_doing_cron()
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( defined( 'WP_CLI' ) && WP_CLI )
+			! $this->url_manager->background()->scopes_request()
 			|| $query->is_main_query()
 			|| $query->is_singular
 			|| $query->get( 'localepress_skip_language_filter' )

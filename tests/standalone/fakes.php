@@ -10,11 +10,16 @@ namespace LocalePress\Settings {
 		public $mode;
 		public $prefix_default;
 		public $detect_browser;
+		public $split_sitemaps;
 
-		public function __construct( $mode = 'directory', $prefix_default = false, $detect_browser = true ) {
+		public function __construct( $mode = 'directory', $prefix_default = false, $detect_browser = true, $split_sitemaps = true ) {
 			$this->mode           = $mode;
 			$this->prefix_default = $prefix_default;
 			$this->detect_browser = $detect_browser;
+			$this->split_sitemaps = $split_sitemaps;
+		}
+		public function is_sitemap_split_enabled() {
+			return $this->split_sitemaps;
 		}
 		public function get_section( $section ) {
 			return array( 'mode' => $this->mode );
@@ -85,6 +90,7 @@ namespace LocalePress\Routing {
 		public $languages;
 		public $default_id = 'en';
 		private $hosts;
+		private $background = null;
 
 		public function __construct( PluginSettings $settings, array $languages ) {
 			$this->hosts     = new LanguageHostResolver( $settings );
@@ -109,11 +115,24 @@ namespace LocalePress\Routing {
 		public function get_language_slugs() {
 			return array_keys( $this->languages );
 		}
+		public function background() {
+			if ( null === $this->background ) {
+				$this->background = new BackgroundLanguageResolver( $this );
+			}
+			return $this->background;
+		}
+		public function get_public_query_var() {
+			return self::PUBLIC_QUERY_VAR;
+		}
 		public function resolve_language( $language ) {
 			if ( is_array( $language ) ) {
 				$language = $language['id'];
 			}
 			return isset( $this->languages[ (string) $language ] ) ? $this->languages[ (string) $language ] : null;
+		}
+		public function resolve_language_id( $language ) {
+			$record = $this->resolve_language( $language );
+			return null === $record ? '' : (string) $record['id'];
 		}
 		public function get_default_language() {
 			return $this->resolve_language( $this->default_id );
@@ -197,7 +216,11 @@ namespace LocalePress\Routing {
 				$record = $this->hosts->match( wp_parse_url( $url, PHP_URL_HOST ), $this->languages, $this->default_id );
 				return null === $record ? '' : $record['id'];
 			}
-			return '';
+
+			$path  = (string) wp_parse_url( $url, PHP_URL_PATH );
+			$first = sanitize_title( (string) strtok( trim( $path, '/' ), '/' ) );
+
+			return isset( $this->languages[ $first ] ) ? (string) $this->languages[ $first ]['id'] : '';
 		}
 		public function get_front_page_id() {
 			return 0;

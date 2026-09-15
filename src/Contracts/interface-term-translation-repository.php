@@ -79,6 +79,15 @@ interface TermTranslationRepositoryInterface {
 	public function update_assignment_language( $term_taxonomy_id, $language_id );
 
 	/**
+	 * Moves a term assignment into another translation group.
+	 *
+	 * @param int    $term_taxonomy_id Term-taxonomy identifier.
+	 * @param string $group_id         Target translation group identifier.
+	 * @return bool
+	 */
+	public function update_assignment_group( $term_taxonomy_id, $group_id );
+
+	/**
 	 * Removes a term assignment.
 	 *
 	 * @param int $term_taxonomy_id Term-taxonomy identifier.

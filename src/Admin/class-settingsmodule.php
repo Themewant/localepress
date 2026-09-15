@@ -562,6 +562,7 @@ final class SettingsModule implements ModuleInterface {
 				'seo' => array(
 					'hreflang_enabled'  => isset( $seo['hreflang_enabled'] ),
 					'x_default_enabled' => isset( $seo['x_default_enabled'] ),
+					'split_sitemaps'    => isset( $seo['split_sitemaps'] ),
 				),
 			)
 		);

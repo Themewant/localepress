@@ -454,6 +454,18 @@ final class SeoMetadata {
 					'suppress_filters'       => false,
 					'update_post_meta_cache' => false,
 					'update_post_term_cache' => false,
+					/*
+					 * This is the one query on a rendered page that is meant to
+					 * cross languages: it asks what this document is called in
+					 * each of them. Held to the language being read, the way
+					 * every other listing on the page is, it can only ever find
+					 * the document already on screen — and a set of alternates
+					 * holding one entry is no alternates at all, so the page
+					 * ends up telling search engines nothing about its
+					 * translations. The identifiers must survive too: they name
+					 * the other languages on purpose.
+					 */
+					'localepress_skip_language_filter' => true,
 				)
 			);
 			$posts_by_id = array();
@@ -513,6 +525,9 @@ final class SeoMetadata {
 					'taxonomy'   => $term->taxonomy,
 					'include'    => $term_ids,
 					'hide_empty' => false,
+					// Crosses languages for the same reason the post lookup above
+					// does: it is asking what this term is called in each of them.
+					'localepress_skip_language_filter' => true,
 				)
 			);
 			$terms_by_id = array();

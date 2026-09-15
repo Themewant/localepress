@@ -1,5 +1,5 @@
 === LocalePress ===
-Contributors: localepress
+Contributors: shapecode
 Tags: multilingual, language, localization, rtl
 Requires at least: 6.4
 Tested up to: 7.1
@@ -12,7 +12,7 @@ A lightweight, extensible multilingual foundation for WordPress.
 
 == Description ==
 
-LocalePress provides secure language registration, core translation relationships, a central translation dashboard, registered-string translation, language-prefixed frontend routing, optional browser language detection, accessible language switchers, multilingual navigation menus, Gutenberg-safe manual translation workflows, two-phase copy and synchronization, basic Elementor document copying, and essential multilingual SEO metadata. It supports posts, pages, public custom post types, synced patterns, categories, tags, and public custom taxonomies.
+LocalePress provides secure language registration, core translation relationships, a central translation dashboard, registered-string translation, language-prefixed frontend routing, optional browser language detection, accessible language switchers, multilingual navigation menus, Gutenberg-safe manual translation workflows, two-phase copy and synchronization, Elementor page, Theme Builder, and popup translation, and essential multilingual SEO metadata. It supports posts, pages, public custom post types, synced patterns, categories, tags, and public custom taxonomies.
 
 Creating a translation always copies the source content, taxonomies, public custom fields, page template, featured image, and the other core post fields, so no editor starts from an empty screen. You can additionally choose items to keep synchronized afterwards, so editing one language updates the rest. Synchronization is permission aware: only editors who may edit every translation in a group can change shared data.
 
@@ -20,7 +20,8 @@ In the block editor, parent pages, categories, tags, and the link dialog are sco
 
 Optional media translation gives each language its own title, alternative text, caption, and description for the same file. The file itself is never duplicated: every language points at one image on disk, so translated pages get accurate alternative text without a second upload.
 
-This free version does not include automated translation, WooCommerce-specific data handling, translation of custom-field values, advanced translated schema or slugs, Elementor Pro integrations, deep Theme Builder behavior, dynamic-tag translation, forms translation, or other addon features.
+This free version does not include automated translation, WooCommerce-specific data handling, translation of arbitrary custom-field values, advanced translated schema or slugs, translation of the text inside Elementor widget settings, dynamic-tag translation, forms translation, or other addon features.
+
 
 == Installation ==
 
@@ -31,6 +32,9 @@ This free version does not include automated translation, WooCommerce-specific d
 == Changelog ==
 
 = 1.0.0 =
+* Added SEO field translation for Yoast SEO, Rank Math, and SEOPress. A new translation now opens with the source's SEO title, meta description, social titles and images, robots settings, and primary category already filled in, so a translator has something to translate from instead of a blank panel. The primary category follows the category's own translation. Once translated, the text is left alone: editing the source no longer overwrites a description somebody wrote in another language. Each plugin's own title and description templates become translatable strings as well. A canonical is never copied, because a translation has an address of its own.
+* Added one sitemap per language. The index at wp-sitemap.xml stays where it is and stays the only address to submit, but it now lists a separate post and taxonomy sitemap for each language, at that language's own address, each holding only its own URLs. A post type the site does not translate stays whole, a language with nothing of a kind is left out rather than given an empty file, and languages on separate hosts are unchanged because each host already answers for itself. Settings > SEO turns it off.
+* Added Elementor Theme Builder and popup translation. A translated header, footer, single, archive, 404, search, or popup template now carries the display conditions, trigger settings, and location that decide when it appears, and the rules that name a page or a category are rewritten to point at that page or category in the language the template belongs to. Each language then renders its own template: Elementor is asked, through its own filters, for the template written in the language being read, falling back to the source template for a language that has none of its own and for a translation that is not published yet.
 * Added an Elementor widget, LocalePress > Language Switcher, so a header built in Elementor can carry a switcher with Elementor's own typography, color, flag, dropdown, and spacing controls. It renders through the same switcher service as the shortcode and the block rather than repeating it.
 * Added a floating language switcher, a vertical strip pinned halfway down the right edge of the screen on every page and on by default, so a newly registered language is reachable before anyone has placed a switcher in a menu or a template. Every language is shown at once with its flag, the one being read filled in. Settings > Switcher turns it off, hides the flags, moves it to the left edge or to any corner, or collapses it to a dropdown. It hides itself inside Elementor and other page builder editors, where it would only sit over the editing canvas.
 * Added a per-language default category, so a post saved without a category lands in the default term of its own language instead of the site-wide one. Translating Uncategorized is all it takes, and Settings > Content now offers a default term per language for sites that want a different one. Default terms of custom taxonomies follow the same rule.

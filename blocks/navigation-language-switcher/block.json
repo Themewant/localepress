@@ -9,6 +9,23 @@
 	"description": "Add language links to a Navigation block.",
 	"textdomain": "localepress",
 	"parent": [ "core/navigation" ],
+	"usesContext": [
+		"textColor",
+		"customTextColor",
+		"backgroundColor",
+		"customBackgroundColor",
+		"overlayTextColor",
+		"customOverlayTextColor",
+		"overlayBackgroundColor",
+		"customOverlayBackgroundColor",
+		"fontSize",
+		"customFontSize",
+		"showSubmenuIcon",
+		"submenuVisibility",
+		"openSubmenusOnClick",
+		"maxNestingLevel",
+		"style"
+	],
 	"attributes": {
 		"display": {
 			"type": "string",

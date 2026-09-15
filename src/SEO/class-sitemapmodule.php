@@ -8,10 +8,14 @@
 namespace LocalePress\SEO;
 
 use LocalePress\Content\LanguageQueryConstraint;
+use LocalePress\Content\PostTranslationManager;
 use LocalePress\Contracts\ModuleInterface;
 use LocalePress\Language\LanguageManager;
 use LocalePress\Routing\LanguageUrlManager;
+use LocalePress\Settings\PluginSettings;
+use LocalePress\Taxonomy\TermTranslationManager;
 use WP_Query;
+use WP_Sitemaps_Provider;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,15 +69,59 @@ final class SitemapModule implements ModuleInterface {
 	private $enabled_ids;
 
 	/**
+	 * Post translation relationships.
+	 *
+	 * @var PostTranslationManager
+	 */
+	private $post_translations;
+
+	/**
+	 * Term translation relationships.
+	 *
+	 * @var TermTranslationManager
+	 */
+	private $term_translations;
+
+	/**
+	 * Central plugin settings.
+	 *
+	 * @var PluginSettings
+	 */
+	private $settings;
+
+	/**
+	 * Language every sitemap query is currently held to.
+	 *
+	 * Null while the provider has named none. An empty string is a language of
+	 * its own: the provider asking for a count across every listed language,
+	 * which is not the same as not having been asked.
+	 *
+	 * @var string|null
+	 */
+	private $scoped_language_id = null;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param LanguageUrlManager $url_manager      Language URL API.
-	 * @param LanguageManager    $language_manager Language manager.
+	 * @param LanguageUrlManager     $url_manager       Language URL API.
+	 * @param LanguageManager        $language_manager  Language manager.
+	 * @param PostTranslationManager $post_translations Post translation manager.
+	 * @param TermTranslationManager $term_translations Term translation manager.
+	 * @param PluginSettings|null    $settings          Optional central settings service.
 	 */
-	public function __construct( LanguageUrlManager $url_manager, LanguageManager $language_manager ) {
-		$this->url_manager      = $url_manager;
-		$this->language_manager = $language_manager;
-		$this->constraint       = new LanguageQueryConstraint();
+	public function __construct(
+		LanguageUrlManager $url_manager,
+		LanguageManager $language_manager,
+		PostTranslationManager $post_translations,
+		TermTranslationManager $term_translations,
+		?PluginSettings $settings = null
+	) {
+		$this->url_manager       = $url_manager;
+		$this->language_manager  = $language_manager;
+		$this->post_translations = $post_translations;
+		$this->term_translations = $term_translations;
+		$this->settings          = null === $settings ? new PluginSettings() : $settings;
+		$this->constraint        = new LanguageQueryConstraint();
 	}
 
 	/**
@@ -88,6 +136,7 @@ final class SitemapModule implements ModuleInterface {
 		add_filter( 'wp_sitemaps_taxonomies_query_args', array( $this, 'mark_provider_query' ), 20 );
 		add_filter( 'posts_clauses', array( $this, 'filter_sitemap_posts' ), 20, 2 );
 		add_filter( 'terms_clauses', array( $this, 'filter_sitemap_terms' ), 20, 3 );
+		add_filter( 'wp_sitemaps_add_provider', array( $this, 'replace_provider' ), 20 );
 	}
 
 	/**
@@ -120,7 +169,17 @@ final class SitemapModule implements ModuleInterface {
 			return $clauses;
 		}
 
-		$language_ids = $this->get_enabled_language_ids();
+		$language_id = $this->get_scoped_language_id();
+
+		if ( '' !== $language_id ) {
+			$default = $this->url_manager->get_default_language();
+
+			return null === $default
+				? $clauses
+				: $this->constraint->apply_to_posts( $clauses, $language_id, $default['id'] );
+		}
+
+		$language_ids = $this->get_sitemap_language_ids();
 
 		return empty( $language_ids )
 			? $clauses
@@ -142,11 +201,172 @@ final class SitemapModule implements ModuleInterface {
 			return $clauses;
 		}
 
-		$language_ids = $this->get_enabled_language_ids();
+		$language_id = $this->get_scoped_language_id();
+
+		if ( '' !== $language_id ) {
+			$default = $this->url_manager->get_default_language();
+
+			return null === $default
+				? $clauses
+				: $this->constraint->apply_to_terms( $clauses, $language_id, $default['id'] );
+		}
+
+		$language_ids = $this->get_sitemap_language_ids();
 
 		return empty( $language_ids )
 			? $clauses
 			: $this->constraint->restrict_terms_to_languages( $clauses, $language_ids );
+	}
+
+	/**
+	 * Replaces a core provider with one that answers per language.
+	 *
+	 * @param mixed $provider Sitemap provider being registered.
+	 * @return mixed
+	 */
+	public function replace_provider( $provider ) {
+		if ( ! $provider instanceof WP_Sitemaps_Provider || ! $this->splits_by_language() ) {
+			return $provider;
+		}
+
+		/*
+		 * Only the two providers whose queries this module constrains. A
+		 * provider LocalePress cannot scope would be advertised once per
+		 * language and answer every one of them with the same URLs.
+		 */
+		if ( ! in_array( $provider->name, array( 'posts', 'taxonomies' ), true ) ) {
+			return $provider;
+		}
+
+		return new SitemapLanguageProvider( $provider, $this );
+	}
+
+	/**
+	 * Runs one callback with every sitemap query held to a single language.
+	 *
+	 * The index is built outside any language's own request, so the counts it
+	 * needs cannot be read from the URL. The provider names the language it is
+	 * counting for, and the clause filters above read it back here.
+	 *
+	 * @param string   $language_id Language identifier, or an empty string to
+	 *                              count across every listed language.
+	 * @param callable $callback    Work to run in that language.
+	 * @return mixed Whatever the callback returns.
+	 */
+	public function with_language( $language_id, callable $callback ) {
+		$previous                 = $this->scoped_language_id;
+		$this->scoped_language_id = (string) $language_id;
+
+		try {
+			return $callback();
+		} finally {
+			$this->scoped_language_id = $previous;
+		}
+	}
+
+	/**
+	 * Returns the language one sitemap query must be held to.
+	 *
+	 * @return string Empty when the query covers every listed language.
+	 */
+	public function get_scoped_language_id() {
+		if ( null !== $this->scoped_language_id ) {
+			return $this->scoped_language_id;
+		}
+
+		/*
+		 * Nothing else on the request says which language a sitemap page is
+		 * for: the index named the address, and the provider was handed only a
+		 * subtype. So while the sitemap is divided, a page answers for the
+		 * language its address resolved to — including the default language at
+		 * the address that carries no prefix, which is the one the index
+		 * published for it.
+		 */
+		if ( ! $this->splits_by_language() ) {
+			return '';
+		}
+
+		// A sitemap the index published whole is served whole. Its address
+		// carries no language because it was never divided by one, so reading
+		// the request's language into it would drop everything else it holds.
+		if ( ! $this->request_names_a_divided_sitemap() ) {
+			return '';
+		}
+
+		$current = $this->url_manager->get_current_language();
+
+		return null === $current ? '' : (string) $current['id'];
+	}
+
+	/**
+	 * Reports whether the request is for a sitemap that was divided by language.
+	 *
+	 * @return bool
+	 */
+	private function request_names_a_divided_sitemap() {
+		$provider = get_query_var( 'sitemap' );
+		$subtype  = get_query_var( 'sitemap-subtype' );
+
+		if ( ! is_scalar( $provider ) || ! is_scalar( $subtype ) ) {
+			return false;
+		}
+
+		$provider = (string) $provider;
+		$subtype  = (string) $subtype;
+
+		return '' !== $provider
+			&& '' !== $subtype
+			&& $this->is_translatable_subtype( $provider, $subtype );
+	}
+
+	/**
+	 * Reports whether a sitemap subtype is translated on this site.
+	 *
+	 * @param string $provider_name Provider name, `posts` or `taxonomies`.
+	 * @param string $subtype       Post type or taxonomy name.
+	 * @return bool
+	 */
+	public function is_translatable_subtype( $provider_name, $subtype ) {
+		if ( 'posts' === $provider_name ) {
+			return $this->post_translations->supports_post_type( $subtype );
+		}
+
+		return 'taxonomies' === $provider_name
+			&& $this->term_translations->supports_taxonomy( $subtype );
+	}
+
+	/**
+	 * Points one sitemap address at the language it lists.
+	 *
+	 * @param string $url         Sitemap URL as core built it.
+	 * @param string $language_id Language identifier.
+	 * @return string
+	 */
+	public function localize_sitemap_url( $url, $language_id ) {
+		return $this->url_manager->prefix_url( $url, $language_id );
+	}
+
+	/**
+	 * Reports whether the core sitemap is divided by language.
+	 *
+	 * Host routing already divides it: each host serves one language and lists
+	 * only its own content, which is the form a site owner submits each property
+	 * in. Dividing again would offer a language a second address on a host that
+	 * does not serve it.
+	 *
+	 * @return bool
+	 */
+	public function splits_by_language() {
+		$split = $this->settings->is_sitemap_split_enabled()
+			&& ! $this->url_manager->uses_host_routing()
+			&& 1 < count( $this->get_sitemap_language_ids() );
+
+		/**
+		 * Filters whether the core sitemap is split into one file per language.
+		 *
+		 * @param bool $split Whether per-language sitemaps are produced.
+		 */
+		return (bool) apply_filters( 'localepress_split_sitemaps_by_language', $split );
 	}
 
 	/**
@@ -162,7 +382,7 @@ final class SitemapModule implements ModuleInterface {
 	 *
 	 * @return array<int, string>
 	 */
-	private function get_enabled_language_ids() {
+	public function get_sitemap_language_ids() {
 		if ( null !== $this->enabled_ids ) {
 			return $this->enabled_ids;
 		}

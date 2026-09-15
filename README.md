@@ -1,6 +1,6 @@
 # LocalePress
 
-LocalePress is a modular multilingual foundation for WordPress. This repository contains the free plugin and currently implements language management, post and taxonomy translation relationships, a central translation dashboard, a registered-string translation system, language-prefixed frontend routing, context-aware language switching, multilingual navigation, Gutenberg-safe manual translation workflows with two-phase copy and synchronization, optional media translation, basic Elementor document compatibility, and essential multilingual SEO metadata.
+LocalePress is a modular multilingual foundation for WordPress. This repository contains the free plugin and currently implements language management, post and taxonomy translation relationships, a central translation dashboard, a registered-string translation system, language-prefixed frontend routing, context-aware language switching, multilingual navigation, Gutenberg-safe manual translation workflows with two-phase copy and synchronization, optional media translation, Elementor document, Theme Builder, and popup compatibility, and essential multilingual SEO metadata.
 
 ## Requirements
 
@@ -87,7 +87,7 @@ src/Language/                          Catalog, validation, lifecycle service, c
 src/Content/                           Post-type policy, relationship API, global lifecycle handling, stored-identifier translation
 src/Taxonomy/                          Taxonomy policy, term relationship API, hierarchy and lifecycle handling
 src/Routing/                           Current-language detection, rewrites, query mapping, URLs, canonicals, and visitor detection
-src/SEO/                               Language attributes, hreflang, canonicals, provider compatibility, and core sitemap constraints
+src/SEO/                               Language attributes, hreflang, canonicals, provider compatibility, and per-language core sitemaps
 src/Navigation/                        Menu languages, theme-location mapping, and translated links
 src/Switcher/                          Shared switcher model/renderer and WordPress integrations
 src/Settings/                          Versioned plugin settings, copy and sync catalog, and safe transfer
@@ -95,7 +95,8 @@ src/Sync/                              Two-phase translation copy and permission
 src/Media/                             Shared-file media translation and attachment resolution
 src/Rest/                              Language-scoped REST collections for the block editor
 src/StringTranslation/                 Registered-string validation, retrieval, lifecycle handling, and the option value translator with its core catalog
-src/Integrations/Elementor/            Optional Elementor document copy compatibility
+src/Integrations/Elementor/            Optional Elementor document copy, Theme Builder and popup language resolution, and the panel widget
+src/Integrations/Seo/                   Yoast SEO, Rank Math, and SEOPress field locations, and the module that carries them into a translation
 src/Integrations/Wpml/                 wpml-config.xml discovery, parsing, and option string translation
 src/Admin/                              Language screens, translation dashboard, editor UI, admin language filter, actions, and list columns
 src/Lifecycle/                          Installation, upgrades, activation, and deactivation
@@ -122,7 +123,7 @@ Supported posts and terms without a stored assignment use the configured default
 
 Post types and taxonomies become translatable by selection, not by discovery. Settings > Content offers every post type and taxonomy registered with `public => true` and an administrative UI, and a new site starts with `post`, `page`, `category`, and `post_tag` selected so the plugin is usable immediately. Everything else — including a plugin's or theme's own custom post types — stays untouched until a site owner chooses it, so registering a post type never silently adds a language control to it. An unreadable submitted policy falls back to the narrower one, so a malformed request cannot widen what is translatable.
 
-Attachments are never listed there; media has its own switch, described under Media translation. Non-public editorial post types are not listed either, `wp_block` included: a site that wants each language to own its synced patterns adds that post type through `localepress_supported_post_types`, which is also the extension point for any other post type outside the public set. A detected WooCommerce `product` post type uses this generic core-field workflow only once selected. LocalePress Free does not copy product metadata, variations, stock, prices, or SEO metadata. Elementor metadata receives only the basic allowlisted behavior documented below.
+Attachments are never listed there; media has its own switch, described under Media translation. Non-public editorial post types are not listed either, `wp_block` included: a site that wants each language to own its synced patterns adds that post type through `localepress_supported_post_types`, which is also the extension point for any other post type outside the public set. A detected WooCommerce `product` post type uses this generic core-field workflow only once selected. LocalePress Free does not copy product metadata, variations, stock, prices, or SEO metadata. Elementor metadata receives only the allowlisted behavior documented below.
 
 Existing sites keep the policy they already stored. Upgrading does not narrow a site that was configured to translate every type, because that would orphan translations already created; switch the policy on the Content tab to adopt the selective default.
 
@@ -414,11 +415,27 @@ Media is translated on demand rather than duplicated into every language at uplo
 
 `ElementorModule` listens only to LocalePress's translated-draft event. `ElementorCompatibility` first requires Elementor's official `elementor/loaded` lifecycle, version constant, and loaded core class; when Elementor is inactive, the module performs no metadata reads or writes and does not autoload Elementor classes.
 
-For an Elementor source document, LocalePress copies `_elementor_data`, `_elementor_edit_mode`, `_elementor_template_type`, `_elementor_page_settings`, `_elementor_version`, and `_wp_page_template` into independent target post-meta rows. This preserves container, legacy section/column, Heading, Text Editor, Image, Button, Icon, and other opaque free-widget structures without translating widget text. When the `copy_content` override is disabled, the target receives an empty `[]` Elementor element collection while retaining its editable document mode, type, page settings, and WordPress page template.
+For an Elementor source document, LocalePress copies `_elementor_data`, `_elementor_edit_mode`, `_elementor_template_type`, `_elementor_page_settings`, `_elementor_version`, `_wp_page_template`, `_elementor_conditions`, `_elementor_popup_display_settings`, and `_elementor_location` into independent target post-meta rows. This preserves container, legacy section/column, Heading, Text Editor, Image, Button, Icon, and other opaque free-widget structures without translating widget text. When the `copy_content` override is disabled, the target receives an empty `[]` Elementor element collection while retaining its editable document mode, type, page settings, and WordPress page template.
 
 Element IDs inside `_elementor_data` are document-local and remain unchanged so nested elements, controls, CSS selectors, and internal widget references stay coherent. Elementor's generated state is not copied: post CSS, page assets, controls usage, element render cache, screenshots, inline SVG cache, markdown cache, and interaction cache are cleared on the target. Elementor then rebuilds post-scoped data for the translated post ID on editor save or frontend render. Existing target Elementor data is never overwritten, copied JSON must decode to an array, and failed partial writes restore the target's prior metadata.
 
-The integration does not interpret or translate widget settings. Elementor Pro dynamic tags, Theme Builder conditions, forms, custom CSS behavior, and advanced template relationships are outside this Free integration. Their opaque data may remain inside a copied basic document, but LocalePress does not synchronize, translate, or provide dedicated behavior for it.
+The integration does not interpret or translate widget settings. Elementor Pro dynamic tags, forms, custom CSS behavior, and advanced template relationships are outside this Free integration. Their opaque data may remain inside a copied basic document, but LocalePress does not synchronize, translate, or provide dedicated behavior for it.
+
+### Theme Builder templates and popups
+
+A Theme Builder template is not chosen by a URL. It is chosen by its display conditions, and a condition is a path: `include/singular/page/42`. Two parts of that path belong to one language. The template the rule was saved on is written in a language, and `42` names a post or a term that has a translation of its own. `ElementorThemeBuilderModule` answers both, and only together: copying the rules without resolving them is worse than copying nothing, because a header location renders exactly one document, so an English and a Bengali header both claiming the whole site would leave Elementor rendering whichever sorted first for every reader.
+
+Conditions copied onto a translation are rewritten for its language, so a rule limited to the English *About* page becomes the same rule limited to that page's translation. An identifier naming a user is left alone — `by_author` and `author` have no translation to follow — as is one naming content that is untranslated or of a post type the site does not translate. `localepress_elementor_translate_conditions` returns false to copy the rules verbatim instead.
+
+At render time the template a location matched is resolved to the translation written in the language being read, through Elementor's own `elementor/theme/get_location_templates/template_id` filter. Only a *published* translation is offered: Elementor drops an unpublished template rather than falling back, so answering with the translated draft LocalePress creates would empty the location, and a site would lose its header the moment someone started translating it. An untranslated template keeps serving every language, which is what makes one header the fallback for a language that has none of its own.
+
+Condition identifiers are resolved the same way while rendering, through `elementor/theme/get_location_templates/condition_sub_id`. That is what lets one set of rules serve every language: a site can leave the conditions on the source template alone, translate the template, and have the translation render wherever the original applied. Sites that prefer rules matching only the exact object they name return false from `localepress_elementor_translate_condition_sub_id`.
+
+Both resolutions run only for a reader. The administration resolves locations to describe them — the Theme Builder listing, the conditions conflict check — and an editor asking which template holds a rule has to be answered with the template that actually holds it.
+
+Popups travel the same way. `_elementor_popup_display_settings` carries the triggers and timing that decide when a popup opens, and a translated popup without it can never be shown. The popup location renders every matching document rather than one, and because matched templates are keyed by identifier, a source popup and its translation resolve to the same entry rather than opening twice.
+
+Elementor answers a location from an option it regenerates when conditions are saved through its own editor. A translation created outside the editor never triggers that, so LocalePress rebuilds the index after copying a document that carries conditions. Nothing here reaches into Elementor Pro's classes to do it: the cache is reached through Elementor's own module registry, and a site without Elementor Pro simply has no Theme Builder to ask.
 
 ## Configuration files (wpml-config.xml)
 
@@ -584,6 +601,24 @@ When another SEO plugin owns canonical output, LocalePress stops emitting its ow
 
 Detection reads loaded constants only, and the canonical hooks are registered unconditionally, because adding a filter for a hook that never fires costs nothing while missing one would leave an unprefixed canonical. No third-party class is loaded or called. `localepress_canonical_provider_constants` and `localepress_provider_canonical_filters` extend either list for a plugin not covered here, and `localepress_has_canonical_provider` overrides the decision outright.
 
+#### SEO fields in a translation
+
+The copy engine carries public custom fields and leaves protected ones with the post that owns them. That is the right default — a protected key usually holds something about that one post — and an SEO title is the exception to it. It is written for a reader, it differs in every language, and every SEO plugin stores it under a key the engine will not touch, so a translator opening a new translation finds the SEO panel blank with nothing to translate from.
+
+`SeoMetaModule` names those fields rather than loosening the rule. It writes through `localepress_copy_post_meta_keys` and `localepress_translate_post_meta_value`, the two filters the engine already offers, so the engine keeps deciding what happens and the protected-key default is unchanged for every key no provider claims. A provider is a list of field names implementing `SeoProviderInterface` — it reads nothing, writes nothing, and loads none of the plugin it describes, which is detected by constant like the canonical integration above. Yoast SEO, Rank Math, and SEOPress ship with lists; `localepress_seo_providers` adds one for a plugin that does not.
+
+Three things follow from these fields being text rather than settings:
+
+- They are copied when the translation is created, so nobody starts from an empty panel.
+- They are then left alone. Once a Bengali description exists, editing the English post must not overwrite it, so the synchronization phase actively **removes** them. This is what protects Rank Math in particular, whose fields are stored under unprefixed keys: without it, the generic custom-field synchronization would reach a translated title and overwrite it on the next save of the source.
+- A field naming a term is resolved to that term's translation. A primary category copied by identifier would label a Bengali post with an English category, so it follows the taxonomy setting a site uses to keep terms aligned, and an untranslated term keeps the identifier it had rather than being emptied.
+
+No provider carries a canonical. A canonical names one address and a translation has its own, so copying one would point every language at the source and remove them all from the index. Analysis scores and reading times are absent for a related reason: they describe text that is about to be rewritten.
+
+Each active plugin's own options are registered as translatable strings through the same option translator the core catalog uses, which is what reaches a title template — the pattern a post falls back to when it carries no title of its own. `localepress_seo_option_strings` returns an empty array to leave a plugin's settings alone and translate only the per-post fields.
+
+All in One SEO is not covered here. Version 4 keeps its per-post data in a table of its own rather than in post meta, so it needs an integration that writes through that plugin's model rather than a list of field names; the canonical integration above still applies to it.
+
 ### Sitemaps
 
 The core sitemap at `wp-sitemap.xml` is a reserved route: it is never prefixed, and every LocalePress redirect stands down for it, along with `robots.txt` and the favicon.
@@ -592,7 +627,17 @@ Its entries are already language-correct without further work. Permalink filters
 
 `SitemapModule` closes the one case that arrangement cannot handle. Content assigned to a language that is no longer enabled has no route of its own, so its permalink falls back to the unprefixed URL, which belongs to the default language. Listing it would submit one address twice under two different pieces of content. Both providers are therefore constrained at query level — the only point at which core allows an entry to be dropped, since `wp_sitemaps_posts_entry` cannot remove one. Content with no assignment at all is kept, which matches how the rest of the engine treats pre-LocalePress content. `localepress_sitemap_language_ids` adjusts the permitted set.
 
-Core sitemaps accept only `loc`, `lastmod`, `changefreq`, and `priority`, and their `<urlset>` declares no XHTML namespace, so `xhtml:link` hreflang annotations cannot be added without replacing the renderer. That replacement, along with per-language sitemap indexes, translated schema, SEO-field copying, and translated slugs, is outside Free v1.
+#### One sitemap per language
+
+The index at `wp-sitemap.xml` stays single and unprefixed — it is the one address a site owner submits — but what it lists is divided: each translated post type and taxonomy gets a sitemap per language, at that language's own address. `/wp-sitemap-posts-post-1.xml` holds the default language and `/bn/wp-sitemap-posts-post-1.xml` holds Bengali, each listing only what belongs to it.
+
+WordPress asks a provider two questions to build the index — which sitemaps exist, and what address each one has — and answers everything else from a query. `SitemapLanguageProvider` wraps a core provider and answers the first two per language; the counts and listings behind them come from the same core code, scoped by the same clause filters above. Nothing in core's listing path learns that languages exist.
+
+Only the post and taxonomy providers are wrapped, because they are the two whose queries this module can scope. Wrapping the users provider, or a third party's, would advertise several sitemaps that all answer with the same URLs. A post type or taxonomy the site does not translate stays whole for the same reason, and a language with nothing of a given kind is not listed at all rather than given an empty file to crawl.
+
+Two addresses per sitemap page is the only rewrite change: the rules naming their sitemap through a match gain a language capture, while the index and the stylesheets keep the single address they had. Languages on separate hosts are already divided — each host serves one language and lists only its own content, which is the form each property is submitted in — so nothing is divided twice. A site with one language has nothing to divide either. **Settings > SEO** turns the division off, and `localepress_split_sitemaps_by_language` decides it in code; either way the rewrite rules follow on the next request, because the setting is part of the signature that triggers a flush.
+
+Core sitemaps accept only `loc`, `lastmod`, `changefreq`, and `priority`, and their `<urlset>` declares no XHTML namespace, so `xhtml:link` hreflang annotations cannot be added without replacing the renderer. That replacement, along with translated schema, SEO-field copying, and translated slugs, is outside Free v1.
 
 ## Template API
 
@@ -965,6 +1010,10 @@ The same flags appear in the admin: the Language and Translations columns on pos
 | `localepress_canonical_provider_constants` | Filter | Extend the constants that indicate an SEO plugin owns canonicals. |
 | `localepress_provider_canonical_filters` | Filter | Extend the SEO provider canonical hooks made language-aware. |
 | `localepress_sitemap_language_ids` | Filter | Adjust the languages whose content may appear in the core sitemap. |
+| `localepress_split_sitemaps_by_language` | Filter | Decide whether the sitemap index lists one sitemap per language. |
+| `localepress_seo_providers` | Filter | Register an SEO plugin field list so its per-post fields travel with a translation. |
+| `localepress_seo_meta_keys` | Filter | Adjust the SEO plugin meta keys carried into, or withheld from, a translation. |
+| `localepress_seo_option_strings` | Filter | Adjust the SEO plugin options registered as translatable strings. |
 | `localepress_seo_is_indexable_request` | Filter | Control LocalePress canonical and hreflang eligibility. |
 | `localepress_switcher_default_args` | Filter | Change shared switcher defaults before instance arguments are merged. |
 | `localepress_switcher_args` | Filter | Adjust merged switcher arguments before normalization. |
@@ -998,6 +1047,9 @@ The same flags appear in the admin: the Language and Translations columns on pos
 | `localepress_elementor_generated_meta_keys` | Filter | Extend generated Elementor metadata invalidated on the target. |
 | `localepress_elementor_document_copied` | Action | React after independent Elementor document metadata is copied. |
 | `localepress_elementor_document_copy_failed` | Action | Observe a rejected or failed Elementor document copy. |
+| `localepress_elementor_translate_conditions` | Filter | Copy Theme Builder display conditions verbatim instead of rewriting them for the target language. |
+| `localepress_elementor_location_template_id` | Filter | Override the Theme Builder template one location renders. |
+| `localepress_elementor_translate_condition_sub_id` | Filter | Stop a condition identifier from following the language being read. |
 | `localepress_post_translation_unlinked` | Action | Clean up after permanent post deletion removes a membership. |
 | `localepress_translation_group_deleted` | Action | React after the final member and its empty group are removed. |
 | `localepress_translation_post_trashed` | Action | Observe trashing while the relationship remains intact. |
@@ -1167,10 +1219,19 @@ phpcs --standard=phpcs.xml.dist
 - With Elementor inactive, create a normal post translation and confirm there are no notices, errors, or Elementor metadata writes.
 - With Elementor active, create a page containing a Container plus Heading, Text Editor, Image, Button, and Icon widgets; translate it and confirm the translated draft opens in the Elementor editor with the same structure.
 - Repeat with a legacy Section and Columns page where supported by the installed Elementor version.
-- Open `wp-sitemap.xml` and confirm it is served unprefixed, then open a post sitemap and confirm each translation appears once under its own language prefix beside its source.
+- Open `wp-sitemap.xml` and confirm it is served unprefixed, and that it lists one post and one taxonomy sitemap per language, each at that language's own address.
+- Open a non-default language's sitemap and confirm it holds only that language's URLs, and that the default language's sitemap holds the default language plus content that has no assignment.
+- Confirm a post type the site does not translate appears once rather than once per language, and that a language with no content of a kind is not listed for it.
+- Turn the split off in Settings > SEO, reload the index, and confirm one sitemap per type returns holding every language, and that a language-prefixed sitemap address no longer resolves.
 - Disable a language that has published content, reload the post and taxonomy sitemaps, and confirm that content is gone and no unprefixed duplicate of a default-language URL remains.
 - Confirm content with no language assignment is still listed.
 - Activate each supported SEO plugin in turn and confirm the page carries exactly one canonical, prefixed with the current language.
+- With Yoast SEO, Rank Math, or SEOPress active, fill in the SEO title, meta description, social title and image, and a primary category on a source post, translate it, and confirm the translation opens with all of them filled in and the primary category pointing at that category's own translation.
+- Translate the SEO title and description on the translation, then edit and save the source post; confirm the translated values are unchanged, with custom-field synchronization both on and off.
+- Confirm the translation carries no canonical of its own from the SEO plugin's field, and that its canonical is its own prefixed URL.
+- Confirm a primary term whose taxonomy has no translation keeps the term it named rather than being cleared.
+- Open String Translation and confirm the SEO plugin's title and description templates are listed, and that the front end renders the translated template in each language.
+- Deactivate every SEO plugin, create a translation, and confirm no SEO metadata is written and no strings are registered.
 - Open a prefixed URL in a language whose WordPress translation files are installed and confirm theme strings, date formatting, and `<html lang>` all follow that language while wp-admin stays in the site language.
 - Confirm a theme that prints `get_bloginfo( 'language' )` itself outputs the request language.
 - Confirm REST, admin-ajax, cron, and WP-CLI requests keep the site locale.
@@ -1185,6 +1246,12 @@ phpcs --standard=phpcs.xml.dist
 - Confirm the translated page retains Elementor Canvas/Full Width and page-level style settings while generating CSS for the translated post ID.
 - Create a translation through `create_translation()` with `copy_content` disabled and confirm Elementor opens with an empty canvas but retains its page settings and template.
 - Add stale generated metadata to a disposable target in a development environment and confirm CSS, page assets, usage, and element caches are absent after the copy and rebuilt on render.
+- Add `elementor_library` to the translated post types, build a header with Elementor Pro set to display on the entire site, translate it, and confirm the source header still renders in every language while the translation stays a draft.
+- Publish that translated header and confirm each language now renders its own, with no duplicate header and no change to the other language.
+- Give a header a condition limited to one page, translate both the page and the header, and confirm the translated header renders on the translated page and nowhere else.
+- Leave the conditions on the source header only, translate and publish it, and confirm the translation still renders wherever the original applied.
+- Translate a popup and confirm the translation opens on its own trigger and timing, once per matching page rather than alongside the source popup.
+- Delete a translated template's language assignment and confirm the location falls back to the source template rather than rendering nothing.
 - Open Categories, Tags, and a public custom taxonomy; confirm Language and Translations columns appear.
 - Confirm older unassigned terms display the effective default, new terms persist it automatically, and plus icons create translations without a separate assignment step.
 - Add and edit terms with each enabled language, then confirm invalid or missing LocalePress nonces leave assignments unchanged.

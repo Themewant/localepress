@@ -397,6 +397,51 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	/**
 	 * {@inheritdoc}
 	 *
+	 * @param int    $term_taxonomy_id Term-taxonomy identifier.
+	 * @param string $group_id         Target translation group identifier.
+	 */
+	public function update_assignment_group( $term_taxonomy_id, $group_id ) {
+		global $wpdb;
+
+		$assignment = $this->find_by_term_taxonomy( $term_taxonomy_id );
+
+		if ( null === $assignment ) {
+			return false;
+		}
+
+		if ( $group_id === $assignment['group_id'] ) {
+			return true;
+		}
+
+		// The group and language pair is unique in storage, so a move onto a
+		// language the target group already holds is refused here rather than
+		// producing a group that answers twice for one language.
+		$updated = $wpdb->update(
+			self::assignments_table(),
+			array(
+				'group_id'   => $group_id,
+				'updated_at' => current_time( 'mysql', true ),
+			),
+			array( 'term_taxonomy_id' => absint( $term_taxonomy_id ) ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+
+		if ( false === $updated ) {
+			return false;
+		}
+
+		$previous_group_id      = $assignment['group_id'];
+		$assignment['group_id'] = (string) $group_id;
+		$this->cache_assignment( $assignment );
+		unset( $this->members[ $previous_group_id ], $this->members[ $group_id ] );
+
+		return true;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
 	 * @param int $term_taxonomy_id Term-taxonomy identifier.
 	 */
 	public function remove_assignment( $term_taxonomy_id ) {

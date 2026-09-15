@@ -455,6 +455,220 @@ final class TermTranslationManager {
 	}
 
 	/**
+	 * Joins terms that already carry translation groups of their own.
+	 *
+	 * link_translations() refuses this on purpose: two terms that each hold a
+	 * group are two translation sets, and a save must never decide on its own
+	 * that they are one. An import is where that decision is made, and where it
+	 * is the whole point — content arrives already translated, every term
+	 * already carrying a language, and nothing in the site yet says which term
+	 * is which term's counterpart. This is the explicit form of that decision.
+	 *
+	 * Every group named here is merged whole, including members nobody named: a
+	 * group is one translation set, and half of a set cannot be moved out of it
+	 * without leaving two groups that each claim the same content. A merge in
+	 * which two sides hold the same language is refused rather than resolved,
+	 * because only the caller knows which of the two terms was meant.
+	 *
+	 * @param array<string, int> $translations   Term IDs keyed by language ID.
+	 * @param string             $taxonomy       Taxonomy name.
+	 * @param int                $source_term_id Term whose group and source survive.
+	 * @return array<string, mixed>|WP_Error
+	 */
+	public function merge_translations( array $translations, $taxonomy, $source_term_id = 0 ) {
+		$taxonomy       = sanitize_key( $taxonomy );
+		$translations   = $this->normalize_translation_map( $translations );
+		$source_term_id = absint( $source_term_id );
+
+		if ( empty( $translations ) ) {
+			return new WP_Error( 'empty_term_translation_group', __( 'Provide at least one term to link.', 'localepress' ) );
+		}
+
+		if ( count( $translations ) !== count( array_unique( array_values( $translations ) ) ) ) {
+			return new WP_Error(
+				'conflicting_term_languages',
+				__( 'A term cannot represent more than one language in a translation group.', 'localepress' )
+			);
+		}
+
+		$terms       = array();
+		$assignments = array();
+		$group_ids   = array();
+
+		foreach ( $translations as $language_id => $term_id ) {
+			$term = $this->validate_term( $term_id, $taxonomy );
+
+			if ( is_wp_error( $term ) ) {
+				return $term;
+			}
+
+			$terms[ $term_id ]       = $term;
+			$assignment              = $this->repository->find_by_term_taxonomy( $term->term_taxonomy_id );
+			$assignments[ $term_id ] = $assignment;
+
+			if ( null === $assignment ) {
+				$language = $this->validate_language( $language_id );
+
+				if ( is_wp_error( $language ) ) {
+					return $language;
+				}
+
+				continue;
+			}
+
+			if ( $language_id !== $assignment['language_id'] ) {
+				return new WP_Error(
+					'conflicting_term_language',
+					__( 'A term is already assigned to a different language.', 'localepress' )
+				);
+			}
+
+			$group_ids[] = $assignment['group_id'];
+		}
+
+		$group_ids = array_values( array_unique( $group_ids ) );
+
+		// Nothing to merge: no term named here has been grouped yet, which is
+		// exactly what link_translations() is for.
+		if ( empty( $group_ids ) ) {
+			return $this->link_translations( $translations, $taxonomy, $source_term_id );
+		}
+
+		// The group the caller's source term is in survives, so a caller that
+		// names one decides which set the others join rather than being handed
+		// whichever group happened to be read first.
+		$keeper_group_id = isset( $assignments[ $source_term_id ] ) && null !== $assignments[ $source_term_id ]
+			? $assignments[ $source_term_id ]['group_id']
+			: $group_ids[0];
+		$languages       = array();
+		$moves           = array();
+
+		foreach ( $group_ids as $group_id ) {
+			$group = $this->repository->find_group( $group_id );
+
+			if ( null === $group || $taxonomy !== $group['taxonomy'] ) {
+				return $this->storage_error();
+			}
+
+			foreach ( $this->repository->get_group_members( $group_id ) as $member ) {
+				if ( isset( $languages[ $member['language_id'] ] ) ) {
+					return new WP_Error(
+						'duplicate_term_translation_language',
+						__( 'This translation group already contains a term for that language.', 'localepress' )
+					);
+				}
+
+				$languages[ $member['language_id'] ] = $member['term_taxonomy_id'];
+
+				if ( $group_id !== $keeper_group_id ) {
+					$moves[ $member['term_taxonomy_id'] ] = $group_id;
+				}
+			}
+		}
+
+		$additions = array();
+
+		foreach ( $translations as $language_id => $term_id ) {
+			if ( null !== $assignments[ $term_id ] ) {
+				continue;
+			}
+
+			if ( isset( $languages[ $language_id ] ) ) {
+				return new WP_Error(
+					'duplicate_term_translation_language',
+					__( 'This translation group already contains a term for that language.', 'localepress' )
+				);
+			}
+
+			$languages[ $language_id ] = $terms[ $term_id ]->term_taxonomy_id;
+			$additions[ $term_id ]     = $language_id;
+		}
+
+		$moved = array();
+		$added = array();
+
+		foreach ( $moves as $term_taxonomy_id => $previous_group_id ) {
+			if ( ! $this->repository->update_assignment_group( $term_taxonomy_id, $keeper_group_id ) ) {
+				$this->rollback_merge( $moved, $added );
+
+				return $this->storage_error();
+			}
+
+			$moved[ $term_taxonomy_id ] = $previous_group_id;
+		}
+
+		foreach ( $additions as $term_id => $language_id ) {
+			$term = $terms[ $term_id ];
+
+			if (
+				! $this->repository->add_assignment(
+					$term->term_taxonomy_id,
+					$term->term_id,
+					$taxonomy,
+					$keeper_group_id,
+					$language_id
+				)
+			) {
+				$this->rollback_merge( $moved, $added );
+
+				return $this->storage_error();
+			}
+
+			$added[] = $term->term_taxonomy_id;
+		}
+
+		foreach ( $group_ids as $group_id ) {
+			if ( $group_id === $keeper_group_id || ! empty( $this->repository->get_group_members( $group_id ) ) ) {
+				continue;
+			}
+
+			$this->repository->delete_group( $group_id );
+
+			/** This action is documented in src/Taxonomy/class-termtranslationmanager.php */
+			do_action( 'localepress_term_translation_group_deleted', $group_id, $taxonomy );
+		}
+
+		$source       = isset( $terms[ $source_term_id ] ) ? $terms[ $source_term_id ] : null;
+		$keeper_group = $this->repository->find_group( $keeper_group_id );
+
+		if (
+			$source instanceof WP_Term
+			&& null !== $keeper_group
+			&& $source->term_taxonomy_id !== $keeper_group['source_term_taxonomy_id']
+		) {
+			$this->repository->update_group_source( $keeper_group_id, $source->term_taxonomy_id );
+		}
+
+		$anchor_term_id = (int) reset( $translations );
+		$result         = array(
+			'group_id'       => $keeper_group_id,
+			'source_term_id' => $this->get_source_term_id( $anchor_term_id, $taxonomy ),
+			'taxonomy'       => $taxonomy,
+			'translations'   => $this->get_stored_translations( $anchor_term_id, $taxonomy ),
+		);
+
+		// Called twice with the same set, the second call has nothing to say.
+		if ( empty( $moved ) && empty( $added ) ) {
+			return $result;
+		}
+
+		$this->synchronize_hierarchy( $anchor_term_id, $taxonomy );
+		$result['translations'] = $this->get_stored_translations( $anchor_term_id, $taxonomy );
+
+		/** This action is documented in src/Taxonomy/class-termtranslationmanager.php */
+		do_action(
+			'localepress_term_translations_linked',
+			$keeper_group_id,
+			$result['translations'],
+			$result['source_term_id'],
+			$taxonomy
+		);
+
+		return $result;
+	}
+
+
+	/**
 	 * Creates and links a translated term copy.
 	 *
 	 * Only core name, slug, description, and translated parent fields are copied.
@@ -512,6 +726,10 @@ final class TermTranslationManager {
 		 *
 		 * Arbitrary term metadata is intentionally outside the core engine.
 		 *
+		 * A translated branch mirrors the source branch, so a filtered parent
+		 * stands only while the source parent has no counterpart in this
+		 * language. Once it has one, hierarchy synchronization owns the parent.
+		 *
 		 * @param array<string, mixed> $term_data New term fields.
 		 * @param WP_Term              $source   Source term.
 		 * @param array<string, mixed> $language Target language record.
@@ -535,7 +753,8 @@ final class TermTranslationManager {
 				? sanitize_title( (string) $term_data['slug'] )
 				: '',
 			'parent'      => is_taxonomy_hierarchical( $source->taxonomy )
-			? $this->get_translated_parent_id( $source, $language_id )
+				&& isset( $term_data['parent'] ) && is_scalar( $term_data['parent'] )
+				? absint( $term_data['parent'] )
 				: 0,
 		);
 		$this->creating_translation = true;
@@ -889,9 +1108,21 @@ final class TermTranslationManager {
 				continue;
 			}
 
-			$parent_id = $term->term_taxonomy_id === $source->term_taxonomy_id
-				? $source->parent
-				: $this->get_translated_parent_id( $source, $member['language_id'] );
+			if ( $term->term_taxonomy_id === $source->term_taxonomy_id ) {
+				$parent_id = $source->parent;
+			} else {
+				$parent_id = $this->get_translated_parent_id( $source, $member['language_id'] );
+
+				/*
+				 * The source sits under a parent this language holds no copy of, so
+				 * there is no counterpart to mirror. Moving the term to the root
+				 * would discard the parent chosen here, which is the only hierarchy
+				 * this language has; that choice stands until a counterpart exists.
+				 */
+				if ( 0 === $parent_id && 0 < $source->parent ) {
+					continue;
+				}
+			}
 
 			if ( $term->term_id !== $parent_id && $term->parent !== $parent_id ) {
 				wp_update_term( $term->term_id, $group['taxonomy'], array( 'parent' => $parent_id ) );
@@ -937,6 +1168,24 @@ final class TermTranslationManager {
 			$this->synchronize_group_parent( $group_id );
 		}
 	}
+
+	/**
+	 * Restores group membership after a failed merge.
+	 *
+	 * @param array<int, string> $moved Previous group IDs keyed by term-taxonomy ID.
+	 * @param array<int, int>    $added Term-taxonomy IDs assigned during the merge.
+	 * @return void
+	 */
+	private function rollback_merge( array $moved, array $added ) {
+		foreach ( $added as $term_taxonomy_id ) {
+			$this->repository->remove_assignment( $term_taxonomy_id );
+		}
+
+		foreach ( $moved as $term_taxonomy_id => $previous_group_id ) {
+			$this->repository->update_assignment_group( $term_taxonomy_id, $previous_group_id );
+		}
+	}
+
 
 	/**
 	 * Rolls back assignments added during a failed link operation.

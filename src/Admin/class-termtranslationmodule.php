@@ -79,7 +79,9 @@ final class TermTranslationModule implements ModuleInterface {
 		$this->list_table->register_hooks();
 		add_action( 'admin_init', array( $this, 'register_taxonomy_hooks' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_post_screen_assets' ) );
 		add_action( 'created_term', array( $this, 'save_new_term_language' ), 10, 3 );
+		add_filter( 'localepress_new_term_language_id', array( $this, 'filter_request_term_language' ), 20, 2 );
 		add_action( 'edited_term', array( $this, 'save_edited_term_language' ), 10, 3 );
 		add_action( 'admin_post_localepress_create_term_translation', array( $this, 'create_translation' ) );
 		add_action( 'admin_notices', array( $this, 'render_notice' ) );
@@ -120,6 +122,56 @@ final class TermTranslationModule implements ModuleInterface {
 			array(),
 			Assets::version( 'assets/css/admin.css' )
 		);
+	}
+
+	/**
+	 * Loads the inline term language bridge on classic post screens.
+	 *
+	 * The block editor creates terms over REST, which already carries the
+	 * language, so only the classic meta box needs this.
+	 *
+	 * @return void
+	 */
+	public function enqueue_post_screen_assets() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if (
+			! $screen
+			|| 'post' !== $screen->base
+			|| ! $this->language_manager->has_languages()
+			|| ! $this->has_inline_term_taxonomy( $screen->post_type )
+		) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'localepress-classic-term-language',
+			LOCALEPRESS_URL . 'assets/js/classic-term-language.js',
+			array(),
+			Assets::version( 'assets/js/classic-term-language.js' ),
+			true
+		);
+	}
+
+	/**
+	 * Reports whether a post type offers inline creation of supported terms.
+	 *
+	 * Only a hierarchical taxonomy gets the add form the script writes into;
+	 * a tag box creates its terms with the post itself.
+	 *
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	private function has_inline_term_taxonomy( $post_type ) {
+		$supported = $this->translation_manager->get_supported_taxonomies();
+
+		foreach ( get_object_taxonomies( (string) $post_type ) as $taxonomy ) {
+			if ( in_array( $taxonomy, $supported, true ) && is_taxonomy_hierarchical( $taxonomy ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -256,6 +308,90 @@ final class TermTranslationModule implements ModuleInterface {
 		}
 	}
 
+	/**
+	 * Answers the language a term created by the current request starts in.
+	 *
+	 * Two classic-editor paths create a term while a post is being written, and
+	 * neither of them reaches LocalePress through the taxonomy screen. Inline
+	 * category creation posts to admin-ajax, and the request WordPress builds
+	 * for it carries no post identifier at all. Tags typed into the tag box are
+	 * created by wp_insert_post() while it stores the submitted taxonomies,
+	 * before the post's own language has been saved.
+	 *
+	 * Both requests still carry the language the editor chose, so that is what
+	 * is read here: the term belongs to the post being written, not to the site
+	 * default. Each source is accepted only behind the nonce that already
+	 * guards it, and the value is a request for a language rather than a grant,
+	 * because TermTranslationManager validates it before anything is stored.
+	 *
+	 * @param string $language_id Resolved language identifier.
+	 * @param string $taxonomy    Taxonomy name.
+	 * @return string
+	 */
+	public function filter_request_term_language( $language_id, $taxonomy = '' ) {
+		$requested = $this->inline_term_language( sanitize_key( $taxonomy ) );
+
+		if ( '' === $requested ) {
+			$requested = $this->saving_post_language();
+		}
+
+		return '' === $requested ? $language_id : $requested;
+	}
+
+	/**
+	 * Returns the language submitted with an inline add-term request.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return string
+	 */
+	private function inline_term_language( $taxonomy ) {
+		if ( '' === $taxonomy ) {
+			return '';
+		}
+
+		// WordPress guards its own inline add-term request with this nonce, and
+		// verifying it is what makes the submitted value readable here.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified below.
+		$nonce_key = '_ajax_nonce-add-' . $taxonomy;
+		$nonce     = isset( $_POST[ $nonce_key ] ) && is_scalar( $_POST[ $nonce_key ] )
+			? sanitize_text_field( wp_unslash( $_POST[ $nonce_key ] ) )
+			: '';
+
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'add-' . $taxonomy ) ) {
+			return '';
+		}
+
+		return isset( $_POST['localepress_term_language_id'] ) && is_scalar( $_POST['localepress_term_language_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['localepress_term_language_id'] ) )
+			: '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Returns the language submitted by the post currently being saved.
+	 *
+	 * @return string
+	 */
+	private function saving_post_language() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified below.
+		$post_id = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
+		$nonce   = isset( $_POST['localepress_language_nonce'] ) && is_scalar( $_POST['localepress_language_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['localepress_language_nonce'] ) )
+			: '';
+
+		if (
+			1 > $post_id
+			|| '' === $nonce
+			|| ! wp_verify_nonce( $nonce, 'localepress_save_post_language_' . $post_id )
+		) {
+			return '';
+		}
+
+		return isset( $_POST['localepress_language_id'] ) && is_scalar( $_POST['localepress_language_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['localepress_language_id'] ) )
+			: '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
 	/**
 	 * Saves a sanitized submitted language through the domain service.
 	 *

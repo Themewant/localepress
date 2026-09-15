@@ -85,8 +85,26 @@ final class SwitcherModule implements ModuleInterface {
 	public function register() {
 		add_shortcode( 'localepress_switcher', array( $this, 'render_shortcode' ) );
 		add_action( 'init', array( $this, 'register_assets_and_block' ) );
+		add_action( 'widgets_init', array( $this, 'register_classic_widget' ) );
 		$this->navigation_menu->register();
 		$this->floating_switcher->register();
+	}
+
+	/**
+	 * Registers the classic widget.
+	 *
+	 * The instance is registered rather than the class name so the widget is
+	 * handed the same switcher service every other placement uses; constructing
+	 * it from a name would leave it building its own.
+	 *
+	 * @return void
+	 */
+	public function register_classic_widget() {
+		if ( ! function_exists( 'register_widget' ) ) {
+			return;
+		}
+
+		register_widget( new LanguageSwitcherWidget( $this->switcher ) );
 	}
 
 	/**

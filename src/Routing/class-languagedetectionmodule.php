@@ -8,6 +8,7 @@
 namespace LocalePress\Routing;
 
 use LocalePress\Contracts\ModuleInterface;
+use LocalePress\Integrations\Cache\CacheCompatibility;
 use LocalePress\Language\BrowserLanguageDetector;
 use LocalePress\Language\LanguageManager;
 use LocalePress\Settings\PluginSettings;
@@ -199,7 +200,9 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
-		$this->store_language_cookie( $language );
+		// A redirect is never the response a page cache stores, so this is the
+		// one write that stays in PHP on a cached site.
+		$this->store_language_cookie( $language, true );
 		$this->vary_response();
 
 		/**
@@ -217,16 +220,22 @@ final class LanguageDetectionModule implements ModuleInterface {
 	/**
 	 * Remembers the language of an explicit language request.
 	 *
-	 * Only prefixed frontend requests are recorded, so the cookie always
-	 * reflects a language the visitor actually navigated to.
+	 * Only frontend requests that resolve to one language are recorded, so the
+	 * cookie always reflects a language the visitor actually navigated to. A
+	 * prefix is the usual proof of that, and where the default language carries
+	 * none it is every unprefixed page: skipping those would leave the cookie
+	 * naming a language the visitor has already navigated away from.
 	 *
 	 * @return void
 	 */
 	public function remember_current_language() {
+		if ( ! $this->is_detection_enabled() || ! $this->is_public_frontend_request() ) {
+			return;
+		}
+
 		if (
-			! $this->is_detection_enabled()
-			|| ! $this->is_public_frontend_request()
-			|| ! $this->url_manager->request_has_language_prefix()
+			! $this->url_manager->request_has_language_prefix()
+			&& ! $this->serves_unprefixed_default_language()
 		) {
 			return;
 		}
@@ -236,6 +245,40 @@ final class LanguageDetectionModule implements ModuleInterface {
 		if ( is_array( $language ) ) {
 			$this->store_language_cookie( $language );
 		}
+	}
+
+	/**
+	 * Reports whether this root request is a deliberate default-language visit.
+	 *
+	 * Only meaningful while the default language is unprefixed, which is what
+	 * makes the site root an address the visitor can choose rather than merely
+	 * arrive at. wp_get_referer() answers false for an off-site referrer and
+	 * for the request's own URL, so only same-site navigation counts.
+	 *
+	 * @return bool
+	 */
+	private function request_chose_unprefixed_default_language() {
+		return ! $this->url_manager->should_prefix_default_language()
+			&& '' !== (string) wp_get_referer();
+	}
+
+	/**
+	 * Reports whether this request is the default language without a prefix.
+	 *
+	 * @return bool
+	 */
+	private function serves_unprefixed_default_language() {
+		if ( $this->url_manager->should_prefix_default_language() ) {
+			return false;
+		}
+
+		$current = $this->url_manager->get_current_language();
+		$default = $this->url_manager->get_default_language();
+
+		return is_array( $current )
+			&& is_array( $default )
+			&& isset( $current['id'], $default['id'] )
+			&& $current['id'] === $default['id'];
 	}
 
 	/**
@@ -267,6 +310,19 @@ final class LanguageDetectionModule implements ModuleInterface {
 	 * @return array<string, mixed>|null
 	 */
 	private function resolve_preferred_language() {
+		/*
+		 * Where the default language carries no prefix, the site root is both
+		 * the undecided address and that language's own home, and the switcher
+		 * has no other address to offer for it. A visitor who arrives from a
+		 * link on this site has therefore just chosen the default language, and
+		 * answering them from a cookie written on the page they came from would
+		 * send them straight back to it — leaving the default language home
+		 * unreachable from anywhere inside the site.
+		 */
+		if ( $this->request_chose_unprefixed_default_language() ) {
+			return null;
+		}
+
 		$remembered = $this->get_remembered_language();
 
 		if ( null !== $remembered ) {
@@ -320,10 +376,23 @@ final class LanguageDetectionModule implements ModuleInterface {
 	 * Stores the visitor's language for the next visit.
 	 *
 	 * @param array<string, mixed> $language Language record.
+	 * @param bool                 $force    Write even on a page-cached site.
 	 * @return void
 	 */
-	private function store_language_cookie( array $language ) {
+	private function store_language_cookie( array $language, $force = false ) {
 		if ( headers_sent() || ! isset( $language['url_slug'] ) ) {
+			return;
+		}
+
+		/*
+		 * A page cache stores response headers alongside the page it caches, so
+		 * a Set-Cookie written here is replayed to everyone the cached copy is
+		 * later served to: one visitor's language, handed out as everybody's.
+		 * Worse, the visitors who would need it never reach PHP at all. On such
+		 * a site the cookie is written from the browser instead, by
+		 * CacheCompatibilityModule, from these same arguments.
+		 */
+		if ( ! $force && CacheCompatibility::is_active() ) {
 			return;
 		}
 
@@ -337,6 +406,32 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
+		$_COOKIE[ self::COOKIE_NAME ] = $slug;
+
+		setcookie( self::COOKIE_NAME, $slug, $this->get_cookie_arguments( $language ) );
+	}
+
+	/**
+	 * Reports whether the visitor's language is remembered at all.
+	 *
+	 * @return bool
+	 */
+	public function is_language_cookie_enabled() {
+		return $this->is_detection_enabled();
+	}
+
+	/**
+	 * Returns the arguments the visitor's language cookie is written with.
+	 *
+	 * Public because the browser-side writer on a page-cached site has to
+	 * describe the very same cookie. A path or domain the two disagree on does
+	 * not overwrite anything — it writes a second cookie under the same name,
+	 * and which one the site then reads back is up to the browser.
+	 *
+	 * @param array<string, mixed> $language Language record.
+	 * @return array<string, mixed>
+	 */
+	public function get_cookie_arguments( array $language ) {
 		/**
 		 * Filters how long the visitor's language is remembered, in seconds.
 		 *
@@ -346,12 +441,9 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * @param array<string, mixed> $language Language record.
 		 */
 		$lifetime = (int) apply_filters( 'localepress_language_cookie_lifetime', YEAR_IN_SECONDS, $language );
-		$expires  = 0 < $lifetime ? time() + $lifetime : 0;
-
-		$_COOKIE[ self::COOKIE_NAME ] = $slug;
 
 		$arguments = array(
-			'expires'  => $expires,
+			'expires'  => 0 < $lifetime ? time() + $lifetime : 0,
 			'path'     => COOKIEPATH ? COOKIEPATH : '/',
 			'domain'   => $this->get_cookie_domain(),
 			'secure'   => is_ssl(),
@@ -369,7 +461,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 */
 		$filtered = apply_filters( 'localepress_language_cookie_args', $arguments, $language );
 
-		setcookie( self::COOKIE_NAME, $slug, is_array( $filtered ) ? $filtered : $arguments );
+		return is_array( $filtered ) ? $filtered : $arguments;
 	}
 
 	/**

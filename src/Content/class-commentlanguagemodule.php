@@ -156,11 +156,7 @@ final class CommentLanguageModule implements ModuleInterface {
 	private function get_query_language( $query ) {
 		if (
 			! $query instanceof WP_Comment_Query
-			|| is_admin()
-			|| wp_doing_ajax()
-			|| wp_doing_cron()
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( defined( 'WP_CLI' ) && WP_CLI )
+			|| ! $this->url_manager->background()->scopes_rendered_page()
 			|| ! $this->url_manager->is_frontend_routing_enabled()
 		) {
 			return null;

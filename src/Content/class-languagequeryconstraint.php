@@ -45,36 +45,90 @@ final class LanguageQueryConstraint {
 	 * @return array<string, string>
 	 */
 	public function apply_to_posts( array $clauses, $language_id, $default_language_id ) {
-		global $wpdb;
-
 		if ( ! isset( $clauses['join'], $clauses['where'] ) || '' === (string) $language_id ) {
 			return $clauses;
 		}
 
-		$table = DatabaseTranslationRepository::assignments_table();
-		$alias = self::POST_ALIAS;
+		if ( false === strpos( $clauses['join'], self::POST_ALIAS ) ) {
+			$clauses['join'] .= $this->posts_join_clause();
+		}
 
-		if ( false === strpos( $clauses['join'], $alias ) ) {
-			// The table name is generated exclusively by the repository and WordPress prefix.
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON ({$wpdb->posts}.ID = {$alias}.post_id)";
+		$clauses['where'] .= $this->posts_where_clause( $language_id, $default_language_id );
+
+		return $clauses;
+	}
+
+	/**
+	 * Returns the join that carries each post's language assignment.
+	 *
+	 * WordPress answers some pages without WP_Query — the adjacent post links,
+	 * the archive list, the calendar — and each writes its own SQL against the
+	 * posts table. They are handed this fragment rather than a clause array,
+	 * and the one that aliases the posts table says so.
+	 *
+	 * @param string $posts_alias Name the posts table is addressed by, if not its own.
+	 * @return string
+	 */
+	public function posts_join_clause( $posts_alias = '' ) {
+		global $wpdb;
+
+		$table       = DatabaseTranslationRepository::assignments_table();
+		$alias       = self::POST_ALIAS;
+		$posts_alias = is_string( $posts_alias ) && '' !== $posts_alias ? $posts_alias : $wpdb->posts;
+
+		// Every name here is a WordPress or LocalePress identifier; none is input.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return " LEFT JOIN {$table} AS {$alias} ON ({$posts_alias}.ID = {$alias}.post_id)";
+	}
+
+	/**
+	 * Returns the language test as a `WHERE` continuation.
+	 *
+	 * @param string $language_id         Requested language identifier.
+	 * @param string $default_language_id Default language identifier.
+	 * @return string Empty when no language was asked for.
+	 */
+	public function posts_where_clause( $language_id, $default_language_id ) {
+		$condition = $this->posts_language_condition( $language_id, $default_language_id );
+
+		return '' === $condition ? '' : ' AND ' . $condition;
+	}
+
+	/**
+	 * Returns the language test on its own, with nothing joining it to a clause.
+	 *
+	 * A query that already has a `WHERE` of its own and a trailing `GROUP BY`,
+	 * `ORDER BY`, or `LIMIT` cannot have a condition appended to the end of it.
+	 * Such a query is given this to put directly after its own `WHERE`.
+	 *
+	 * @param string $language_id         Requested language identifier.
+	 * @param string $default_language_id Default language identifier.
+	 * @return string Empty when no language was asked for.
+	 */
+	public function posts_language_condition( $language_id, $default_language_id ) {
+		global $wpdb;
+
+		if ( '' === (string) $language_id ) {
+			return '';
 		}
 
 		if ( (string) $default_language_id === (string) $language_id ) {
+			/*
+			 * Content written before LocalePress carries no assignment at all,
+			 * and the default language is the one it was written in.
+			 */
 			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
-			$clauses['where'] .= $wpdb->prepare(
-				' AND (localepress_route_language.language_id = %s OR localepress_route_language.post_id IS NULL)',
-				$language_id
-			);
-		} else {
-			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
-			$clauses['where'] .= $wpdb->prepare(
-				' AND localepress_route_language.language_id = %s',
+			return $wpdb->prepare(
+				'(localepress_route_language.language_id = %s OR localepress_route_language.post_id IS NULL)',
 				$language_id
 			);
 		}
 
-		return $clauses;
+		// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+		return $wpdb->prepare(
+			'localepress_route_language.language_id = %s',
+			$language_id
+		);
 	}
 
 	/**

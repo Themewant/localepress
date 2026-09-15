@@ -13,16 +13,18 @@ use LocalePress\Routing\LanguageUrlManager;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Makes WordPress itself run in the language of a prefixed frontend request.
+ * Makes WordPress itself run in the language the request is answering in.
  *
  * Translating content is not enough for a page to read as one language. Theme
  * and plugin strings, date and number formatting, text direction, and the
  * document language WordPress prints all derive from `get_locale()`, so a
- * request under a language prefix has to answer with that language's locale.
+ * request in a language has to answer with that language's locale.
  *
- * The switch is deliberately bound to an explicit language prefix in the
- * request URL. Administration, login, REST, cron, and CLI requests carry no
- * prefix, so they keep the site locale without needing a guard of their own.
+ * The switch is bound to a request that named a language: a frontend URL under
+ * a language prefix, and equally an AJAX or REST call that named one, because a
+ * fragment of a page belongs to the same language as the page it joins.
+ * Administration screens, login, cron, and CLI name none, so they keep the site
+ * locale without needing a guard of their own.
  */
 final class LocaleModule implements ModuleInterface {
 
@@ -39,6 +41,13 @@ final class LocaleModule implements ModuleInterface {
 	 * @var string|null
 	 */
 	private $resolved;
+
+	/**
+	 * Locale this module last handed WordPress, or null before the first call.
+	 *
+	 * @var string|null
+	 */
+	private $applied = null;
 
 	/**
 	 * Language URL API.
@@ -66,6 +75,13 @@ final class LocaleModule implements ModuleInterface {
 		 * early enough for every normal text domain.
 		 */
 		add_filter( 'locale', array( $this, 'filter_locale' ), 20 );
+
+		/*
+		 * A REST call can name its language in a body, which cannot be read
+		 * until the request is dispatched — long after the text domains were
+		 * loaded. When that happens the locale has to be resolved again.
+		 */
+		add_action( 'localepress_request_language_changed', array( $this, 'refresh_locale' ) );
 	}
 
 	/**
@@ -78,6 +94,8 @@ final class LocaleModule implements ModuleInterface {
 		$resolved = $this->resolve_request_locale();
 
 		if ( '' === $resolved ) {
+			$this->applied = is_string( $locale ) ? $locale : '';
+
 			return $locale;
 		}
 
@@ -90,8 +108,49 @@ final class LocaleModule implements ModuleInterface {
 		 * @param string|mixed $locale   Locale WordPress resolved.
 		 */
 		$filtered = apply_filters( 'localepress_request_locale', $resolved, $locale );
+		$applied  = is_string( $filtered ) && '' !== $filtered ? $filtered : $locale;
 
-		return is_string( $filtered ) && '' !== $filtered ? $filtered : $locale;
+		$this->applied = is_string( $applied ) ? $applied : '';
+
+		return $applied;
+	}
+
+	/**
+	 * Resolves the locale again after the request changed language mid-flight.
+	 *
+	 * Answering `get_locale()` differently from here on is not enough on its
+	 * own: the text domains WordPress, the theme, and every plugin loaded are
+	 * already in memory in the locale that was current when they were read.
+	 * Switching is what reloads them, so the strings a REST call returns are
+	 * written in the language it asked for rather than the one the site was
+	 * booted in.
+	 *
+	 * @return void
+	 */
+	public function refresh_locale() {
+		$previous       = $this->applied;
+		$this->resolved = null;
+		$this->applied  = null;
+
+		/*
+		 * Nothing has asked for a locale yet, so nothing has been loaded in the
+		 * wrong one and the next caller resolves this for itself.
+		 */
+		if ( null === $previous || ! did_action( 'init' ) ) {
+			return;
+		}
+
+		$resolved = $this->resolve_request_locale();
+
+		// An empty resolution means the site's own locale applies again, and
+		// get_locale() answers with it now that the cache has been cleared.
+		$target = '' === $resolved ? get_locale() : $resolved;
+
+		if ( ! is_string( $target ) || '' === $target || $target === $previous ) {
+			return;
+		}
+
+		switch_to_locale( $target );
 	}
 
 	/**
@@ -139,10 +198,7 @@ final class LocaleModule implements ModuleInterface {
 	 */
 	private function is_switchable_request() {
 		$allowed = $this->url_manager->supports_language_prefixes()
-			&& ! is_admin()
-			&& ! wp_doing_cron()
-			&& ! ( defined( 'WP_CLI' ) && WP_CLI )
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+			&& $this->url_manager->background()->scopes_request();
 
 		/**
 		 * Filters whether LocalePress may switch the WordPress locale.

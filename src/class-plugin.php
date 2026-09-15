@@ -18,12 +18,14 @@ use LocalePress\Admin\SetupWizardModule;
 use LocalePress\Admin\SettingsModule;
 use LocalePress\Admin\StringTranslationModule;
 use LocalePress\Admin\StringTranslationQuery;
+use LocalePress\Admin\MediaTranslationFields;
 use LocalePress\Admin\TermTranslationModule;
 use LocalePress\Admin\TranslationDashboardModule;
 use LocalePress\Admin\TranslationDashboardQuery;
 use LocalePress\Content\CommentLanguageModule;
 use LocalePress\Content\PostTranslationManager;
 use LocalePress\Content\PostTypeSupport;
+use LocalePress\Content\DirectQueryLanguageModule;
 use LocalePress\Content\QueryIdTranslationModule;
 use LocalePress\Content\TranslationLifecycleModule;
 use LocalePress\Contracts\LanguageRepositoryInterface;
@@ -38,8 +40,15 @@ use LocalePress\Infrastructure\DatabaseTranslationDashboardRepository;
 use LocalePress\Infrastructure\DatabaseTranslationRepository;
 use LocalePress\Infrastructure\OptionsLanguageRepository;
 use LocalePress\Integrations\Elementor\ElementorCompatibility;
+use LocalePress\Integrations\Cache\CacheCompatibilityModule;
 use LocalePress\Integrations\Elementor\ElementorModule;
+use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
+use LocalePress\Integrations\Elementor\ElementorThemeBuilderModule;
 use LocalePress\Integrations\Elementor\ElementorWidgetModule;
+use LocalePress\Integrations\Seo\RankMathProvider;
+use LocalePress\Integrations\Seo\SeoMetaModule;
+use LocalePress\Integrations\Seo\SeoPressProvider;
+use LocalePress\Integrations\Seo\YoastSeoProvider;
 use LocalePress\Integrations\Wpml\WpmlConfigModule;
 use LocalePress\Integrations\Wpml\WpmlConfigReader;
 use LocalePress\Language\BrowserLanguageDetector;
@@ -341,6 +350,15 @@ final class Plugin {
 
 		$option_strings = new OptionStringTranslator( $this->string_manager );
 
+		// Held in a variable because the cache compatibility module writes the
+		// same cookie from the browser, and has to describe it identically.
+		$language_detection = new LanguageDetectionModule(
+			$this->language_url_manager,
+			$this->language_manager,
+			new BrowserLanguageDetector(),
+			$this->plugin_settings
+		);
+
 		$modules = array(
 			// Registered first: the locale filter must exist before WordPress
 			// loads the default text domain right after `plugins_loaded`.
@@ -360,6 +378,20 @@ final class Plugin {
 				$this->language_manager,
 				$this->workflow_settings
 			),
+			// After both string sources, so an option one of them already claimed
+			// keeps the group it was registered under. Its own work is on the
+			// copy filters, which nothing has reached yet.
+			new SeoMetaModule(
+				array(
+					new YoastSeoProvider(),
+					new RankMathProvider(),
+					new SeoPressProvider(),
+				),
+				$this->term_translation_manager,
+				$this->workflow_settings,
+				$option_strings,
+				$this->language_manager
+			),
 			new TranslationLifecycleModule( $this->post_translation_manager ),
 			new TermTranslationLifecycleModule( $this->term_translation_manager ),
 			new DefaultTermModule(
@@ -373,13 +405,16 @@ final class Plugin {
 			new RoutingModule(
 				$this->language_url_manager,
 				$this->post_translation_manager,
-				$this->term_translation_manager
-			),
-			new LanguageDetectionModule(
-				$this->language_url_manager,
-				$this->language_manager,
-				new BrowserLanguageDetector(),
+				$this->term_translation_manager,
 				$this->plugin_settings
+			),
+			$language_detection,
+			// Registered next to detection because it stands in for it wherever a
+			// page cache answers a request before PHP can.
+			new CacheCompatibilityModule(
+				$language_detection,
+				$this->language_url_manager,
+				$this->post_translation_manager
 			),
 			// Host routing serves the document from one host; this keeps every URL
 			// the document loads on that same host.
@@ -392,6 +427,12 @@ final class Plugin {
 				$this->term_translation_manager
 			),
 			new CommentLanguageModule(
+				$this->language_url_manager,
+				$this->post_translation_manager
+			),
+			// The pages WordPress answers with SQL of its own rather than through
+			// WP_Query: the adjacent post links, the archive list, the calendar.
+			new DirectQueryLanguageModule(
 				$this->language_url_manager,
 				$this->post_translation_manager
 			),
@@ -412,11 +453,29 @@ final class Plugin {
 			new RestLanguageModule(
 				$this->post_translation_manager,
 				$this->term_translation_manager,
-				$this->language_manager
+				$this->language_manager,
+				$this->language_url_manager
 			),
 			new SeoModule( $this->seo_metadata ),
-			new SitemapModule( $this->language_url_manager, $this->language_manager ),
+			new SitemapModule(
+				$this->language_url_manager,
+				$this->language_manager,
+				$this->post_translation_manager,
+				$this->term_translation_manager,
+				$this->plugin_settings
+			),
 			new ElementorModule( $this->elementor_compatibility ),
+			// Kept apart from the document copy for the same reason: this one
+			// answers which template a theme location renders, which happens on
+			// every front-end request whether or not anything was ever translated.
+			new ElementorThemeBuilderModule(
+				new ElementorThemeBuilder(
+					$this->post_translation_manager,
+					$this->term_translation_manager
+				),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
 			// Its hooks exist only while Elementor is drawing its panel, so the
 			// module costs a site without Elementor two listeners that never run.
 			new ElementorWidgetModule(),
@@ -425,7 +484,11 @@ final class Plugin {
 				$this->post_translation_manager,
 				$this->workflow_settings
 			),
-			new MediaModule( $this->media_translations, $this->post_translation_manager ),
+			new MediaModule(
+				$this->media_translations,
+				$this->post_translation_manager,
+				$this->current_language_resolver
+			),
 		);
 
 		if ( is_admin() ) {
@@ -497,6 +560,7 @@ final class Plugin {
 			);
 			$modules[] = new ContentTranslationModule( $this->post_translation_manager, $this->language_manager );
 			$modules[] = new TermTranslationModule( $this->term_translation_manager, $this->language_manager );
+			$modules[] = new MediaTranslationFields( $this->post_translation_manager, $this->language_manager );
 		}
 
 		/**

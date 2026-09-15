@@ -569,6 +569,12 @@ final class SettingsPage {
 				<label><input type="checkbox" name="seo[hreflang_enabled]" value="1" <?php checked( $seo['hreflang_enabled'] ); ?> /> <?php esc_html_e( 'Output hreflang links for available translations', 'localepress' ); ?></label>
 				<label><input type="checkbox" name="seo[x_default_enabled]" value="1" <?php checked( $seo['x_default_enabled'] ); ?> /> <?php esc_html_e( 'Include x-default using the default language URL', 'localepress' ); ?></label>
 			</fieldset><p class="description"><?php esc_html_e( 'Canonical URL integration remains active when hreflang output is disabled.', 'localepress' ); ?></p></td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Sitemap', 'localepress' ); ?></th>
+			<td><fieldset class="localepress-option-list">
+				<label><input type="checkbox" name="seo[split_sitemaps]" value="1" <?php checked( $seo['split_sitemaps'] ); ?> /> <?php esc_html_e( 'List one sitemap per language in the sitemap index', 'localepress' ); ?></label>
+			</fieldset><p class="description"><?php esc_html_e( 'Each language gets a sitemap at its own address, under one shared index. Turn this off to keep a single sitemap holding every language. Languages on separate hosts always have their own sitemap.', 'localepress' ); ?></p></td>
 		</tr></tbody></table>
 		<?php
 	}

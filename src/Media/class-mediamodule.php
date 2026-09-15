@@ -9,6 +9,7 @@ namespace LocalePress\Media;
 
 use LocalePress\Content\PostTranslationManager;
 use LocalePress\Contracts\ModuleInterface;
+use LocalePress\Language\CurrentLanguageResolver;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,6 +18,17 @@ defined( 'ABSPATH' ) || exit;
  * Connects media translation to translation creation and attachment resolution.
  */
 final class MediaModule implements ModuleInterface {
+
+	/**
+	 * Meta keys that describe the shared file rather than one language.
+	 *
+	 * @var array<int, string>
+	 */
+	const SHARED_FILE_META_KEYS = array(
+		'_wp_attached_file',
+		'_wp_attachment_metadata',
+		'_wp_attachment_backup_sizes',
+	);
 
 	/**
 	 * Media translation service.
@@ -40,14 +52,34 @@ final class MediaModule implements ModuleInterface {
 	private $protected_files = array();
 
 	/**
+	 * Current language resolver.
+	 *
+	 * @var CurrentLanguageResolver
+	 */
+	private $current_language;
+
+	/**
+	 * Whether a structural change is already being propagated.
+	 *
+	 * @var bool
+	 */
+	private $sharing = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param MediaTranslationManager $media             Media translation service.
 	 * @param PostTranslationManager  $post_translations Post translation manager.
+	 * @param CurrentLanguageResolver $current_language  Current language resolver.
 	 */
-	public function __construct( MediaTranslationManager $media, PostTranslationManager $post_translations ) {
+	public function __construct(
+		MediaTranslationManager $media,
+		PostTranslationManager $post_translations,
+		CurrentLanguageResolver $current_language
+	) {
 		$this->media             = $media;
 		$this->post_translations = $post_translations;
+		$this->current_language  = $current_language;
 	}
 
 	/**
@@ -60,6 +92,15 @@ final class MediaModule implements ModuleInterface {
 		add_filter( 'localepress_copy_post_meta_keys', array( $this, 'add_shared_file_meta_keys' ), 10, 4 );
 		add_action( 'delete_attachment', array( $this, 'protect_shared_files' ), 5 );
 		add_filter( 'wp_delete_file', array( $this, 'skip_protected_file' ), 5 );
+		add_action( 'added_post_meta', array( $this, 'share_structural_meta' ), 10, 4 );
+		add_action( 'updated_post_meta', array( $this, 'share_structural_meta' ), 10, 4 );
+		add_action( 'deleted_post_meta', array( $this, 'unshare_structural_meta' ), 10, 3 );
+
+		// The widget form shows the record an editor picked, in the language they
+		// picked it in; only what a reader is served follows their language.
+		if ( ! is_admin() ) {
+			add_filter( 'widget_media_image_instance', array( $this, 'translate_media_widget' ), 5 );
+		}
 	}
 
 	/**
@@ -83,10 +124,7 @@ final class MediaModule implements ModuleInterface {
 			return $keys;
 		}
 
-		return array_merge(
-			$keys,
-			array( '_wp_attached_file', '_wp_attachment_metadata', '_wp_attachment_backup_sizes' )
-		);
+		return array_merge( $keys, self::SHARED_FILE_META_KEYS );
 	}
 
 	/**
@@ -164,6 +202,191 @@ final class MediaModule implements ModuleInterface {
 
 		return '';
 	}
+
+	/**
+	 * Propagates a structural change to every language of the same file.
+	 *
+	 * The shared-file keys reach a new translation through the copy, and after
+	 * that nothing was keeping them together. WordPress's own image editor is
+	 * why that matters: cropping or rotating an image writes the new path, the
+	 * new sizes, and the backup of the old ones straight to metadata and never
+	 * touches the post row, so a save-driven copy never hears about it and the
+	 * other languages go on describing a file that has been replaced. Reading
+	 * the write itself is what catches every editor of an image, including the
+	 * regenerate and offload tools that do the same thing.
+	 *
+	 * @param int    $meta_id    Meta row identifier.
+	 * @param int    $object_id  Attachment identifier.
+	 * @param string $meta_key   Meta key written.
+	 * @param mixed  $meta_value Value written, unslashed.
+	 * @return void
+	 */
+	public function share_structural_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
+		unset( $meta_id );
+
+		$siblings = $this->shared_file_siblings( $object_id, $meta_key );
+
+		if ( empty( $siblings ) ) {
+			return;
+		}
+
+		$this->sharing = true;
+
+		try {
+			foreach ( $siblings as $sibling_id ) {
+				// update_post_meta() expects a slashed value, and what an action
+				// hands us has already been unslashed on its way into storage.
+				update_post_meta( $sibling_id, $meta_key, wp_slash( $meta_value ) );
+			}
+		} finally {
+			$this->sharing = false;
+		}
+	}
+
+	/**
+	 * Removes a structural key from every language of the same file.
+	 *
+	 * Restoring an original image deletes the backup sizes rather than writing
+	 * them, so the languages that were following the edit have to stop.
+	 *
+	 * @param array<int, int> $meta_ids  Meta row identifiers.
+	 * @param int             $object_id Attachment identifier.
+	 * @param string          $meta_key  Meta key removed.
+	 * @return void
+	 */
+	public function unshare_structural_meta( $meta_ids, $object_id, $meta_key ) {
+		unset( $meta_ids );
+
+		$siblings = $this->shared_file_siblings( $object_id, $meta_key );
+
+		if ( empty( $siblings ) ) {
+			return;
+		}
+
+		$this->sharing = true;
+
+		try {
+			foreach ( $siblings as $sibling_id ) {
+				delete_post_meta( $sibling_id, $meta_key );
+			}
+		} finally {
+			$this->sharing = false;
+		}
+	}
+
+	/**
+	 * Returns the other language records describing one attachment's file.
+	 *
+	 * The sharing flag is what keeps this from answering its own writes: each
+	 * one is a metadata change on an attachment in the same group, and without
+	 * it the first edit would propagate forever.
+	 *
+	 * @param int    $object_id Attachment identifier.
+	 * @param string $meta_key  Meta key being written.
+	 * @return array<int, int>
+	 */
+	private function shared_file_siblings( $object_id, $meta_key ) {
+		$object_id = absint( $object_id );
+
+		if (
+			$this->sharing
+			|| ! is_string( $meta_key )
+			|| ! in_array( $meta_key, self::SHARED_FILE_META_KEYS, true )
+			|| ! $this->media->is_enabled()
+			|| 1 > $object_id
+			|| 'attachment' !== get_post_type( $object_id )
+		) {
+			return array();
+		}
+
+		$siblings = array();
+
+		foreach ( $this->post_translations->get_translations( $object_id ) as $translation_id ) {
+			$translation_id = absint( $translation_id );
+
+			if ( 0 < $translation_id && $translation_id !== $object_id ) {
+				$siblings[] = $translation_id;
+			}
+		}
+
+		if ( empty( $siblings ) ) {
+			return array();
+		}
+
+		/**
+		 * Filters whether a structural media change reaches the other languages.
+		 *
+		 * Returning an empty array leaves each language's record as it is, which
+		 * a site wants only when something else is keeping the files in step.
+		 *
+		 * @param array<int, int> $siblings  Attachment identifiers to update.
+		 * @param int             $object_id Attachment that was edited.
+		 * @param string          $meta_key  Meta key being written.
+		 */
+		$filtered = apply_filters( 'localepress_shared_file_siblings', $siblings, $object_id, $meta_key );
+
+		return is_array( $filtered ) ? array_map( 'absint', $filtered ) : $siblings;
+	}
+
+	/**
+	 * Answers a media widget with the image record of the language being read.
+	 *
+	 * The widget stores one attachment identifier, in the language the site was
+	 * built in. Left alone it shows that language's alternative text, caption,
+	 * and title on every translated page — the file is shared, so the picture is
+	 * right and everything said about it is in the wrong language.
+	 *
+	 * @param array<string, mixed> $instance Widget instance settings.
+	 * @return array<string, mixed>
+	 */
+	public function translate_media_widget( $instance ) {
+		if ( ! is_array( $instance ) || empty( $instance['attachment_id'] ) ) {
+			return $instance;
+		}
+
+		$language = $this->current_language->resolve();
+
+		if ( ! is_array( $language ) || ! isset( $language['id'] ) ) {
+			return $instance;
+		}
+
+		$source_id = absint( $instance['attachment_id'] );
+		$target_id = $this->media->translate_attachment_id( $source_id, (string) $language['id'] );
+
+		if ( $target_id === $source_id ) {
+			return $instance;
+		}
+
+		$attachment = get_post( $target_id );
+
+		if ( ! $attachment instanceof WP_Post ) {
+			return $instance;
+		}
+
+		$instance['attachment_id'] = $target_id;
+
+		// Each field is replaced only where the widget is showing it and the
+		// translation has something of its own to say; an empty translation is
+		// not a better answer than the text that was already there.
+		if ( ! empty( $instance['alt'] ) ) {
+			$alt = get_post_meta( $target_id, MediaTranslationManager::ALT_META_KEY, true );
+
+			if ( is_string( $alt ) && '' !== $alt ) {
+				$instance['alt'] = $alt;
+			}
+		}
+
+		if ( ! empty( $instance['caption'] ) && '' !== $attachment->post_excerpt ) {
+			$instance['caption'] = $attachment->post_excerpt;
+		}
+
+		if ( ! empty( $instance['image_title'] ) && '' !== $attachment->post_title ) {
+			$instance['image_title'] = $attachment->post_title;
+		}
+
+		return $instance;
+	}
+
 
 	/**
 	 * Reports whether an attachment has at least one other language.

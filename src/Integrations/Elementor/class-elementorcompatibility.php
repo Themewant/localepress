@@ -214,6 +214,14 @@ final class ElementorCompatibility {
 			'_elementor_page_settings',
 			'_elementor_version',
 			'_wp_page_template',
+			// Theme Builder and popup state. All three are authored rather than
+			// generated: the rules deciding where a template appears, the
+			// triggers deciding when a popup opens, and the location a generic
+			// section document was filed under. A translation that arrives
+			// without them is a template nothing can ever display.
+			ElementorThemeBuilder::CONDITIONS_META_KEY,
+			ElementorThemeBuilder::POPUP_SETTINGS_META_KEY,
+			ElementorThemeBuilder::LOCATION_META_KEY,
 		);
 
 		/**
