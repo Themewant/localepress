@@ -106,12 +106,20 @@ final class LanguageDetectionModule implements ModuleInterface {
 	/**
 	 * Keeps a shared cache from serving one visitor's language to everyone.
 	 *
-	 * Detection answers the same URL differently for two readers, which is the
-	 * one thing a page cache is built to assume never happens. Announcing what
-	 * the answer varies on is the correct fix, and enough for a well-behaved
-	 * proxy. Full-page cache plugins largely ignore Vary on a cookie, so the
-	 * request where detection can actually fire is additionally marked
-	 * uncacheable — one URL on the site, and only while detection is on.
+	 * Exactly one request on the site is reader-dependent: the site root with
+	 * no language in it, where detection decides where the visitor lands. Every
+	 * other page names its language in the URL, so what it serves is the same
+	 * for every reader and nothing about it varies.
+	 *
+	 * Holding to that distinction is the whole point of doing this here. A
+	 * `Vary: Cookie` on a page that does not vary is not a harmless extra: a
+	 * CDN that honors it keys that URL by the visitor's entire cookie jar — a
+	 * login cookie, a session, a comment author — and turns one cached page
+	 * into a variant per reader. Announced on the one URL that earns it, the
+	 * cost is a single address; announced site-wide, it is the hit ratio.
+	 *
+	 * Full-page cache plugins largely ignore Vary on a cookie, so that same URL
+	 * is additionally marked uncacheable.
 	 *
 	 * @return void
 	 */
@@ -120,15 +128,14 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
-		$undecided = is_front_page() && ! $this->url_manager->request_names_language();
-
-		if ( ! $undecided && ! $this->url_manager->request_has_language_prefix() ) {
+		// A language in the URL settles the question, whoever is asking.
+		if ( ! is_front_page() || $this->url_manager->request_names_language() ) {
 			return;
 		}
 
 		$this->vary_response();
 
-		if ( $undecided && ! defined( 'DONOTCACHEPAGE' ) ) {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 			/**
 			 * Filters whether the undecided site root may be page-cached.
 			 *
@@ -139,13 +146,21 @@ final class LanguageDetectionModule implements ModuleInterface {
 			 * @param bool $exclude Whether to mark the response uncacheable.
 			 */
 			if ( apply_filters( 'localepress_exclude_detected_root_from_cache', true ) ) {
+				/*
+				 * Not this plugin's constant to name. DONOTCACHEPAGE is the signal the
+				 * page cache plugins already watch for — W3 Total Cache, WP Super Cache,
+				 * WP Rocket, Batcache — and they look for that spelling and no other.
+				 * A prefixed name would define something nothing reads, which is the
+				 * whole feature gone rather than a naming preference honoured.
+				 */
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Third-party constant; the name is the contract.
 				define( 'DONOTCACHEPAGE', true );
 			}
 		}
 	}
 
 	/**
-	 * Announces what a language-dependent response varies on.
+	 * Announces what the undecided site root varies on.
 	 *
 	 * @return void
 	 */
@@ -156,11 +171,39 @@ final class LanguageDetectionModule implements ModuleInterface {
 
 		$this->varied = true;
 
-		// The header answers a first visit; the cookie answers every one after
-		// it, and a cache that knows only about the first serves the wrong
-		// language to the second.
-		header( 'Vary: Accept-Language', false );
-		header( 'Vary: Cookie', false );
+		/**
+		 * Filters the request headers the undecided site root varies on.
+		 *
+		 * The Accept-Language header answers a first visit; the cookie answers
+		 * every one after it, and a cache that knows only about the first serves
+		 * the wrong language to the second. Both are named for that reason.
+		 *
+		 * Narrow the list on a CDN that keys the site root by language itself,
+		 * or return an empty array to announce nothing. No other page on the
+		 * site sends a Vary header, so this affects one URL either way.
+		 *
+		 * @param array<int, string> $headers Request header names.
+		 */
+		$headers = apply_filters( 'localepress_vary_headers', array( 'Accept-Language', 'Cookie' ) );
+
+		if ( ! is_array( $headers ) ) {
+			return;
+		}
+
+		foreach ( $headers as $header ) {
+			$header = trim( (string) $header );
+
+			/*
+			 * A filtered value is written straight into a response header, so
+			 * only something shaped like a header name is passed on. Anything
+			 * carrying a newline would append a header of its own.
+			 */
+			if ( '' === $header || ! preg_match( '/^[A-Za-z0-9!#$%&\'*+.^_`|~-]+$/', $header ) ) {
+				continue;
+			}
+
+			header( 'Vary: ' . $header, false );
+		}
 	}
 
 	/**
@@ -514,6 +557,11 @@ final class LanguageDetectionModule implements ModuleInterface {
 	/**
 	 * Reports whether this is a normal public HTML frontend request.
 	 *
+	 * WordPress fires `template_redirect` before it decides a request is for
+	 * robots.txt or the favicon, so both reach this plugin. Neither names a
+	 * language the visitor chose, and the favicon is not caught by `is_404()`
+	 * either — `WP::handle_404()` exempts it.
+	 *
 	 * @return bool
 	 */
 	private function is_public_frontend_request() {
@@ -523,6 +571,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			&& ! ( defined( 'WP_CLI' ) && WP_CLI )
 			&& ! is_robots()
+			&& ! is_favicon()
 			&& ! is_feed()
 			&& ! is_embed()
 			&& ! is_preview()

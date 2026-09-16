@@ -1,18 +1,16 @@
 <?php
 /**
- * Plugin Name:       LocalePress
- * Description:       A lightweight multilingual foundation for WordPress.
- * Version:           1.0.0
- * Requires at least: 6.4
- * Requires PHP:      7.4
- * Author:            LocalePress
- * License:           GPL-2.0-or-later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       localepress
- * Domain Path:       /languages
- *
- * @package LocalePress
- */
+ * Plugin Name: LocalePress
+ * Description: A lightweight multilingual foundation for WordPress.
+ * Plugin URI:  https://shapekode.com/
+ * Author:      ShapeKode
+ * Author URI:  https://profiles.wordpress.org/shapekode22/
+ * Version:     1.0.0
+ * License:     GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: localepress
+ * Domain Path: /languages
+*/
 
 defined( 'ABSPATH' ) || exit;
 

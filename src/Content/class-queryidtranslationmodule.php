@@ -397,7 +397,15 @@ final class QueryIdTranslationModule implements ModuleInterface {
 			);
 		}
 
+		/*
+		 * Nothing here builds a taxonomy query. The one being read was written by
+		 * WordPress, the theme, or whatever made the request, and this rewrites the
+		 * term identifiers inside it to the current language so it selects the same
+		 * terms rather than that language's absence of them. Leaving it alone would
+		 * not make the query cheaper; it would make it return nothing.
+		 */
 		if ( ! empty( $query_vars['tax_query'] ) && is_array( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Rewrites a caller's query; adds none.
 			$query_vars['tax_query'] = $this->translate_tax_query( $query_vars['tax_query'], $language_id );
 		}
 	}

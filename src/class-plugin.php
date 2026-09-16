@@ -13,6 +13,7 @@ use LocalePress\Admin\AdminLanguageFilter;
 use LocalePress\Admin\AdminLanguageFilterModule;
 use LocalePress\Admin\AdminModule;
 use LocalePress\Admin\AdminNoticeGate;
+use LocalePress\Admin\AdminTextDirectionModule;
 use LocalePress\Admin\ContentTranslationModule;
 use LocalePress\Admin\SetupWizardModule;
 use LocalePress\Admin\SettingsModule;
@@ -561,6 +562,7 @@ final class Plugin {
 			$modules[] = new ContentTranslationModule( $this->post_translation_manager, $this->language_manager );
 			$modules[] = new TermTranslationModule( $this->term_translation_manager, $this->language_manager );
 			$modules[] = new MediaTranslationFields( $this->post_translation_manager, $this->language_manager );
+			$modules[] = new AdminTextDirectionModule( $this->post_translation_manager, $this->language_manager );
 		}
 
 		/**

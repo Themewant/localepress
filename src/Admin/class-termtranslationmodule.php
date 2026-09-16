@@ -229,7 +229,9 @@ final class TermTranslationModule implements ModuleInterface {
 	public function create_translation() {
 		// Values select the nonce action and are validated before any mutation.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$source_term_id = isset( $_GET['source_term_id'] ) ? absint( $_GET['source_term_id'] ) : 0;
+		$source_term_id = isset( $_GET['source_term_id'] ) && is_scalar( $_GET['source_term_id'] )
+			? absint( wp_unslash( $_GET['source_term_id'] ) )
+			: 0;
 		$taxonomy       = isset( $_GET['taxonomy'] ) && is_scalar( $_GET['taxonomy'] )
 			? sanitize_key( wp_unslash( $_GET['taxonomy'] ) )
 			: '';
@@ -374,7 +376,9 @@ final class TermTranslationModule implements ModuleInterface {
 	 */
 	private function saving_post_language() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified below.
-		$post_id = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
+		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] )
+			? absint( wp_unslash( $_POST['post_ID'] ) )
+			: 0;
 		$nonce   = isset( $_POST['localepress_language_nonce'] ) && is_scalar( $_POST['localepress_language_nonce'] )
 			? sanitize_text_field( wp_unslash( $_POST['localepress_language_nonce'] ) )
 			: '';

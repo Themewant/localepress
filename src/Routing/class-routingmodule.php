@@ -439,7 +439,7 @@ final class RoutingModule implements ModuleInterface {
 		 * guards above have already reduced this to the handful of calls per page
 		 * that ask for the bare site root.
 		 */
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_debug_backtrace -- Inspected in memory, never output.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_debug_backtrace, WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- No hook carries the caller; inspected in memory and never output.
 		$traces = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
 
 		// The first frames are this method, the filter callback, and the hook

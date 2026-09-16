@@ -299,7 +299,7 @@ final class SettingsPage {
 			</tr>
 		</tbody></table>
 		<?php if ( ! empty( $url['detect_browser'] ) ) : ?>
-			<div class="localepress-notice notice notice-warning inline"><p><?php esc_html_e( 'A full page cache that stores the site home page can serve one visitor\'s detected language to everyone. Exclude the home page from caching, or make the cache vary on the Accept-Language header.', 'localepress' ); ?></p></div>
+			<div class="localepress-notice notice notice-info inline"><p><?php esc_html_e( 'The home page is the one address detection makes reader-dependent, so LocalePress marks it uncacheable and declares what it varies on. Page cache plugins read that; no other page is affected.', 'localepress' ); ?> <?php esc_html_e( 'A CDN or a server-level cache sits above WordPress and sees neither, so exclude the home page there, or let it vary on the Accept-Language header.', 'localepress' ); ?></p></div>
 		<?php endif; ?>
 		<?php
 	}

@@ -112,9 +112,9 @@ final class CacheCompatibilityModule implements ModuleInterface {
 			return;
 		}
 
-		// An embed is someone else's page, and a 404 or a feed names no
-		// language the visitor chose.
-		if ( is_embed() || is_404() || is_feed() || is_preview() ) {
+		// An embed is someone else's page, and a 404, a feed, or the favicon
+		// names no language the visitor chose.
+		if ( is_embed() || is_404() || is_feed() || is_preview() || is_favicon() ) {
 			return;
 		}
 

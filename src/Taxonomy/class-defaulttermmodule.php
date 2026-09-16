@@ -584,7 +584,9 @@ final class DefaultTermModule implements ModuleInterface {
 			return '';
 		}
 
-		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] )
+			? absint( wp_unslash( $_POST['post_ID'] ) )
+			: 0;
 		$nonce   = isset( $_POST['localepress_language_nonce'] ) && is_scalar( $_POST['localepress_language_nonce'] )
 			? sanitize_text_field( wp_unslash( $_POST['localepress_language_nonce'] ) )
 			: '';
@@ -606,7 +608,7 @@ final class DefaultTermModule implements ModuleInterface {
 	 */
 	private function edited_post_language_id() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- An identifier used to read a stored language.
-		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
 
 		return 1 > $post_id ? '' : $this->post_translations->get_post_language_id( $post_id );
 	}

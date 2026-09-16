@@ -82,6 +82,14 @@ final class LocaleModule implements ModuleInterface {
 		 * loaded. When that happens the locale has to be resolved again.
 		 */
 		add_action( 'localepress_request_language_changed', array( $this, 'refresh_locale' ) );
+
+		/*
+		 * Before `$wp_locale` is built, which is what reads the global and
+		 * what `is_rtl()` answers from. `setup_theme` is the last hook that
+		 * still runs ahead of it.
+		 */
+		add_action( 'setup_theme', array( $this, 'apply_text_direction' ), 20 );
+		add_action( 'localepress_request_language_changed', array( $this, 'apply_text_direction' ), 20 );
 	}
 
 	/**
@@ -151,6 +159,75 @@ final class LocaleModule implements ModuleInterface {
 		}
 
 		switch_to_locale( $target );
+	}
+
+	/**
+	 * Makes `is_rtl()` answer for the request language rather than the locale.
+	 *
+	 * WordPress derives text direction from a string inside the locale's own
+	 * translation file: `WP_Locale::init()` reads `_x( 'ltr', 'text direction' )`
+	 * unless `$GLOBALS['text_direction']` already says otherwise. That makes the
+	 * direction depend on whether the translation pack happens to be installed,
+	 * which is not something a site's language list should be at the mercy of —
+	 * an Arabic language with no `ar` pack would print `dir="rtl"` from the
+	 * language record while `is_rtl()` answered false, and the theme's
+	 * `-rtl.css` would never load.
+	 *
+	 * Announcing the direction the language was configured with settles that
+	 * ahead of `WP_Locale`, and every consumer follows from there: `is_rtl()`,
+	 * the RTL stylesheet each handle registers, and whatever the theme asks.
+	 *
+	 * @return void
+	 */
+	public function apply_text_direction() {
+		$language = $this->resolve_request_language();
+
+		if ( null === $language ) {
+			return;
+		}
+
+		$direction = LanguageTag::direction( $language );
+
+		$GLOBALS['text_direction'] = $direction;
+
+		/*
+		 * A locale object built before this ran — which is every request that
+		 * changed language after `init`, and any `switch_to_locale()` since —
+		 * read the global at construction and will not read it again.
+		 */
+		if ( isset( $GLOBALS['wp_locale'] ) && $GLOBALS['wp_locale'] instanceof \WP_Locale ) {
+			$GLOBALS['wp_locale']->text_direction = $direction;
+		}
+
+		/*
+		 * Only if the styles registry already exists. Asking for it before
+		 * `wp_default_styles` has run would build it early, and it is that hook
+		 * which copies the direction across for a registry built later.
+		 */
+		if ( did_action( 'wp_default_styles' ) ) {
+			wp_styles()->text_direction = $direction;
+		}
+	}
+
+	/**
+	 * Returns the language record this request runs in, if any.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	private function resolve_request_language() {
+		if ( $this->resolving || ! $this->is_switchable_request() ) {
+			return null;
+		}
+
+		$this->resolving = true;
+
+		try {
+			$language = $this->url_manager->get_current_language();
+		} finally {
+			$this->resolving = false;
+		}
+
+		return is_array( $language ) ? $language : null;
 	}
 
 	/**

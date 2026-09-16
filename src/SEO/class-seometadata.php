@@ -142,7 +142,7 @@ final class SeoMetadata {
 			$attributes[] = 'xml:lang="' . esc_attr( $tag ) . '"';
 		}
 
-		$attributes[] = 'dir="' . ( empty( $language['is_rtl'] ) ? 'ltr' : 'rtl' ) . '"';
+		$attributes[] = 'dir="' . LanguageTag::direction( $language ) . '"';
 		$attributes[] = trim( (string) $preserved );
 		$attributes   = implode( ' ', array_filter( $attributes ) );
 

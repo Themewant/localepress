@@ -312,7 +312,7 @@ final class NavigationMenuIntegration {
 				: 'alternate';
 		}
 
-		$atts['dir'] = empty( $language['is_rtl'] ) ? 'ltr' : 'rtl';
+		$atts['dir'] = LanguageTag::direction( $language );
 
 		// An entry kept only to show the language exists has nowhere to link to.
 		if ( empty( $menu_item->localepress_available ) && empty( $atts['href'] ) ) {

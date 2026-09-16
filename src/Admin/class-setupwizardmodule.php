@@ -106,7 +106,7 @@ final class SetupWizardModule implements ModuleInterface {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Used to select the nonce verified below.
-		$step = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1;
+		$step = isset( $_POST['step'] ) && is_scalar( $_POST['step'] ) ? absint( wp_unslash( $_POST['step'] ) ) : 1;
 		$step = min( 5, max( 1, $step ) );
 		check_admin_referer( 'localepress_setup_step_' . $step );
 
@@ -267,7 +267,28 @@ final class SetupWizardModule implements ModuleInterface {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified by save_step().
 		$mode           = isset( $_POST['url_mode'] ) ? sanitize_key( wp_unslash( $_POST['url_mode'] ) ) : '';
 		$prefix_default = isset( $_POST['prefix_default'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['prefix_default'] ) );
-		$domains        = isset( $_POST['domain'] ) && is_array( $_POST['domain'] ) ? wp_unslash( $_POST['domain'] ) : array();
+		$domains        = array();
+
+		/*
+		 * The field is an array keyed by language identifier, and a posted key
+		 * is browser input exactly like the value beside it. Reading the
+		 * languages the site actually has, rather than walking what arrived,
+		 * keeps an unrecognised key out instead of cleaning it up afterwards,
+		 * and leaves every value sanitized at the point it is read.
+		 */
+		foreach ( $this->language_manager->get_languages() as $language ) {
+			$language_id = isset( $language['id'] ) ? (string) $language['id'] : '';
+
+			if (
+				'' === $language_id
+				|| ! isset( $_POST['domain'][ $language_id ] )
+				|| ! is_scalar( $_POST['domain'][ $language_id ] )
+			) {
+				continue;
+			}
+
+			$domains[ $language_id ] = sanitize_text_field( wp_unslash( $_POST['domain'][ $language_id ] ) );
+		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$url = $this->settings->get_section( 'url' );
@@ -347,7 +368,7 @@ final class SetupWizardModule implements ModuleInterface {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verified by save_step().
 		$display = isset( $_POST['display'] ) ? sanitize_key( wp_unslash( $_POST['display'] ) ) : 'native_name';
 		$layout  = isset( $_POST['layout'] ) ? sanitize_key( wp_unslash( $_POST['layout'] ) ) : 'horizontal';
-		$menu_id = isset( $_POST['menu_id'] ) ? absint( $_POST['menu_id'] ) : 0;
+		$menu_id = isset( $_POST['menu_id'] ) && is_scalar( $_POST['menu_id'] ) ? absint( wp_unslash( $_POST['menu_id'] ) ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( 0 < $menu_id && ( ! current_user_can( 'edit_theme_options' ) || ! wp_get_nav_menu_object( $menu_id ) ) ) {

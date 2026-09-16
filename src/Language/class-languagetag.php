@@ -77,6 +77,21 @@ final class LanguageTag {
 	}
 
 	/**
+	 * Returns the writing direction a language is read in.
+	 *
+	 * Static because the answer is a property of the record and nothing else:
+	 * the callers that need it are spread across the switcher, the document
+	 * head, the admin screens, and the locale module, and injecting this class
+	 * into each of them to read one flag would cost more than it explains.
+	 *
+	 * @param array<string, mixed>|mixed $language Language record.
+	 * @return string Either `ltr` or `rtl`.
+	 */
+	public static function direction( $language ) {
+		return is_array( $language ) && ! empty( $language['is_rtl'] ) ? 'rtl' : 'ltr';
+	}
+
+	/**
 	 * Reports whether a language tag is safe for HTML and hreflang output.
 	 *
 	 * @param string $tag Language tag.

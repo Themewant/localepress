@@ -148,14 +148,14 @@ final class SetupWizardPage {
 					__( 'Make %s the default language', 'localepress' ),
 					$language['native_name']
 				);
-				$confirm      = sprintf(
+				$confirm = sprintf(
 					/* translators: %s: language name. */
 					__( 'Remove %s? Content already assigned to it keeps its language until the content itself is deleted.', 'localepress' ),
 					$language['native_name']
 				);
 				// The default language stays, so the site keeps the language its
 				// untranslated content is written in.
-				$is_default   = $default === $language['id'];
+				$is_default = $default === $language['id'];
 				?>
 				<tr>
 					<td>
@@ -417,7 +417,7 @@ final class SetupWizardPage {
 	 */
 	private function current_step() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only wizard navigation.
-		$step = isset( $_GET['step'] ) ? absint( $_GET['step'] ) : $this->settings->get_setup_step();
+		$step = isset( $_GET['step'] ) && is_scalar( $_GET['step'] ) ? absint( wp_unslash( $_GET['step'] ) ) : $this->settings->get_setup_step();
 
 		return min( 5, max( 1, $step ) );
 	}

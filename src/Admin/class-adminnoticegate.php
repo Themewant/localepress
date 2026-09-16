@@ -138,8 +138,16 @@ final class AdminNoticeGate implements ModuleInterface {
 	/**
 	 * Returns the LocalePress admin page slug for the current request.
 	 *
-	 * The page query variable is used instead of the screen identifier because
-	 * WordPress derives that identifier from the translated menu title.
+	 * Read from the global WordPress fills in from the page query variable
+	 * before any admin screen loads, rather than from the query string itself.
+	 * It is the same value, already unslashed, and it is the one the menu
+	 * system dispatched on — so this cannot disagree with the screen that is
+	 * actually rendering.
+	 *
+	 * The screen identifier is not used because WordPress derives that from the
+	 * translated menu title.
+	 *
+	 * @global string $plugin_page
 	 *
 	 * @return string Empty when this is not a LocalePress screen.
 	 */
@@ -148,9 +156,8 @@ final class AdminNoticeGate implements ModuleInterface {
 			return '';
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only screen check.
-		$page = isset( $_GET['page'] ) && is_scalar( $_GET['page'] )
-			? sanitize_key( wp_unslash( $_GET['page'] ) )
+		$page = isset( $GLOBALS['plugin_page'] ) && is_scalar( $GLOBALS['plugin_page'] )
+			? sanitize_key( $GLOBALS['plugin_page'] )
 			: '';
 
 		return 'localepress' === $page || 0 === strpos( $page, 'localepress-' ) ? $page : '';

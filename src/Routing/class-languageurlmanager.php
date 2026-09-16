@@ -716,13 +716,13 @@ final class LanguageUrlManager {
 
 		$this->load_languages();
 
-		$path      = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
+		$path       = isset( $url_parts['path'] ) ? $url_parts['path'] : '/';
 		$home_parts = wp_parse_url( LanguageHostResolver::site_url() );
 		$home_path  = is_array( $home_parts ) && isset( $home_parts['path'] )
 			? trailingslashit( $home_parts['path'] )
 			: '/';
-		$relative  = $this->get_home_relative_path( $path, $home_path );
-		$segments  = '' === $relative ? array() : explode( '/', trim( $relative, '/' ) );
+		$relative   = $this->get_home_relative_path( $path, $home_path );
+		$segments   = '' === $relative ? array() : explode( '/', trim( $relative, '/' ) );
 
 		if ( ! empty( $segments ) && $this->is_reserved_path( $segments[0] ) ) {
 			return $original;
@@ -1619,11 +1619,14 @@ final class LanguageUrlManager {
 				continue;
 			}
 
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Identifier only, cast to an integer.
-			$value = isset( $_GET[ $argument ] ) ? wp_unslash( $_GET[ $argument ] ) : null;
+			// Only ever an object identifier, so it is read as one: anything that
+			// is not a positive integer leaves as zero and the next candidate is
+			// tried.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request-shape check.
+			$value = isset( $_GET[ $argument ] ) && is_scalar( $_GET[ $argument ] ) ? absint( wp_unslash( $_GET[ $argument ] ) ) : 0;
 
-			if ( is_scalar( $value ) && 0 < absint( $value ) ) {
-				return absint( $value );
+			if ( 0 < $value ) {
+				return $value;
 			}
 		}
 

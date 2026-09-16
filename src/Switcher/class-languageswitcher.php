@@ -529,7 +529,7 @@ final class LanguageSwitcher {
 		$language_code = isset( $language['language_code'] )
 			? sanitize_key( $language['language_code'] )
 			: '';
-		$direction     = empty( $language['is_rtl'] ) ? 'ltr' : 'rtl';
+		$direction     = LanguageTag::direction( $language );
 		$item['label'] = isset( $item['label'] ) && is_scalar( $item['label'] )
 			? sanitize_text_field( (string) $item['label'] )
 			: $this->get_item_label( $language, $args['display'] );

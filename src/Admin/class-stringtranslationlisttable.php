@@ -8,6 +8,7 @@
 namespace LocalePress\Admin;
 
 use LocalePress\Language\FlagRegistry;
+use LocalePress\Language\LanguageTag;
 use LocalePress\StringTranslation\RegisteredStringValidator;
 
 defined( 'ABSPATH' ) || exit;
@@ -300,14 +301,25 @@ final class StringTranslationListTable extends \WP_List_Table {
 			);
 		}
 
+		/*
+		 * The screen is in the editor's language and the box is in the
+		 * reader's. Without these a right-to-left translation is typed into a
+		 * left-to-right field, which misplaces the caret and every number,
+		 * bracket, and Latin word in the line.
+		 */
+		$code      = isset( $language['language_code'] ) ? sanitize_key( $language['language_code'] ) : '';
+		$direction = LanguageTag::direction( $language );
+
 		return $heading . sprintf(
-			'<textarea id="%1$s" class="large-text localepress-string-translation" name="translations[%2$s][%3$s]" rows="3" maxlength="%4$d" aria-label="%5$s">%6$s</textarea>',
+			'<textarea id="%1$s" class="large-text localepress-string-translation" name="translations[%2$s][%3$s]" rows="3" maxlength="%4$d" aria-label="%5$s" lang="%7$s" dir="%8$s">%6$s</textarea>',
 			esc_attr( $field_id ),
 			esc_attr( $language_id ),
 			esc_attr( $item['string_id'] ),
 			RegisteredStringValidator::MAX_STRING_LENGTH,
 			esc_attr( $label ),
-			esc_textarea( $value )
+			esc_textarea( $value ),
+			esc_attr( $code ),
+			esc_attr( $direction )
 		);
 	}
 

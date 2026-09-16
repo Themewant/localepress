@@ -184,7 +184,9 @@ final class ContentTranslationModule implements ModuleInterface {
 	public function create_translation() {
 		// Values select the nonce action and are validated before any mutation.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$source_post_id = isset( $_GET['source_post_id'] ) ? absint( $_GET['source_post_id'] ) : 0;
+		$source_post_id = isset( $_GET['source_post_id'] ) && is_scalar( $_GET['source_post_id'] )
+			? absint( wp_unslash( $_GET['source_post_id'] ) )
+			: 0;
 		$language_id    = isset( $_GET['language_id'] ) && is_scalar( $_GET['language_id'] )
 			? sanitize_text_field( wp_unslash( $_GET['language_id'] ) )
 			: '';
