@@ -235,8 +235,7 @@ final class BackgroundLanguageResolver {
 	 * @return string Language identifier, or empty when none was named.
 	 */
 	private function read_signals() {
-		// A REST request is answered in the language it asked for and in no
-		// other, whatever page happened to make the call.
+
 		if ( $this->is_rest_request() ) {
 			return $this->get_argument_language_id(
 				array( $this->url_manager->get_public_query_var(), LanguageUrlManager::QUERY_VAR )
@@ -350,9 +349,9 @@ final class BackgroundLanguageResolver {
 	/**
 	 * Returns the address of the page that made this call.
 	 *
-	 * wp_get_referer() is used rather than the header directly because it
-	 * validates the host, so a referrer pointing somewhere else can never decide
-	 * what language this site answers in.
+	 * The referrer comes from wp_get_referer() rather than from the header
+	 * directly, because that call validates the host: a referrer pointing
+	 * somewhere else can never decide what language this site answers in.
 	 *
 	 * @return string
 	 */

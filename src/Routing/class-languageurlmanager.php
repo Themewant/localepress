@@ -772,9 +772,6 @@ final class LanguageUrlManager {
 			return $original;
 		}
 
-		// A site switched over from directory routing still has prefixed URLs in
-		// menus, content, and caches. The language lives in the query string now,
-		// so a leftover prefix would name a page that does not exist.
 		if ( ! empty( $segments ) && isset( $this->languages_by_slug[ sanitize_title( $segments[0] ) ] ) ) {
 			array_shift( $segments );
 
@@ -785,8 +782,6 @@ final class LanguageUrlManager {
 
 		$rebuilt = $this->build_url( $url_parts, $original );
 
-		// Both spellings are dropped first, so switching a URL from one language
-		// to another never leaves the previous one behind it.
 		$rebuilt = remove_query_arg(
 			array( $this->get_public_query_var(), self::QUERY_VAR ),
 			$rebuilt
@@ -1032,8 +1027,6 @@ final class LanguageUrlManager {
 		$post_types = is_scalar( $post_types ) ? array( (string) $post_types ) : (array) $post_types;
 		$post_types = array_values( array_filter( array_map( 'sanitize_key', $post_types ) ) );
 
-		// Date and author archives carry no post type of their own, and WordPress
-		// answers them with posts.
 		return empty( $post_types ) ? array( 'post' ) : $post_types;
 	}
 
@@ -1059,8 +1052,6 @@ final class LanguageUrlManager {
 		$language_id = (string) $language['id'];
 		$key         = $language_id . '|' . implode( ',', $post_types );
 
-		// One archive asks this once per language, and a page with more than one
-		// switcher on it asks again for each.
 		if ( isset( $this->archive_posts[ $key ] ) ) {
 			return $this->archive_posts[ $key ];
 		}
@@ -1104,7 +1095,6 @@ final class LanguageUrlManager {
 
 		$language_id = (string) $language['id'];
 
-		// Every switcher on the page asks this for every language it renders.
 		if ( isset( $this->language_content[ $language_id ] ) ) {
 			return $this->language_content[ $language_id ];
 		}
@@ -1175,10 +1165,6 @@ final class LanguageUrlManager {
 			$raw_url = $this->get_raw_post_url( $post->ID );
 		}
 
-		// A post with no route of its own keeps WordPress's own URL. WordPress
-		// creates an `auto-draft` the moment an editor opens Add New, and such a
-		// post has no slug, so its permalink is the unresolvable `?p=<id>` form.
-		// Prefixing that only produces a link that resolves to nothing.
 		if ( ! $this->has_routable_slug( $post->ID ) ) {
 			return $raw_url;
 		}
@@ -1370,8 +1356,6 @@ final class LanguageUrlManager {
 			return $this->request_has_language_prefix();
 		}
 
-		// Both sides go through normalize(): www names no language, so arriving on
-		// www.example.com is the same undecided request as example.com.
 		$request_host = $this->hosts->normalize( $this->hosts->get_request_host() );
 
 		return '' !== $request_host && $request_host !== $this->hosts->get_site_host();
@@ -1619,9 +1603,6 @@ final class LanguageUrlManager {
 				continue;
 			}
 
-			// Only ever an object identifier, so it is read as one: anything that
-			// is not a positive integer leaves as zero and the next candidate is
-			// tried.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request-shape check.
 			$value = isset( $_GET[ $argument ] ) && is_scalar( $_GET[ $argument ] ) ? absint( wp_unslash( $_GET[ $argument ] ) ) : 0;
 
@@ -1741,10 +1722,6 @@ final class LanguageUrlManager {
 	private function get_request_query_language_slug() {
 		$parts = wp_parse_url( $this->get_current_request_url() );
 
-		// One reader for the query argument, shared with get_url_language_id(),
-		// so what the router accepts and what a redirect check expects cannot
-		// drift apart. The internal variable is accepted everywhere the public
-		// one is, so a search form or a hand-built link can use either name.
 		$language_id = $this->get_query_string_language_id(
 			is_array( $parts ) && isset( $parts['query'] ) ? $parts['query'] : ''
 		);

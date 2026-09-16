@@ -10,7 +10,9 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: localepress
  * Domain Path: /languages
-*/
+ *
+ * @package LocalePress
+ */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,6 +53,7 @@ require_once LOCALEPRESS_PATH . 'src/class-autoloader.php';
 ( new LocalePress\Autoloader( LOCALEPRESS_PATH . 'src/' ) )->register();
 require_once LOCALEPRESS_PATH . 'includes/functions.php';
 require_once LOCALEPRESS_PATH . 'includes/api.php';
+
 
 register_activation_hook( LOCALEPRESS_FILE, array( LocalePress\Lifecycle\Activator::class, 'activate' ) );
 register_deactivation_hook( LOCALEPRESS_FILE, array( LocalePress\Lifecycle\Deactivator::class, 'deactivate' ) );

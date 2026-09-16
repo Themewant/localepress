@@ -523,6 +523,7 @@ final class SettingsModule implements ModuleInterface {
 					'unavailable_behavior' => isset( $switcher['unavailable_behavior'] ) ? $switcher['unavailable_behavior'] : '',
 					'show_flags'           => isset( $switcher['show_flags'] ),
 					'show_disabled'        => isset( $switcher['show_disabled'] ),
+
 					/*
 					 * Written whole rather than merged into what is stored: an
 					 * unchecked checkbox posts nothing at all, so a floater

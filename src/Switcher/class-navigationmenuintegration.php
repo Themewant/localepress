@@ -128,11 +128,11 @@ final class NavigationMenuIntegration {
 	/**
 	 * Renders switcher controls inside a saved menu item.
 	 *
-	 * @param int      $item_id           Menu item identifier.
-	 * @param WP_Post  $menu_item         Menu item object.
-	 * @param int      $depth             Menu depth.
-	 * @param stdClass $args              Menu arguments.
-	 * @param int      $current_object_id Current object identifier.
+	 * @param int       $item_id           Menu item identifier.
+	 * @param WP_Post   $menu_item         Menu item object.
+	 * @param int       $depth             Menu depth.
+	 * @param \stdClass $args              Menu arguments.
+	 * @param int       $current_object_id Current object identifier.
 	 * @return void
 	 */
 	public function render_item_fields( $item_id, $menu_item, $depth, $args, $current_object_id ) {
@@ -250,7 +250,7 @@ final class NavigationMenuIntegration {
 	 * every one of them to the language currently being viewed.
 	 *
 	 * @param array<int, WP_Post> $items Menu items.
-	 * @param stdClass            $args  Menu arguments.
+	 * @param \stdClass           $args  Menu arguments.
 	 * @return array<int, WP_Post>
 	 */
 	public function filter_menu_items( $items, $args ) {
@@ -314,7 +314,6 @@ final class NavigationMenuIntegration {
 
 		$atts['dir'] = LanguageTag::direction( $language );
 
-		// An entry kept only to show the language exists has nowhere to link to.
 		if ( empty( $menu_item->localepress_available ) && empty( $atts['href'] ) ) {
 			$atts['aria-disabled'] = 'true';
 		}
@@ -325,9 +324,9 @@ final class NavigationMenuIntegration {
 	/**
 	 * Builds the menu items that replace one virtual switcher item.
 	 *
-	 * @param WP_Post  $item   Virtual switcher menu item.
-	 * @param stdClass $args   Menu arguments.
-	 * @param int      $offset Menu order offset accumulated so far.
+	 * @param WP_Post   $item   Virtual switcher menu item.
+	 * @param \stdClass $args   Menu arguments.
+	 * @param int       $offset Menu order offset accumulated so far.
 	 * @return array<int, WP_Post>
 	 */
 	private function build_menu_items( WP_Post $item, $args, $offset ) {
@@ -339,7 +338,7 @@ final class NavigationMenuIntegration {
 		 *
 		 * @param array<string, mixed> $settings  Switcher settings.
 		 * @param WP_Post              $menu_item Menu item object.
-		 * @param stdClass             $args      Menu arguments.
+		 * @param \stdClass             $args      Menu arguments.
 		 */
 		$filtered = apply_filters( 'localepress_switcher_menu_args', $settings, $item, $args );
 		$settings = is_array( $filtered ) ? $this->switcher->normalize_args( $filtered ) : $settings;
@@ -466,7 +465,7 @@ final class NavigationMenuIntegration {
 		 * @param array<int, WP_Post>  $built    Generated menu items.
 		 * @param WP_Post              $item     Virtual switcher menu item.
 		 * @param array<string, mixed> $settings Normalized switcher settings.
-		 * @param stdClass             $args     Menu arguments.
+		 * @param \stdClass             $args     Menu arguments.
 		 */
 		$result = apply_filters( 'localepress_switcher_menu_items', $built, $item, $settings, $args );
 

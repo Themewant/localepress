@@ -125,8 +125,6 @@ final class ElementorThemeBuilder {
 
 		$parts = explode( '/', $condition );
 
-		// A condition with fewer than four segments names no object at all:
-		// `include/general`, `include/archive`, `include/singular/post`.
 		if ( 4 > count( $parts ) ) {
 			return $condition;
 		}
@@ -245,8 +243,6 @@ final class ElementorThemeBuilder {
 			return $none;
 		}
 
-		// An author identifier is a user. Users have no translations, and
-		// rewriting one would silently point the condition at unrelated content.
 		if ( in_array( $sub_name, self::AUTHOR_SUB_CONDITIONS, true ) ) {
 			return $none;
 		}
@@ -258,8 +254,6 @@ final class ElementorThemeBuilder {
 			);
 		}
 
-		// Longest prefix first: `any_child_of_category` also ends in a taxonomy
-		// name, and `child_of_` would claim the wrong half of it.
 		foreach ( array( 'any_child_of_', 'child_of_', 'in_' ) as $prefix ) {
 			if ( 0 !== strpos( $sub_name, $prefix ) ) {
 				continue;
@@ -274,9 +268,6 @@ final class ElementorThemeBuilder {
 				);
 			}
 
-			// `in_category_children` names the same taxonomy as `in_category`,
-			// matching a post through the children of the term instead of the
-			// term itself. The identifier is still that taxonomy's term.
 			$trimmed = preg_replace( '/_children$/', '', $taxonomy );
 
 			if ( is_string( $trimmed ) && $trimmed !== $taxonomy && taxonomy_exists( $trimmed ) ) {

@@ -96,12 +96,12 @@ final class SeoModule implements ModuleInterface {
 	 */
 	private function canonical_filters() {
 		$filters = array(
-			'wpseo_canonical',                        // Yoast SEO.
-			'rank_math/frontend/canonical',           // Rank Math.
-			'seopress_titles_canonical',              // SEOPress.
-			'aioseo_canonical_url',                   // All in One SEO.
-			'slim_seo_canonical_url',                 // Slim SEO.
-			'the_seo_framework_rel_canonical_output', // The SEO Framework.
+			'wpseo_canonical',
+			'rank_math/frontend/canonical',
+			'seopress_titles_canonical',
+			'aioseo_canonical_url',
+			'slim_seo_canonical_url',
+			'the_seo_framework_rel_canonical_output',
 		);
 
 		/**
@@ -124,17 +124,17 @@ final class SeoModule implements ModuleInterface {
 	 */
 	private function has_canonical_provider() {
 		$constants = array(
-			'WPSEO_VERSION',                // Yoast SEO.
-			'WPSEO_PREMIUM_VERSION',        // Yoast SEO Premium.
-			'RANK_MATH_VERSION',            // Rank Math.
-			'RANK_MATH_FILE',               // Rank Math, older releases.
-			'SEOPRESS_VERSION',             // SEOPress.
-			'AIOSEO_VERSION',               // All in One SEO 4.
-			'AIOSEOP_VERSION',              // All in One SEO 3.
-			'SLIM_SEO_VER',                 // Slim SEO.
-			'THE_SEO_FRAMEWORK_VERSION',    // The SEO Framework.
-			'SMARTCRAWL_VERSION',           // SmartCrawl.
-			'SQ_VERSION',                   // Squirrly SEO.
+			'WPSEO_VERSION',
+			'WPSEO_PREMIUM_VERSION',
+			'RANK_MATH_VERSION',
+			'RANK_MATH_FILE',
+			'SEOPRESS_VERSION',
+			'AIOSEO_VERSION',
+			'AIOSEOP_VERSION',
+			'SLIM_SEO_VER',
+			'THE_SEO_FRAMEWORK_VERSION',
+			'SMARTCRAWL_VERSION',
+			'SQ_VERSION',
 		);
 
 		/**

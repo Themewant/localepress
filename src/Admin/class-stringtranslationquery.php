@@ -145,11 +145,11 @@ final class StringTranslationQuery {
 		 */
 		$filtered_args = apply_filters( 'localepress_string_translation_query_args', $args );
 		$args          = $this->normalize_args( is_array( $filtered_args ) ? $filtered_args : $args );
-		$result       = $this->repository->query_definitions( $args );
-		$items        = isset( $result['items'] ) && is_array( $result['items'] ) ? $result['items'] : array();
-		$string_ids   = array_values( wp_list_pluck( $items, 'string_id' ) );
-		$selected     = $this->selected_language_ids( $args['language_id'] );
-		$translations = empty( $selected )
+		$result        = $this->repository->query_definitions( $args );
+		$items         = isset( $result['items'] ) && is_array( $result['items'] ) ? $result['items'] : array();
+		$string_ids    = array_values( wp_list_pluck( $items, 'string_id' ) );
+		$selected      = $this->selected_language_ids( $args['language_id'] );
+		$translations  = empty( $selected )
 			? array()
 			: $this->repository->get_translations( $string_ids, $selected );
 

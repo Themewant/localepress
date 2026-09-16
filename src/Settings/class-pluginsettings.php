@@ -88,6 +88,7 @@ final class PluginSettings {
 				'prefix_default' => true,
 				'detect_browser' => false,
 			),
+
 			/*
 			 * Core content is translatable on a new site so the plugin is usable
 			 * immediately, while custom post types and taxonomies are opt-in: a
@@ -144,6 +145,7 @@ final class PluginSettings {
 			'enabled'    => true,
 			'position'   => 'middle-right',
 			'layout'     => 'vertical',
+
 			/*
 			 * Flags are the floater's own answer rather than the site-wide one,
 			 * and the answer is yes. Everywhere else a switcher sits in running
@@ -262,8 +264,6 @@ final class PluginSettings {
 			}
 		}
 
-		// Term IDs name rows in this site's own database, so a transfer neither
-		// carries them nor clears the ones this site chose.
 		$current['content']['default_terms'] = $local_terms;
 
 		return $this->update( $current );

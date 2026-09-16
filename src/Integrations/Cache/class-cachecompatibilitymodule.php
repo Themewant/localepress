@@ -7,6 +7,7 @@
 
 namespace LocalePress\Integrations\Cache;
 
+use LocalePress\Assets;
 use LocalePress\Content\PostTranslationManager;
 use LocalePress\Contracts\ModuleInterface;
 use LocalePress\Routing\LanguageDetectionModule;
@@ -32,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
 final class CacheCompatibilityModule implements ModuleInterface {
 
 	/**
-	 * Script handle the inline cookie writer is attached to.
+	 * Handle of the script that writes the language cookie.
 	 */
 	const SCRIPT_HANDLE = 'localepress-language-cookie';
 
@@ -112,8 +113,6 @@ final class CacheCompatibilityModule implements ModuleInterface {
 			return;
 		}
 
-		// An embed is someone else's page, and a 404, a feed, or the favicon
-		// names no language the visitor chose.
 		if ( is_embed() || is_404() || is_feed() || is_preview() || is_favicon() ) {
 			return;
 		}
@@ -130,31 +129,45 @@ final class CacheCompatibilityModule implements ModuleInterface {
 			return;
 		}
 
-		$script = $this->build_cookie_script( $slug, $this->detection->get_cookie_arguments( $language ) );
+		$encoded = wp_json_encode( $this->build_cookie_data( $slug, $this->detection->get_cookie_arguments( $language ) ) );
 
-		if ( '' === $script ) {
+		if ( ! is_string( $encoded ) ) {
 			return;
 		}
 
-		wp_register_script( self::SCRIPT_HANDLE, '', array(), LOCALEPRESS_VERSION, true );
-		wp_enqueue_script( self::SCRIPT_HANDLE );
-		wp_add_inline_script( self::SCRIPT_HANDLE, $script );
+		wp_enqueue_script(
+			self::SCRIPT_HANDLE,
+			LOCALEPRESS_URL . 'assets/js/language-cookie.js',
+			array(),
+			Assets::version( 'assets/js/language-cookie.js' ),
+			true
+		);
+
+		/*
+		 * Data only. The cookie is written by the enqueued file above, which is
+		 * what this names the cookie for.
+		 */
+		wp_add_inline_script(
+			self::SCRIPT_HANDLE,
+			'window.localePressLanguageCookie = ' . $encoded . ';',
+			'before'
+		);
 	}
 
 	/**
-	 * Builds the inline script that writes the cookie.
+	 * Describes the cookie the browser has to write.
 	 *
 	 * The arguments are the ones PHP would have written the cookie with, so
 	 * the two describe one cookie rather than two under the same name.
 	 *
 	 * @param string               $slug      Language URL slug.
 	 * @param array<string, mixed> $arguments Cookie arguments.
-	 * @return string
+	 * @return array<string, mixed>
 	 */
-	private function build_cookie_script( $slug, array $arguments ) {
+	private function build_cookie_data( $slug, array $arguments ) {
 		$path = isset( $arguments['path'] ) ? (string) $arguments['path'] : '';
 
-		$cookie = array(
+		return array(
 			'name'     => LanguageDetectionModule::COOKIE_NAME,
 			'value'    => $slug,
 			'path'     => '' === $path ? '/' : $path,
@@ -163,23 +176,6 @@ final class CacheCompatibilityModule implements ModuleInterface {
 			'secure'   => ! empty( $arguments['secure'] ),
 			'sameSite' => isset( $arguments['samesite'] ) ? (string) $arguments['samesite'] : 'Lax',
 		);
-
-		$encoded = wp_json_encode( $cookie );
-
-		if ( ! is_string( $encoded ) ) {
-			return '';
-		}
-
-		// An expiry of zero means a session cookie, which is the attribute
-		// being absent rather than a date in the past.
-		return '(function(c){'
-			. 'var p=[c.name+"="+encodeURIComponent(c.value),"path="+c.path];'
-			. 'if(c.domain){p.push("domain="+c.domain);}'
-			. 'if(c.expires){p.push("expires="+new Date(c.expires*1000).toUTCString());}'
-			. 'if(c.secure){p.push("secure");}'
-			. 'if(c.sameSite){p.push("SameSite="+c.sameSite);}'
-			. 'document.cookie=p.join("; ");'
-			. '}(' . $encoded . '));';
 	}
 
 	/**
@@ -237,9 +233,6 @@ final class CacheCompatibilityModule implements ModuleInterface {
 			return $link;
 		}
 
-		// The posts archive is the blog page, which LocalePress routes to its
-		// own translation; rewriting the raw link would name a second address
-		// for a page that already has one.
 		if ( 'post' === $post_type || ! $this->posts->supports_post_type( $post_type ) ) {
 			return $link;
 		}

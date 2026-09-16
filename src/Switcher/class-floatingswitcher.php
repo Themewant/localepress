@@ -97,9 +97,6 @@ final class FloatingSwitcher implements ModuleInterface {
 		wp_enqueue_style( 'localepress-floating-switcher' );
 
 		if ( 'dropdown' === $config['layout'] ) {
-			// A panel opening downward out of a switcher pinned to the bottom of
-			// the screen has nowhere to go, and only the browser knows how much
-			// room is actually there.
 			wp_enqueue_script( 'localepress-switcher' );
 		}
 	}
@@ -210,7 +207,10 @@ final class FloatingSwitcher implements ModuleInterface {
 			return false;
 		}
 
-		foreach ( array( 'preview' => 'is_preview_mode', 'editor' => 'is_edit_mode' ) as $component => $method ) {
+		foreach ( array(
+			'preview' => 'is_preview_mode',
+			'editor'  => 'is_edit_mode',
+		) as $component => $method ) {
 			if (
 				isset( $elementor->{$component} )
 				&& is_object( $elementor->{$component} )

@@ -67,9 +67,9 @@
 							label: __( 'Missing translation', 'localepress' ),
 							value: attributes.unavailableBehavior,
 							disabled: attributes.hideMissing,
-							help: attributes.hideMissing
-								? __( 'Turn off the checkbox above to choose one of these.', 'localepress' )
-								: __( 'What a language does on a page it has no translation of.', 'localepress' ),
+							help: attributes.hideMissing ?
+								__( 'Turn off the checkbox above to choose one of these.', 'localepress' ) :
+								__( 'What a language does on a page it has no translation of.', 'localepress' ),
 							options: [
 								{ label: __( 'Hide languages the site has no content in', 'localepress' ), value: 'hide' },
 								{ label: __( 'Show as unavailable', 'localepress' ), value: 'disabled' },

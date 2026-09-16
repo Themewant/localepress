@@ -240,6 +240,7 @@ final class QueryIdTranslationModule implements ModuleInterface {
 	private function is_translatable_query( WP_Query $query ) {
 		if (
 			! $this->is_translatable_request()
+
 			/*
 			 * The main query names what the visitor asked for, and the router has
 			 * already decided which translation that route resolves to. This
@@ -256,6 +257,7 @@ final class QueryIdTranslationModule implements ModuleInterface {
 			|| $query->get( 'suppress_filters' )
 			|| $query->get( 'localepress_skip_language_filter' )
 			|| $query->get( self::SKIP_QUERY_VAR )
+
 			/*
 			 * A preview names the one post an editor is looking at, in whatever
 			 * state it is in. Answering with its translation would show them

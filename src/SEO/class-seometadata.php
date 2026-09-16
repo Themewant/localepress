@@ -442,18 +442,19 @@ final class SeoMetadata {
 				return '';
 			}
 
-			$posts       = get_posts(
+			$posts = get_posts(
 				array(
-					'post__in'               => $post_ids,
-					'post_type'              => $source->post_type,
-					'post_status'            => array_values( get_post_stati( array( 'public' => true ) ) ),
-					'posts_per_page'         => count( $post_ids ),
-					'orderby'                => 'post__in',
-					'ignore_sticky_posts'    => true,
-					'no_found_rows'          => true,
-					'suppress_filters'       => false,
-					'update_post_meta_cache' => false,
-					'update_post_term_cache' => false,
+					'post__in'                         => $post_ids,
+					'post_type'                        => $source->post_type,
+					'post_status'                      => array_values( get_post_stati( array( 'public' => true ) ) ),
+					'posts_per_page'                   => count( $post_ids ),
+					'orderby'                          => 'post__in',
+					'ignore_sticky_posts'              => true,
+					'no_found_rows'                    => true,
+					'suppress_filters'                 => false,
+					'update_post_meta_cache'           => false,
+					'update_post_term_cache'           => false,
+
 					/*
 					 * This is the one query on a rendered page that is meant to
 					 * cross languages: it asks what this document is called in
@@ -522,11 +523,9 @@ final class SeoMetadata {
 
 			$terms       = get_terms(
 				array(
-					'taxonomy'   => $term->taxonomy,
-					'include'    => $term_ids,
-					'hide_empty' => false,
-					// Crosses languages for the same reason the post lookup above
-					// does: it is asking what this term is called in each of them.
+					'taxonomy'                         => $term->taxonomy,
+					'include'                          => $term_ids,
+					'hide_empty'                       => false,
 					'localepress_skip_language_filter' => true,
 				)
 			);

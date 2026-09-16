@@ -136,7 +136,7 @@ final class SitemapModule implements ModuleInterface {
 		add_filter( 'wp_sitemaps_taxonomies_query_args', array( $this, 'mark_provider_query' ), 20 );
 		add_filter( 'posts_clauses', array( $this, 'filter_sitemap_posts' ), 20, 2 );
 		add_filter( 'terms_clauses', array( $this, 'filter_sitemap_terms' ), 20, 3 );
-		add_filter( 'wp_sitemaps_add_provider', array( $this, 'replace_provider' ), 20 );
+		add_filter( 'wp_sitemaps_add_provider', array( $this, 'replace_provider' ), 20, 2 );
 	}
 
 	/**
@@ -221,10 +221,14 @@ final class SitemapModule implements ModuleInterface {
 	/**
 	 * Replaces a core provider with one that answers per language.
 	 *
-	 * @param mixed $provider Sitemap provider being registered.
+	 * The name comes from the filter rather than from the provider: WP_Sitemaps_Provider
+	 * declares it protected, so reading it from here is not allowed.
+	 *
+	 * @param mixed  $provider Sitemap provider being registered.
+	 * @param string $name     Name the provider is registered under.
 	 * @return mixed
 	 */
-	public function replace_provider( $provider ) {
+	public function replace_provider( $provider, $name = '' ) {
 		if ( ! $provider instanceof WP_Sitemaps_Provider || ! $this->splits_by_language() ) {
 			return $provider;
 		}
@@ -234,7 +238,7 @@ final class SitemapModule implements ModuleInterface {
 		 * provider LocalePress cannot scope would be advertised once per
 		 * language and answer every one of them with the same URLs.
 		 */
-		if ( ! in_array( $provider->name, array( 'posts', 'taxonomies' ), true ) ) {
+		if ( ! in_array( (string) $name, array( 'posts', 'taxonomies' ), true ) ) {
 			return $provider;
 		}
 
@@ -286,9 +290,6 @@ final class SitemapModule implements ModuleInterface {
 			return '';
 		}
 
-		// A sitemap the index published whole is served whole. Its address
-		// carries no language because it was never divided by one, so reading
-		// the request's language into it would drop everything else it holds.
 		if ( ! $this->request_names_a_divided_sitemap() ) {
 			return '';
 		}

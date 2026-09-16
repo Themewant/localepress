@@ -1,6 +1,6 @@
 <?php
 /**
- * wpml-config.xml reader.
+ * Reader for wpml-config.xml.
  *
  * @package LocalePress
  */

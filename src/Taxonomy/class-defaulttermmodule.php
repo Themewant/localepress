@@ -166,16 +166,11 @@ final class DefaultTermModule implements ModuleInterface {
 		add_action( 'wp_loaded', array( $this, 'register_taxonomy_filters' ) );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_request_language' ), 10, 3 );
 
-		// A language only needs terms once it can hold them, so a language saved
-		// as disabled is seeded when it is turned on rather than when it is added.
 		add_action( 'localepress_language_registered', array( $this, 'seed_registered_language' ) );
 		add_action( 'localepress_language_updated', array( $this, 'seed_enabled_language' ), 10, 2 );
 
-		// Languages registered before seeding existed never received one.
 		add_action( 'admin_init', array( $this, 'seed_existing_languages' ) );
 
-		// After AdminLanguageFilterModule (15) and TranslationLifecycleModule (20)
-		// have assigned the language this post is going to keep.
 		add_action( 'wp_after_insert_post', array( $this, 'realign_default_terms' ), 25, 2 );
 	}
 
@@ -436,8 +431,7 @@ final class DefaultTermModule implements ModuleInterface {
 		}
 
 		if ( 0 < $candidate ) {
-			// A chosen term that was deleted, or moved to another taxonomy, leaves
-			// the stored default in place rather than an identifier nothing answers.
+
 			$term    = get_term( $candidate, $taxonomy );
 			$term_id = $term instanceof WP_Term ? (int) $term->term_id : $stored;
 		}
@@ -517,8 +511,6 @@ final class DefaultTermModule implements ModuleInterface {
 			$source_language_id = isset( $assignment['language_id'] ) ? (string) $assignment['language_id'] : '';
 		}
 
-		// The first language registered owns the stored default outright, so it
-		// needs no copy of it.
 		if ( '' === $source_language_id || $source_language_id === $language_id ) {
 			return;
 		}

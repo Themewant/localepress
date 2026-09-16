@@ -180,8 +180,7 @@ final class OptionStringTranslator {
 	 * @return void
 	 */
 	private function attach( $context, $option, $keys ) {
-		// LocalePress reads its own options while resolving a string, so letting a
-		// configuration file claim one would be a loop with no useful outcome.
+
 		if ( 0 === strpos( $option, 'localepress' ) ) {
 			return;
 		}
@@ -203,9 +202,9 @@ final class OptionStringTranslator {
 	/**
 	 * Walks a value, registering every translatable string it reaches.
 	 *
-	 * @param mixed             $value   Value at this level.
-	 * @param mixed             $keys    Declared keys at this level.
-	 * @param string            $group   String group.
+	 * @param mixed              $value   Value at this level.
+	 * @param mixed              $keys    Declared keys at this level.
+	 * @param string             $group   String group.
 	 * @param array<int, string> $path   Key path walked so far.
 	 * @return mixed
 	 */
@@ -265,10 +264,6 @@ final class OptionStringTranslator {
 			return $value;
 		}
 
-		// Registered strings are stored as plain text. A value carrying markup
-		// would lose it in both directions -- the original an editor reads, and
-		// the translation the page renders -- so a theme's raw HTML option is
-		// left alone instead of being silently flattened into a bare sentence.
 		$normalized = sanitize_textarea_field( wp_check_invalid_utf8( $value ) );
 
 		if ( $normalized !== $original ) {
@@ -282,8 +277,6 @@ final class OptionStringTranslator {
 			return $value;
 		}
 
-		// An untranslated value comes back as the stored original, so returning
-		// the caller's own string keeps whatever whitespace it had.
 		if ( ! is_string( $translated ) || '' === $translated || $translated === $normalized ) {
 			return $value;
 		}
@@ -356,8 +349,7 @@ final class OptionStringTranslator {
 	 */
 	private function merge_keys( $base, $additions ) {
 		if ( ! is_array( $base ) || ! is_array( $additions ) ) {
-			// One of the declarations covers the whole value, which already
-			// includes everything the other one asked for.
+
 			return is_array( $base ) ? $additions : $base;
 		}
 

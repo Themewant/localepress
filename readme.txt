@@ -1,6 +1,6 @@
 === LocalePress ===
 Contributors: shapecode
-Tags: multilingual, language, localization, rtl
+Tags: multilingual, language, localization, translation, translate
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -19,6 +19,8 @@ Creating a translation always copies the source content, taxonomies, public cust
 In the block editor, parent pages, categories, tags, and the link dialog are scoped to the language you are writing in, so you are never offered content from another language. Block themes get a Language Switcher for the Navigation block, which inherits your menu's colors, spacing, and mobile overlay.
 
 Optional media translation gives each language its own title, alternative text, caption, and description for the same file. The file itself is never duplicated: every language points at one image on disk, so translated pages get accurate alternative text without a second upload.
+
+The bundled scripts are plain ES5 and load without a build step. They use a few modern browser APIs where a browser offers them — `Element.closest`, `Element.matches`, `dataset`, `classList`, `requestAnimationFrame`, `String.prototype.normalize` for accent-insensitive search, and `navigator.clipboard` for the copy buttons on the Switcher screen. Every one of them is checked before use, and each screen renders, saves, and switches languages without JavaScript at all, so an older browser loses presentation rather than function.
 
 This free version does not include automated translation, WooCommerce-specific data handling, translation of arbitrary custom-field values, advanced translated schema or slugs, translation of the text inside Elementor widget settings, dynamic-tag translation, forms translation, or other addon features.
 

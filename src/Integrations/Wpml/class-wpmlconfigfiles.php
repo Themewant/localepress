@@ -1,6 +1,6 @@
 <?php
 /**
- * wpml-config.xml file discovery.
+ * Discovery of wpml-config.xml files.
  *
  * @package LocalePress
  */

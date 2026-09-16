@@ -457,7 +457,7 @@ final class TermTranslationManager {
 	/**
 	 * Joins terms that already carry translation groups of their own.
 	 *
-	 * link_translations() refuses this on purpose: two terms that each hold a
+	 * The link_translations() method refuses this on purpose: two terms that each hold a
 	 * group are two translation sets, and a save must never decide on its own
 	 * that they are one. An import is where that decision is made, and where it
 	 * is the whole point — content arrives already translated, every term
@@ -528,15 +528,10 @@ final class TermTranslationManager {
 
 		$group_ids = array_values( array_unique( $group_ids ) );
 
-		// Nothing to merge: no term named here has been grouped yet, which is
-		// exactly what link_translations() is for.
 		if ( empty( $group_ids ) ) {
 			return $this->link_translations( $translations, $taxonomy, $source_term_id );
 		}
 
-		// The group the caller's source term is in survives, so a caller that
-		// names one decides which set the others join rather than being handed
-		// whichever group happened to be read first.
 		$keeper_group_id = isset( $assignments[ $source_term_id ] ) && null !== $assignments[ $source_term_id ]
 			? $assignments[ $source_term_id ]['group_id']
 			: $group_ids[0];

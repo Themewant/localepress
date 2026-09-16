@@ -243,8 +243,6 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
-		// A redirect is never the response a page cache stores, so this is the
-		// one write that stays in PHP on a cached site.
 		$this->store_language_cookie( $language, true );
 		$this->vary_response();
 
@@ -372,7 +370,6 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return $remembered;
 		}
 
-		// An internal referrer means the visitor navigated here on purpose.
 		if ( '' !== (string) wp_get_referer() ) {
 			return null;
 		}
@@ -445,7 +442,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
-		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) && $slug === sanitize_title( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) ) {
+		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) && sanitize_title( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) === $slug ) {
 			return;
 		}
 

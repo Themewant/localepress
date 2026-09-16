@@ -361,27 +361,16 @@ final class Plugin {
 		);
 
 		$modules = array(
-			// Registered first: the locale filter must exist before WordPress
-			// loads the default text domain right after `plugins_loaded`.
+
 			new LocaleModule( $this->language_url_manager ),
 			new StringModule( $this->string_manager ),
-			// One translator is shared, so an option named by more than one source
-			// is filtered once and keeps the group it was first registered under.
-			// The catalog runs first for that reason: the site title stays in
-			// `WordPress` even if a plugin's configuration file also claims it.
 			new CoreStringModule( $option_strings, $this->language_manager ),
-			// Registered before the content modules: what a wpml-config.xml file
-			// declares has to be in place before anything asks which post types,
-			// taxonomies, or custom fields are translatable.
 			new WpmlConfigModule(
 				new WpmlConfigReader(),
 				$option_strings,
 				$this->language_manager,
 				$this->workflow_settings
 			),
-			// After both string sources, so an option one of them already claimed
-			// keeps the group it was registered under. Its own work is on the
-			// copy filters, which nothing has reached yet.
 			new SeoMetaModule(
 				array(
 					new YoastSeoProvider(),
@@ -410,18 +399,15 @@ final class Plugin {
 				$this->plugin_settings
 			),
 			$language_detection,
-			// Registered next to detection because it stands in for it wherever a
-			// page cache answers a request before PHP can.
+
 			new CacheCompatibilityModule(
 				$language_detection,
 				$this->language_url_manager,
 				$this->post_translation_manager
 			),
-			// Host routing serves the document from one host; this keeps every URL
-			// the document loads on that same host.
+
 			new HostOriginModule( $this->language_url_manager ),
-			// After routing: the request language has to be resolved before a
-			// query's identifiers can be rewritten to it.
+
 			new QueryIdTranslationModule(
 				$this->language_url_manager,
 				$this->post_translation_manager,
@@ -431,8 +417,7 @@ final class Plugin {
 				$this->language_url_manager,
 				$this->post_translation_manager
 			),
-			// The pages WordPress answers with SQL of its own rather than through
-			// WP_Query: the adjacent post links, the archive list, the calendar.
+
 			new DirectQueryLanguageModule(
 				$this->language_url_manager,
 				$this->post_translation_manager
@@ -466,9 +451,7 @@ final class Plugin {
 				$this->plugin_settings
 			),
 			new ElementorModule( $this->elementor_compatibility ),
-			// Kept apart from the document copy for the same reason: this one
-			// answers which template a theme location renders, which happens on
-			// every front-end request whether or not anything was ever translated.
+
 			new ElementorThemeBuilderModule(
 				new ElementorThemeBuilder(
 					$this->post_translation_manager,
@@ -477,8 +460,7 @@ final class Plugin {
 				$this->post_translation_manager,
 				$this->language_url_manager
 			),
-			// Its hooks exist only while Elementor is drawing its panel, so the
-			// module costs a site without Elementor two listeners that never run.
+
 			new ElementorWidgetModule(),
 			new SyncModule(
 				$this->translation_synchronizer,

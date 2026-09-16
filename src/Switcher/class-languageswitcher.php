@@ -31,6 +31,7 @@ final class LanguageSwitcher {
 		'layout'               => 'horizontal',
 		'hide_current'         => false,
 		'hide_missing'         => false,
+
 		/*
 		 * A language is offered where the visitor can read this content, and
 		 * elsewhere it points at its own home. Only a language the site has
@@ -233,8 +234,7 @@ final class LanguageSwitcher {
 		wp_enqueue_style( 'localepress-switcher' );
 
 		if ( 'dropdown' === $args['layout'] ) {
-			// A panel that opens downward off the bottom of the page is clipped,
-			// and how much room it has is a question only the browser can answer.
+
 			wp_enqueue_script( 'localepress-switcher' );
 		}
 
@@ -377,17 +377,16 @@ final class LanguageSwitcher {
 				 * @param array<string, mixed> $language Language record.
 				 * @param array<string, mixed> $args     Normalized arguments.
 				 */
-				$url      = apply_filters(
+				$url = apply_filters(
 					'localepress_switcher_unavailable_url',
 					$url,
 					$args['unavailable_behavior'],
 					$language,
 					$args
 				);
-				$url      = is_string( $url ) ? esc_url_raw( $url ) : '';
-				// Every behavior but "show as unavailable" is allowed to offer a
-				// substitute, and an entry that leads somewhere is a link rather
-				// than a dead label.
+
+				$url = is_string( $url ) ? esc_url_raw( $url ) : '';
+
 				$fallback = 'disabled' !== $args['unavailable_behavior'] && '' !== $url;
 
 				/*

@@ -124,16 +124,12 @@ final class RestLanguageModule implements ModuleInterface {
 	public function register() {
 		add_action( 'rest_api_init', array( $this, 'register_collection_filters' ) );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_request_language' ), 10, 3 );
-		// Last, so the language is still in place for everything else that reads
-		// the response on the way out.
+
 		add_filter( 'rest_request_after_callbacks', array( $this, 'release_request_language' ), 10000, 3 );
 		add_filter( 'posts_clauses', array( $this, 'filter_posts_by_language' ), 10, 2 );
 		add_filter( 'terms_clauses', array( $this, 'filter_terms_by_language' ), 10, 3 );
 		add_filter( 'block_editor_rest_api_preload_paths', array( $this, 'add_language_to_preload_paths' ), 50, 2 );
 
-		// After AdminLanguageFilterModule (10), because a term created inside a
-		// REST request belongs to the language that request names rather than to
-		// whatever the administration listing happens to be filtered to.
 		add_filter( 'localepress_new_term_language_id', array( $this, 'filter_new_term_language' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_script' ) );
 	}
@@ -152,8 +148,6 @@ final class RestLanguageModule implements ModuleInterface {
 			add_filter( "rest_{$taxonomy}_query", array( $this, 'mark_collection_args' ) );
 		}
 
-		// The editor's link search dialog uses the search controller rather than a
-		// post type collection.
 		add_filter( 'rest_post_search_query', array( $this, 'mark_collection_args' ) );
 	}
 
@@ -334,9 +328,6 @@ final class RestLanguageModule implements ModuleInterface {
 	public function filter_terms_by_language( $clauses, $taxonomies, $args ) {
 		unset( $taxonomies );
 
-		// A query naming the objects it reads terms for is answering "what does
-		// this post hold", not "what may this post choose". Constraining it would
-		// hide a term the post already carries, which the editor then drops.
 		if ( is_array( $args ) && ! empty( $args['object_ids'] ) ) {
 			return $clauses;
 		}
@@ -377,9 +368,7 @@ final class RestLanguageModule implements ModuleInterface {
 		$language_id = $this->post_translations->get_post_language_id( $post->ID );
 
 		if ( '' === $language_id ) {
-			// A post with no assignment reads as the default language everywhere
-			// else, and the editor script falls back to it too. Leaving the path
-			// untagged would preload one unfiltered list holding every language.
+
 			$language_id = $this->language_manager->get_default_id();
 		}
 
@@ -411,8 +400,6 @@ final class RestLanguageModule implements ModuleInterface {
 
 			$params['lang'] = $language_id;
 
-			// The editor's preloading middleware compares sorted query strings, so
-			// the rebuilt path has to use the same order.
 			ksort( $params );
 			$rebuilt = add_query_arg( urlencode_deep( $params ), $parts['path'] );
 
@@ -498,16 +485,16 @@ final class RestLanguageModule implements ModuleInterface {
 	/**
 	 * Builds the collection route for a post type or taxonomy object.
 	 *
-	 * @param mixed $object Post type or taxonomy object.
+	 * @param mixed $type_object Post type or taxonomy object.
 	 * @return string
 	 */
-	private function get_rest_route( $object ) {
-		if ( ! is_object( $object ) || empty( $object->show_in_rest ) ) {
+	private function get_rest_route( $type_object ) {
+		if ( ! is_object( $type_object ) || empty( $type_object->show_in_rest ) ) {
 			return '';
 		}
 
-		$base      = ! empty( $object->rest_base ) && is_string( $object->rest_base ) ? $object->rest_base : $object->name;
-		$namespace = ! empty( $object->rest_namespace ) && is_string( $object->rest_namespace ) ? $object->rest_namespace : 'wp/v2';
+		$base      = ! empty( $type_object->rest_base ) && is_string( $type_object->rest_base ) ? $type_object->rest_base : $type_object->name;
+		$namespace = ! empty( $type_object->rest_namespace ) && is_string( $type_object->rest_namespace ) ? $type_object->rest_namespace : 'wp/v2';
 
 		return trim( $namespace, '/' ) . '/' . trim( (string) $base, '/' );
 	}
@@ -515,10 +502,10 @@ final class RestLanguageModule implements ModuleInterface {
 	/**
 	 * Applies the shared constraint after letting developers opt out.
 	 *
-	 * @param array<string, string>      $clauses     SQL clauses.
-	 * @param string                     $language_id Requested language identifier.
+	 * @param array<string, string>        $clauses     SQL clauses.
+	 * @param string                       $language_id Requested language identifier.
 	 * @param WP_Query|array<string,mixed> $query     Query or arguments being filtered.
-	 * @param string                     $type        Either posts or terms.
+	 * @param string                       $type        Either posts or terms.
 	 * @return array<string, string>
 	 */
 	private function constrain( $clauses, $language_id, $query, $type ) {

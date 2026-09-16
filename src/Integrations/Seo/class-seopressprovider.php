@@ -88,13 +88,13 @@ final class SeoPressProvider extends SeoProvider {
 					'seopress_titles_archives_*'      => true,
 					'seopress_titles_single_titles'   => array(
 						'*' => array(
-							'title' => true,
+							'title'       => true,
 							'description' => true,
 						),
 					),
-					'seopress_titles_tax_titles' => array(
+					'seopress_titles_tax_titles'      => array(
 						'*' => array(
-							'title' => true,
+							'title'       => true,
 							'description' => true,
 						),
 					),

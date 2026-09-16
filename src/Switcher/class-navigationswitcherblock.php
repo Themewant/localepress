@@ -250,8 +250,6 @@ final class NavigationSwitcherBlock {
 				continue;
 			}
 
-			// A submenu that opens on click has a button where its link would be,
-			// and a button leads nowhere for `hreflang` to describe.
 			if ( 'A' !== $name || '' === $tag ) {
 				continue;
 			}
@@ -374,14 +372,14 @@ final class NavigationSwitcherBlock {
 	 * Collects every item whose label may still contain a token.
 	 *
 	 * @param array<int, array<string, mixed>> $items      Switcher items.
-	 * @param array<string, mixed>             $parent     Item rendered as the submenu parent.
+	 * @param array<string, mixed>             $parent_item Item rendered as the submenu parent.
 	 * @param array<string, mixed>             $attributes Block attributes.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function collect_labels( array $items, array $parent, array $attributes ) {
+	private function collect_labels( array $items, array $parent_item, array $attributes ) {
 		unset( $attributes );
-		$collected = $items;
-		$collected[] = $parent;
+		$collected   = $items;
+		$collected[] = $parent_item;
 
 		return $collected;
 	}
@@ -421,8 +419,7 @@ final class NavigationSwitcherBlock {
 			);
 
 			if ( ! is_string( $in_attributes ) ) {
-				// Which token sits where is no longer known, and a flag is worth
-				// less than markup that holds together.
+
 				$output = str_replace( $token, esc_attr( $label ), $output );
 				continue;
 			}

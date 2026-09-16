@@ -284,8 +284,8 @@ final class StringTranslationListTable extends \WP_List_Table {
 			$language['native_name'],
 			$item['original_string']
 		);
-		$field_id    = 'localepress-string-' . $item['string_id'] . '-' . $language_id;
-		$heading     = '';
+		$field_id = 'localepress-string-' . $item['string_id'] . '-' . $language_id;
+		$heading  = '';
 
 		if ( $labelled ) {
 			// The code is the label because it is the same width for every

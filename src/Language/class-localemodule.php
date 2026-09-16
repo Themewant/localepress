@@ -157,8 +157,6 @@ final class LocaleModule implements ModuleInterface {
 
 		$resolved = $this->resolve_request_locale();
 
-		// An empty resolution means the site's own locale applies again, and
-		// get_locale() answers with it now that the cache has been cleared.
 		$target = '' === $resolved ? get_locale() : $resolved;
 
 		if ( ! is_string( $target ) || '' === $target || $target === $previous ) {
@@ -199,6 +197,8 @@ final class LocaleModule implements ModuleInterface {
 
 		$direction = LanguageTag::direction( $language );
 
+		// Writing this global is what this module exists to do; WordPress reads it back for RTL.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$GLOBALS['text_direction'] = $direction;
 
 		/*
@@ -265,8 +265,6 @@ final class LocaleModule implements ModuleInterface {
 			return $this->resolved;
 		}
 
-		// Mid-resolution, so nothing is settled yet and the memo stays empty
-		// for the outer call that is still on its way to filling it.
 		if ( $this->resolving ) {
 			return '';
 		}

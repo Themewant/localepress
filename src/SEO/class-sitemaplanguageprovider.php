@@ -100,10 +100,9 @@ final class SitemapLanguageProvider extends WP_Sitemaps_Provider {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_sitemap_type_data() {
+
 		$subtypes = $this->get_object_subtypes();
 
-		// A provider without subtypes holds one undivided list. Core's users
-		// provider is the only one, and an author belongs to no language.
 		if ( empty( $subtypes ) ) {
 			return $this->provider->get_sitemap_type_data();
 		}
@@ -120,10 +119,7 @@ final class SitemapLanguageProvider extends WP_Sitemaps_Provider {
 			$subtype = (string) $subtype;
 
 			if ( ! $this->module->is_translatable_subtype( $this->name, $subtype ) ) {
-				// Counted across every listed language, because that is what
-				// this one undivided sitemap will hold. Saying so explicitly
-				// matters: without it the count would be read as belonging to
-				// whichever language the index itself was fetched under.
+
 				$data[] = array(
 					'name'  => $subtype,
 					'pages' => $this->module->with_language(
@@ -145,9 +141,6 @@ final class SitemapLanguageProvider extends WP_Sitemaps_Provider {
 					}
 				);
 
-				// A language with nothing of this kind is not listed at all. An
-				// empty sitemap in the index is a URL a crawler fetches to learn
-				// nothing, and core drops zero-page entries anyway.
 				if ( 1 > (int) $pages ) {
 					continue;
 				}

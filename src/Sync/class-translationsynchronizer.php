@@ -243,8 +243,6 @@ final class TranslationSynchronizer {
 			$keys[] = '_wp_page_template';
 		}
 
-		// The featured image is applied while the draft is inserted, so only the
-		// synchronization phase has to keep it aligned afterwards.
 		if ( $sync && $this->is_enabled( 'featured_image', true, $options ) ) {
 			$keys[] = '_thumbnail_id';
 		}
@@ -319,8 +317,9 @@ final class TranslationSynchronizer {
 	 */
 	private function apply_meta( WP_Post $source, WP_Post $target, $language_id, array $options, $sync ) {
 		foreach ( $this->get_meta_keys( $source->ID, $target->ID, $language_id, $sync, $options ) as $meta_key ) {
-			$source_values = get_post_meta( $source->ID, $meta_key );
-			$target_values = get_post_meta( $target->ID, $meta_key );
+			// False, not true: a meta key can hold several values and all of them are copied.
+			$source_values = get_post_meta( $source->ID, $meta_key, false );
+			$target_values = get_post_meta( $target->ID, $meta_key, false );
 			$source_values = is_array( $source_values ) ? $source_values : array();
 			$target_values = is_array( $target_values ) ? $target_values : array();
 

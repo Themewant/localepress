@@ -128,7 +128,7 @@ final class SearchFormModule implements ModuleInterface {
 			return '';
 		}
 
-		$open    = $matches[0];
+		$open     = $matches[0];
 		$replaced = preg_replace(
 			'#\saction=("[^"]*"|\'[^\']*\'|[^\s>]+)#i',
 			' action="' . esc_url( $url ) . '"',

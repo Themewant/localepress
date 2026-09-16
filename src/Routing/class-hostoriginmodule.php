@@ -176,8 +176,6 @@ final class HostOriginModule implements ModuleInterface {
 			return $url;
 		}
 
-		// Only this site's own addresses move. A CDN, an external media host, or
-		// a third-party endpoint belongs exactly where it was asked for.
 		if ( ! $this->is_site_host( $parts['host'] ) ) {
 			return $url;
 		}
@@ -231,8 +229,6 @@ final class HostOriginModule implements ModuleInterface {
 
 		$host = $this->url_manager->hosts()->get_request_host();
 
-		// A host the site answers on but no language claims is left exactly as it
-		// is: rewriting toward it would only spread an address nothing links to.
 		$this->target_host = '' === $host || $this->url_manager->request_host_serves_no_language()
 			? ''
 			: $host;
@@ -262,8 +258,8 @@ final class HostOriginModule implements ModuleInterface {
 			return $this->site_hosts;
 		}
 
-		$hosts  = $this->url_manager->hosts();
-		$known  = array( $hosts->get_site_host() );
+		$hosts = $this->url_manager->hosts();
+		$known = array( $hosts->get_site_host() );
 
 		foreach ( $this->url_manager->get_language_slugs() as $slug ) {
 			$known[] = $hosts->normalize( $this->url_manager->get_language_host( $slug ) );

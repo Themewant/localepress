@@ -1,6 +1,6 @@
 <?php
 /**
- * wpml-config.xml compatibility module.
+ * Compatibility module for wpml-config.xml.
  *
  * @package LocalePress
  */

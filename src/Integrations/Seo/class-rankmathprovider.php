@@ -83,25 +83,25 @@ final class RankMathProvider extends SeoProvider {
 	public function get_option_declarations() {
 		return array(
 			'Rank Math' => array(
-				'rank-math-options-titles' => array(
-					'pt_*_title'            => true,
-					'pt_*_description'      => true,
-					'tax_*_title'           => true,
-					'tax_*_description'     => true,
-					'author_archive_title'  => true,
+				'rank-math-options-titles'  => array(
+					'pt_*_title'                 => true,
+					'pt_*_description'           => true,
+					'tax_*_title'                => true,
+					'tax_*_description'          => true,
+					'author_archive_title'       => true,
 					'author_archive_description' => true,
-					'date_archive_title'    => true,
+					'date_archive_title'         => true,
 					'date_archive_description'   => true,
-					'search_title'          => true,
-					'404_title'             => true,
+					'search_title'               => true,
+					'404_title'                  => true,
 				),
 				'rank-math-options-general' => array(
-					'breadcrumbs_separator'  => true,
-					'breadcrumbs_home_label' => true,
-					'breadcrumbs_prefix'     => true,
+					'breadcrumbs_separator'      => true,
+					'breadcrumbs_home_label'     => true,
+					'breadcrumbs_prefix'         => true,
 					'breadcrumbs_archive_format' => true,
 					'breadcrumbs_search_format'  => true,
-					'breadcrumbs_404_label'  => true,
+					'breadcrumbs_404_label'      => true,
 				),
 			),
 		);

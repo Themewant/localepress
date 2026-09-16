@@ -155,6 +155,8 @@ final class MenuLocationsModule implements ModuleInterface {
 			}
 		}
 
+		// The per-language locations replace the registry this module just read and expanded.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$_wp_registered_nav_menus = $expanded;
 		$this->expanded           = true;
 	}
@@ -242,8 +244,6 @@ final class MenuLocationsModule implements ModuleInterface {
 				$languages[ $menu_id ] = $parts['language'];
 			}
 
-			// A language of its own means a location LocalePress invented, and
-			// WordPress has no place to put it.
 			if ( $location === $parts['location'] ) {
 				$locations[ $parts['location'] ] = $menu_id;
 			}

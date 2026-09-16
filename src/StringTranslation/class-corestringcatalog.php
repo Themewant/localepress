@@ -49,12 +49,11 @@ final class CoreStringCatalog {
 			self::SITE_CONTEXT   => array(
 				'blogname'        => true,
 				'blogdescription' => true,
-				// Date and time patterns are text too: a language often writes the
-				// day before the month, or spells out a month name differently.
 				'date_format'     => true,
 				'time_format'     => true,
 			),
 			self::WIDGET_CONTEXT => array(
+
 				/*
 				 * Every widget type stores its instances in `widget_{$id_base}`,
 				 * numbered by instance, so one wildcard covers the widgets a site

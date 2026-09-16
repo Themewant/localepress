@@ -20,12 +20,21 @@ defined( 'ABSPATH' ) || exit;
  * banners on every admin page. On LocalePress screens they push the interface
  * down and compete with the plugin's own feedback, so they are removed.
  *
+ * What is never removed is anything a reader has to act on. WordPress's own
+ * notices stay — an available core update, maintenance mode, recovery mode, a
+ * plugin core had to deactivate — and so does every notice printed as an
+ * error, whoever printed it. A plugin telling a site that an update is waiting
+ * is exactly the message that must survive a screen it did not expect to be
+ * read on, so the gate takes only what is promotional by nature: the
+ * informational and success banners plugins print everywhere.
+ *
  * Two layers are used because notices arrive two different ways:
  *
  * 1. PHP - callbacks on the four core notice hooks are detached before those
- *    hooks run. Callbacks owned by LocalePress are kept.
+ *    hooks run. Callbacks owned by LocalePress, and WordPress's own, are kept.
  * 2. CSS - a small scoped rule hides notice markup that scripts inject into
- *    the page after PHP has finished, which the first layer cannot reach.
+ *    the page after PHP has finished, which the first layer cannot reach. It
+ *    passes over update and error markup for the same reason.
  *
  * LocalePress prints its own notices with the `localepress-notice` class so
  * the CSS layer can tell them apart. Any new LocalePress notice markup must
@@ -44,6 +53,34 @@ final class AdminNoticeGate implements ModuleInterface {
 		'user_admin_notices',
 		'network_admin_notices',
 	);
+
+	/**
+	 * WordPress's own notice callbacks, which are never detached.
+	 *
+	 * These carry updates, recovery mode, and the account and security messages
+	 * a site is expected to act on. Hiding any of them would mean a reader who
+	 * happens to be on a LocalePress screen is the one reader not told.
+	 *
+	 * @var array<int, string>
+	 */
+	const CORE_CALLBACKS = array(
+		'update_nag',
+		'maintenance_nag',
+		'site_admin_notice',
+		'wp_recovery_mode_nag',
+		'deactivated_plugins_notice',
+		'paused_plugins_notice',
+		'paused_themes_notice',
+		'default_password_nag',
+		'new_user_email_admin_notice',
+	);
+
+	/**
+	 * Core class whose notice callbacks are never detached.
+	 *
+	 * @var string
+	 */
+	const CORE_NOTICE_CLASS = 'WP_Privacy_Policy_Content';
 
 	/**
 	 * Class prefix identifying callbacks owned by the plugin.
@@ -101,11 +138,16 @@ final class AdminNoticeGate implements ModuleInterface {
 			return;
 		}
 
+		/*
+		 * Everything an update or a failure is announced with is passed over:
+		 * the update nag and the inline update rows, and any notice printed as
+		 * an error, which is what recovery mode, paused plugins, and a licence
+		 * that can no longer fetch updates all use. The legacy `div.error` class
+		 * is left alone for the same reason.
+		 */
 		$selectors = array(
-			'#wpbody-content .notice:not(.localepress-notice)',
+			'#wpbody-content .notice:not(.localepress-notice):not(.notice-error):not(.update-nag):not(.update-message)',
 			'#wpbody-content div.updated:not(.localepress-notice)',
-			'#wpbody-content div.error:not(.localepress-notice)',
-			'#wpbody-content .update-nag',
 		);
 
 		printf(
@@ -184,7 +226,11 @@ final class AdminNoticeGate implements ModuleInterface {
 
 		foreach ( $registered as $priority => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				if ( ! isset( $callback['function'] ) || $this->is_own_callback( $callback['function'] ) ) {
+				if (
+					! isset( $callback['function'] )
+					|| $this->is_own_callback( $callback['function'] )
+					|| $this->is_core_callback( $callback['function'] )
+				) {
 					continue;
 				}
 
@@ -194,33 +240,56 @@ final class AdminNoticeGate implements ModuleInterface {
 	}
 
 	/**
+	 * Determines whether a callback is one of WordPress's own.
+	 *
+	 * Matched by name because core registers these as plain functions, and as
+	 * one static method on a core class.
+	 *
+	 * @param mixed $callback Registered callback.
+	 * @return bool
+	 */
+	private function is_core_callback( $callback ) {
+		if ( is_string( $callback ) ) {
+			return in_array( $callback, self::CORE_CALLBACKS, true );
+		}
+
+		if ( ! is_array( $callback ) || ! isset( $callback[0] ) ) {
+			return false;
+		}
+
+		$owner = is_object( $callback[0] ) ? get_class( $callback[0] ) : $callback[0];
+
+		return is_string( $owner ) && self::CORE_NOTICE_CLASS === ltrim( $owner, '\\' );
+	}
+
+	/**
 	 * Determines whether a callback belongs to LocalePress.
 	 *
 	 * Closures cannot be attributed to an owner, so they are treated as
 	 * foreign. LocalePress registers its notice callbacks as class methods.
 	 *
-	 * @param mixed $function Registered callback.
+	 * @param mixed $callback Registered callback.
 	 * @return bool
 	 */
-	private function is_own_callback( $function ) {
-		if ( $function instanceof Closure ) {
+	private function is_own_callback( $callback ) {
+		if ( $callback instanceof Closure ) {
 			return false;
 		}
 
-		if ( is_string( $function ) ) {
-			return 0 === strpos( $function, self::OWN_FUNCTION_PREFIX )
-				|| 0 === strpos( $function, self::OWN_NAMESPACE );
+		if ( is_string( $callback ) ) {
+			return 0 === strpos( $callback, self::OWN_FUNCTION_PREFIX )
+				|| 0 === strpos( $callback, self::OWN_NAMESPACE );
 		}
 
-		if ( is_object( $function ) ) {
-			return 0 === strpos( get_class( $function ), self::OWN_NAMESPACE );
+		if ( is_object( $callback ) ) {
+			return 0 === strpos( get_class( $callback ), self::OWN_NAMESPACE );
 		}
 
-		if ( ! is_array( $function ) || ! isset( $function[0] ) ) {
+		if ( ! is_array( $callback ) || ! isset( $callback[0] ) ) {
 			return false;
 		}
 
-		$owner = is_object( $function[0] ) ? get_class( $function[0] ) : $function[0];
+		$owner = is_object( $callback[0] ) ? get_class( $callback[0] ) : $callback[0];
 
 		return is_string( $owner ) && 0 === strpos( $owner, self::OWN_NAMESPACE );
 	}

@@ -210,9 +210,9 @@ final class LanguageHostResolver {
 	/**
 	 * Finds the language served by one host.
 	 *
-	 * @param string                                    $host        Hostname to match.
-	 * @param array<string, array<string, mixed>>       $languages   Enabled languages.
-	 * @param string                                    $default_id  Default language identifier.
+	 * @param string                              $host        Hostname to match.
+	 * @param array<string, array<string, mixed>> $languages   Enabled languages.
+	 * @param string                              $default_id  Default language identifier.
 	 * @return array<string, mixed>|null
 	 */
 	public function match( $host, array $languages, $default_id = '' ) {
@@ -251,8 +251,8 @@ final class LanguageHostResolver {
 	/**
 	 * Returns the site host exactly as WordPress is configured to serve it.
 	 *
-	 * normalize() answers "do these two hosts name the same language", and for
-	 * that question a leading www is noise. Addressing a host is the opposite
+	 * The normalize() method answers "do these two hosts name the same
+	 * language", and for that question a leading www is noise. Addressing a host is the opposite
 	 * question: a site configured on www.example.com is reachable there and may
 	 * hold no certificate without it, so a URL built for it has to keep the
 	 * prefix. Both forms exist because comparing and addressing are not the same
@@ -390,9 +390,6 @@ final class LanguageHostResolver {
 		$host = strtolower( $host );
 		$host = preg_replace( '#[/?].*$#', '', $host );
 		$host = is_string( $host ) ? $host : '';
-
-		// A port never distinguishes one language from another, and dropping it
-		// keeps matching stable behind proxies and local development ports.
 		$host = preg_replace( '/:\d+$/', '', $host );
 		$host = is_string( $host ) ? trim( $host, '.' ) : '';
 

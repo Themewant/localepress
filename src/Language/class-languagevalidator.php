@@ -103,8 +103,6 @@ final class LanguageValidator {
 				return new WP_Error( 'duplicate_url_slug', __( 'That URL slug is already in use.', 'localepress' ) );
 			}
 
-			// Two languages on one domain would make the host ambiguous, and the
-			// first match would silently win for both.
 			if (
 				'' !== $language['domain']
 				&& isset( $existing_language['domain'] )

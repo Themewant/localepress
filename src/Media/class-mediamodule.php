@@ -96,8 +96,6 @@ final class MediaModule implements ModuleInterface {
 		add_action( 'updated_post_meta', array( $this, 'share_structural_meta' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( $this, 'unshare_structural_meta' ), 10, 3 );
 
-		// The widget form shows the record an editor picked, in the language they
-		// picked it in; only what a reader is served follows their language.
 		if ( ! is_admin() ) {
 			add_filter( 'widget_media_image_instance', array( $this, 'translate_media_widget' ), 5 );
 		}
@@ -234,8 +232,7 @@ final class MediaModule implements ModuleInterface {
 
 		try {
 			foreach ( $siblings as $sibling_id ) {
-				// update_post_meta() expects a slashed value, and what an action
-				// hands us has already been unslashed on its way into storage.
+
 				update_post_meta( $sibling_id, $meta_key, wp_slash( $meta_value ) );
 			}
 		} finally {
@@ -365,9 +362,6 @@ final class MediaModule implements ModuleInterface {
 
 		$instance['attachment_id'] = $target_id;
 
-		// Each field is replaced only where the widget is showing it and the
-		// translation has something of its own to say; an empty translation is
-		// not a better answer than the text that was already there.
 		if ( ! empty( $instance['alt'] ) ) {
 			$alt = get_post_meta( $target_id, MediaTranslationManager::ALT_META_KEY, true );
 

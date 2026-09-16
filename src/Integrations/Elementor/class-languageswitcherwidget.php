@@ -581,7 +581,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 				),
 				'selectors' => array(
 					'{{WRAPPER}} .localepress-switcher__list' => 'justify-content: {{VALUE}};',
-					'{{WRAPPER}} .localepress-switcher'       => 'display: flex; justify-content: {{VALUE}};',
+					'{{WRAPPER}} .localepress-switcher' => 'display: flex; justify-content: {{VALUE}};',
 				),
 			)
 		);
@@ -618,6 +618,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 				'layout'               => isset( $settings['layout'] ) ? $settings['layout'] : 'horizontal',
 				'hide_current'         => 'yes' === ( isset( $settings['hide_current'] ) ? $settings['hide_current'] : '' ),
 				'unavailable_behavior' => isset( $settings['unavailable_behavior'] ) ? $settings['unavailable_behavior'] : 'hide',
+
 				/*
 				 * Spelled out, and always false. `hide_missing` is the older
 				 * spelling of `unavailable_behavior="hide"` and the renderer

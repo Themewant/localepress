@@ -17,11 +17,18 @@
  *
  * Nothing here is required for the switcher to work: where this does not run,
  * every panel opens downward, exactly as it did before.
+ *
+ * Browser APIs used beyond ES5: `Element.closest`, `Element.matches`,
+ * `HTMLElement.dataset`, `window.requestAnimationFrame`, and passive event
+ * listeners. Each is guarded or optional, so an engine without one degrades to
+ * the stylesheet's own downward panel rather than failing.
+ *
+ * @package LocalePress
  */
 ( function () {
 	'use strict';
 
-	const SELECTOR = '.localepress-switcher__dropdown';
+	var SELECTOR = '.localepress-switcher__dropdown';
 
 	/**
 	 * Room to leave between the panel and the edge of the viewport, in pixels.
@@ -31,10 +38,53 @@
 	 *
 	 * @type {number}
 	 */
-	const EDGE = 8;
+	var EDGE = 8;
 
-	const open = new Set();
-	let frame = 0;
+	/**
+	 * Dropdowns currently open, in the order they were opened.
+	 *
+	 * @type {Array}
+	 */
+	var openPanels = [];
+
+	/**
+	 * Identifier of the pending animation frame, or zero when none is queued.
+	 *
+	 * @type {number}
+	 */
+	var frame = 0;
+
+	/**
+	 * Remembers one open dropdown, without ever listing it twice.
+	 *
+	 * @param {HTMLDetailsElement} details Open dropdown.
+	 * @return {void}
+	 */
+	function remember( details ) {
+		if ( -1 === openPanels.indexOf( details ) ) {
+			openPanels.push( details );
+		}
+	}
+
+	/**
+	 * Forgets one dropdown and clears the direction it was opened in.
+	 *
+	 * The attributes are cleared rather than left at their last value, so a panel
+	 * reopened somewhere else starts from the direction the stylesheet describes.
+	 *
+	 * @param {HTMLDetailsElement} details Dropdown that is no longer open.
+	 * @return {void}
+	 */
+	function forget( details ) {
+		var index = openPanels.indexOf( details );
+
+		if ( -1 !== index ) {
+			openPanels.splice( index, 1 );
+		}
+
+		delete details.dataset.localepressDrop;
+		delete details.dataset.localepressAlign;
+	}
 
 	/**
 	 * Points one open dropdown at the side of the switcher that can hold it.
@@ -47,8 +97,14 @@
 	 * @param {HTMLDetailsElement} details Open dropdown.
 	 * @return {void}
 	 */
-	const place = function ( details ) {
-		const list = details.querySelector( '.localepress-switcher__list' );
+	function place( details ) {
+		var list = details.querySelector( '.localepress-switcher__list' );
+		var anchor;
+		var below;
+		var above;
+		var rtl;
+		var width;
+		var overflows;
 
 		if ( ! list ) {
 			return;
@@ -57,28 +113,29 @@
 		// Measured against the summary, not the details element: the panel hangs
 		// off the summary's edge, and an open details box already contains the
 		// panel, so its own edges would answer the wrong question.
-		const anchor = ( details.querySelector( 'summary' ) || details ).getBoundingClientRect();
-		const below = window.innerHeight - anchor.bottom;
-		const above = anchor.top;
+		anchor = ( details.querySelector( 'summary' ) || details ).getBoundingClientRect();
+		below = window.innerHeight - anchor.bottom;
+		above = anchor.top;
 
 		// Downward stays the default: it flips only when the panel does not fit
 		// below and above is genuinely roomier, so a switcher with space on both
 		// sides keeps opening the way a reader expects. Where neither side fits,
 		// the roomier one still shows more of the list than the other would.
-		details.dataset.localepressDrop =
-			list.offsetHeight + EDGE > below && above > below ? 'up' : 'down';
+		if ( list.offsetHeight + EDGE > below && above > below ) {
+			details.dataset.localepressDrop = 'up';
+		} else {
+			details.dataset.localepressDrop = 'down';
+		}
 
 		// The same question sideways. A panel wider than the room left of the
 		// viewport edge would push the document wider and scroll the page across,
 		// which is the same bounce in the other axis.
-		const rtl = 'rtl' === window.getComputedStyle( list ).direction;
-		const width = list.offsetWidth;
-		const overflows = rtl
-			? anchor.right - width < EDGE
-			: anchor.left + width > window.innerWidth - EDGE;
+		rtl = 'rtl' === window.getComputedStyle( list ).direction;
+		width = list.offsetWidth;
+		overflows = rtl ? anchor.right - width < EDGE : anchor.left + width > window.innerWidth - EDGE;
 
 		details.dataset.localepressAlign = overflows ? 'end' : 'start';
-	};
+	}
 
 	/**
 	 * Opens one dropdown with its direction already decided.
@@ -86,13 +143,13 @@
 	 * @param {HTMLDetailsElement} details Closed dropdown.
 	 * @return {void}
 	 */
-	const show = function ( details ) {
+	function show( details ) {
 		// Reading a layout property below flushes the pending style change, so the
 		// panel is measured in its open state without a frame being painted first.
 		details.open = true;
 		place( details );
-		open.add( details );
-	};
+		remember( details );
+	}
 
 	/**
 	 * Closes one dropdown and forgets where it was.
@@ -100,42 +157,60 @@
 	 * @param {HTMLDetailsElement} details Open dropdown.
 	 * @return {void}
 	 */
-	const hide = function ( details ) {
+	function hide( details ) {
 		details.open = false;
-		open.delete( details );
+		forget( details );
+	}
 
-		// Cleared rather than left at its last value, so a panel reopened
-		// somewhere else starts from the direction the stylesheet describes.
-		delete details.dataset.localepressDrop;
-		delete details.dataset.localepressAlign;
-	};
-
-	const placeOpen = function () {
+	/**
+	 * Measures every open dropdown once, on the frame that was scheduled for it.
+	 *
+	 * @return {void}
+	 */
+	function placeOpen() {
 		frame = 0;
-		open.forEach( place );
-	};
 
-	// Scrolling changes how much room a switcher has without changing anything
-	// about the switcher, so an open panel is measured again on the next frame
-	// rather than on every event.
-	const schedule = function () {
-		if ( ! frame && open.size ) {
+		// Copied first: measuring never changes the list, but reading it once
+		// keeps the loop off the live array either way.
+		openPanels.slice().forEach( place );
+	}
+
+	/**
+	 * Queues one measurement pass for the next frame.
+	 *
+	 * Scrolling changes how much room a switcher has without changing anything
+	 * about the switcher, so an open panel is measured again on the next frame
+	 * rather than on every event.
+	 *
+	 * @return {void}
+	 */
+	function schedule() {
+		if ( ! frame && openPanels.length ) {
 			frame = window.requestAnimationFrame( placeOpen );
 		}
-	};
+	}
 
-	document.addEventListener( 'click', function ( event ) {
+	/**
+	 * Opens or closes the dropdown whose summary was clicked.
+	 *
+	 * @param {MouseEvent} event Click event.
+	 * @return {void}
+	 */
+	function onClick( event ) {
+		var summary;
+		var details;
+
 		if ( event.defaultPrevented || 0 !== event.button ) {
 			return;
 		}
 
-		const summary = event.target.closest ? event.target.closest( SELECTOR + ' > summary' ) : null;
+		summary = event.target.closest ? event.target.closest( SELECTOR + ' > summary' ) : null;
 
 		if ( ! summary ) {
 			return;
 		}
 
-		const details = summary.parentElement;
+		details = summary.parentElement;
 
 		event.preventDefault();
 
@@ -144,34 +219,43 @@
 		} else {
 			show( details );
 		}
-	} );
+	}
 
-	// A dropdown can also be opened by something other than its summary — a
-	// script, or a browser's find-in-page. `toggle` is not a bubbling event, so
-	// the listener catches it on the way down.
-	document.addEventListener(
-		'toggle',
-		function ( event ) {
-			const details = event.target;
+	/**
+	 * Follows a dropdown opened by something other than its summary.
+	 *
+	 * A script, or a browser's find-in-page, can open one too. `toggle` is not a
+	 * bubbling event, so this runs in the capture phase.
+	 *
+	 * @param {Event} event Toggle event.
+	 * @return {void}
+	 */
+	function onToggle( event ) {
+		var details = event.target;
 
-			if ( ! details || ! details.matches || ! details.matches( SELECTOR ) ) {
-				return;
-			}
+		if ( ! details || ! details.matches || ! details.matches( SELECTOR ) ) {
+			return;
+		}
 
-			if ( details.open ) {
-				open.add( details );
-				place( details );
+		if ( details.open ) {
+			remember( details );
+			place( details );
 
-				return;
-			}
+			return;
+		}
 
-			open.delete( details );
-			delete details.dataset.localepressDrop;
-			delete details.dataset.localepressAlign;
-		},
-		true
-	);
+		forget( details );
+	}
 
+	document.removeEventListener( 'click', onClick );
+	document.addEventListener( 'click', onClick );
+
+	document.removeEventListener( 'toggle', onToggle, true );
+	document.addEventListener( 'toggle', onToggle, true );
+
+	window.removeEventListener( 'scroll', schedule );
 	window.addEventListener( 'scroll', schedule, { passive: true } );
+
+	window.removeEventListener( 'resize', schedule );
 	window.addEventListener( 'resize', schedule, { passive: true } );
 }() );

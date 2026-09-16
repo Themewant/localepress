@@ -67,14 +67,10 @@ final class MediaTranslationManager {
 			return new WP_Error( 'invalid_media_source', __( 'Only attachments can be translated as media.', 'localepress' ) );
 		}
 
-		// Attachments are never drafts, and their MIME type and GUID both describe
-		// the shared file rather than this record.
 		$post_data['post_status']    = 'inherit';
 		$post_data['post_mime_type'] = $source->post_mime_type;
 		$post_data['guid']           = $source->guid;
 
-		// Passing no file keeps WordPress from deriving a new stored path; the
-		// source path is applied verbatim below.
 		$translation_id = wp_insert_attachment( wp_slash( $post_data ), false, 0, true );
 
 		if ( is_wp_error( $translation_id ) ) {

@@ -91,8 +91,8 @@ final class RoutingModule implements ModuleInterface {
 	/**
 	 * Language the last canonical URL was built for.
 	 *
-	 * get_unprefixed_redirect_url() answers with a URL because that is what its
-	 * callers and tests want from it, but a singular or term route is corrected
+	 * The get_unprefixed_redirect_url() method answers with a URL because that
+	 * is what its callers and tests want, but a singular or term route is corrected
 	 * to the language its object belongs to rather than to the default one. The
 	 * loop check needs to know which, so the decision is recorded as it is made.
 	 *
@@ -222,8 +222,6 @@ final class RoutingModule implements ModuleInterface {
 	public function add_language_rewrite_rules( $rules ) {
 		$slugs = $this->url_manager->get_language_slugs();
 
-		// Host and query routing keep core's own paths; the language never enters
-		// the path, so there is nothing extra to match.
 		if (
 			empty( $slugs )
 			|| $this->url_manager->uses_host_routing()
@@ -281,9 +279,9 @@ final class RoutingModule implements ModuleInterface {
 	/**
 	 * Treats every language host as an internal redirect target.
 	 *
-	 * wp_safe_redirect() refuses any host but the site's own, which would silently
-	 * drop every canonical and browser-detection redirect the moment a language
-	 * lives on a host of its own.
+	 * The wp_safe_redirect() function refuses any host but the site's own, which
+	 * would silently drop every canonical and browser-detection redirect the
+	 * moment a language lives on a host of its own.
 	 *
 	 * @param array<int, string> $hosts Allowed redirect hosts.
 	 * @return array<int, string>
@@ -302,8 +300,6 @@ final class RoutingModule implements ModuleInterface {
 				continue;
 			}
 
-			// Both spellings of the same host are the site's own, and a host that
-			// already carries www must not be offered as www.www.
 			$bare    = 0 === strpos( $host, 'www.' ) ? substr( $host, 4 ) : $host;
 			$hosts[] = $bare;
 			$hosts[] = 'www.' . $bare;
@@ -442,8 +438,6 @@ final class RoutingModule implements ModuleInterface {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_debug_backtrace, WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- No hook carries the caller; inspected in memory and never output.
 		$traces = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
 
-		// The first frames are this method, the filter callback, and the hook
-		// plumbing that reached it. None of them is the caller.
 		$traces = array_slice( $traces, 3 );
 		$rules  = $this->get_front_door_callers();
 		$match  = false;
@@ -476,13 +470,13 @@ final class RoutingModule implements ModuleInterface {
 	 * home URL a plugin builds while the theme is on screen.
 	 *
 	 * @param array<string, string> $rule     Rule with a function and/or file key.
-	 * @param string                $function Frame function name.
+	 * @param string                $function_name Frame function name.
 	 * @param string                $file     Frame file path.
 	 * @param bool                  $entry    Whether a file rule needs a home URL call.
 	 * @return bool
 	 */
-	private function trace_matches( array $rule, $function, $file, $entry ) {
-		if ( ! empty( $rule['function'] ) && $rule['function'] === $function ) {
+	private function trace_matches( array $rule, $function_name, $file, $entry ) {
+		if ( ! empty( $rule['function'] ) && $rule['function'] === $function_name ) {
 			return true;
 		}
 
@@ -490,7 +484,7 @@ final class RoutingModule implements ModuleInterface {
 			return false;
 		}
 
-		return ! $entry || in_array( $function, array( 'home_url', 'get_home_url', 'bloginfo', 'get_bloginfo' ), true );
+		return ! $entry || in_array( $function_name, array( 'home_url', 'get_home_url', 'bloginfo', 'get_bloginfo' ), true );
 	}
 
 	/**
@@ -566,8 +560,6 @@ final class RoutingModule implements ModuleInterface {
 			return $url;
 		}
 
-		// home_url() with no path at all answers without a trailing slash, and a
-		// theme comparing that string against the current URL depends on it.
 		return '' === (string) $path ? untrailingslashit( $home ) : $home;
 	}
 
@@ -953,9 +945,6 @@ final class RoutingModule implements ModuleInterface {
 			return $clauses;
 		}
 
-		// Reading the terms one object holds answers what that object was given,
-		// so it keeps every one of them whatever language is being viewed. A
-		// sitemap query names every language on purpose and narrows itself.
 		if ( is_array( $args )
 			&& ( ! empty( $args['object_ids'] )
 				|| ! empty( $args['localepress_skip_language_filter'] )
@@ -1458,12 +1447,14 @@ final class RoutingModule implements ModuleInterface {
 			|| is_404()
 			|| is_preview()
 			|| $this->url_manager->is_builder_preview_request()
+
 			/*
 			 * Only a path prefix needs pretty permalinks to exist at all. A query
 			 * argument is added to whatever URL WordPress already produced, so it
 			 * is canonicalized on a plain-permalink site too.
 			 */
 			|| ( ! $this->url_manager->uses_query_routing() && '' === (string) get_option( 'permalink_structure' ) )
+
 			/*
 			 * Host routing has no unprefixed form to correct: every request already
 			 * arrives on a language host, or on one that maps to no language at all
@@ -1516,8 +1507,8 @@ final class RoutingModule implements ModuleInterface {
 			 * The two redirects run on the same request and have to agree, or
 			 * each would keep undoing the other.
 			 */
-			$url                        = $this->url_manager->get_post_url( get_queried_object_id(), '' );
-			$this->redirect_language    = $this->object_language(
+			$url                     = $this->url_manager->get_post_url( get_queried_object_id(), '' );
+			$this->redirect_language = $this->object_language(
 				$this->post_translations->get_post_language_id( get_queried_object_id() ),
 				$default
 			);
@@ -1680,14 +1671,9 @@ final class RoutingModule implements ModuleInterface {
 				array(
 					'schema'              => self::REWRITE_SCHEMA_VERSION,
 					'slugs'               => $slugs,
-					// Switching between directory and host routing adds or removes
-					// every localized rule, so the mode and its hosts belong here.
 					'mode'                => $this->url_manager->hosts()->get_mode(),
 					'hosts'               => $hosts,
 					'permalink_structure' => (string) get_option( 'permalink_structure' ),
-					// Dividing the sitemap by language adds the rules that give
-					// each language's sitemap an address, and turning it off
-					// takes them away again.
 					'split_sitemaps'      => $this->settings->is_sitemap_split_enabled(),
 				)
 			)
@@ -2154,8 +2140,6 @@ final class RoutingModule implements ModuleInterface {
 	private function query_reads_supported_post_types( WP_Query $query ) {
 		$post_types = $this->get_queried_post_types( $query );
 
-		// A query asking for every post type names none in particular, so there
-		// is nothing here to opt out of the constraint.
 		if ( empty( $post_types ) ) {
 			return true;
 		}
