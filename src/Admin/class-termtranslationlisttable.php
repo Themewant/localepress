@@ -252,10 +252,17 @@ final class TermTranslationListTable {
 			);
 		}
 
+		/*
+		 * A flag and a two-letter code identify the language at a glance, and a
+		 * column of full native names only crowds the row. The name stays
+		 * reachable on hover and is the only part a screen reader announces,
+		 * since "EN" on its own says very little.
+		 */
 		return sprintf(
-			'%1$s<strong>%2$s</strong><span class="localepress-list-native-name">%3$s</span>',
+			'<span class="localepress-list-language" title="%3$s">%1$s<strong aria-hidden="true">%2$s</strong><span class="screen-reader-text">%4$s</span></span>',
 			$this->flags->get_flag_html( $language ),
 			esc_html( strtoupper( $language['language_code'] ) ),
+			esc_attr( $language['native_name'] ),
 			esc_html( $language['native_name'] )
 		);
 	}

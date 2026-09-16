@@ -20,11 +20,18 @@ defined( 'ABSPATH' ) || exit;
  * document language WordPress prints all derive from `get_locale()`, so a
  * request in a language has to answer with that language's locale.
  *
- * The switch is bound to a request that named a language: a frontend URL under
- * a language prefix, and equally an AJAX or REST call that named one, because a
- * fragment of a page belongs to the same language as the page it joins.
- * Administration screens, login, cron, and CLI name none, so they keep the site
- * locale without needing a guard of their own.
+ * The language is the one detection resolved for the request, and not a second
+ * opinion about it: the address under a language prefix, the language an AJAX
+ * or REST call named because a fragment belongs to the page it joins, the
+ * language of the document a preview is showing, and, where none of those
+ * settle it, the default the site answers its bare address in. That is the
+ * same answer the content query, the document language attributes, and the
+ * switcher are all already built on, so a locale taken from anywhere else is
+ * how a page ends up serving one language's posts in another language's theme
+ * strings, dates, and text direction.
+ *
+ * Administration screens, login, cron, and CLI resolve no language of their
+ * own, so they keep the site locale without needing a guard here.
  */
 final class LocaleModule implements ModuleInterface {
 
@@ -162,7 +169,7 @@ final class LocaleModule implements ModuleInterface {
 	}
 
 	/**
-	 * Makes `is_rtl()` answer for the request language rather than the locale.
+	 * Makes `is_rtl()` answer for the configured language, not for a .mo string.
 	 *
 	 * WordPress derives text direction from a string inside the locale's own
 	 * translation file: `WP_Locale::init()` reads `_x( 'ltr', 'text direction' )`
@@ -176,6 +183,10 @@ final class LocaleModule implements ModuleInterface {
 	 * Announcing the direction the language was configured with settles that
 	 * ahead of `WP_Locale`, and every consumer follows from there: `is_rtl()`,
 	 * the RTL stylesheet each handle registers, and whatever the theme asks.
+	 *
+	 * Which language that is comes from resolve_request_language() — the same
+	 * call filter_locale() switches on — so `is_rtl()`, the locale, and the
+	 * `dir` the document prints always describe one language.
 	 *
 	 * @return void
 	 */
@@ -210,7 +221,12 @@ final class LocaleModule implements ModuleInterface {
 	}
 
 	/**
-	 * Returns the language record this request runs in, if any.
+	 * Returns the language this request is being answered in, if any.
+	 *
+	 * The one place the question is asked. Both the locale and the text
+	 * direction are read from what this returns, so neither can describe a
+	 * language the other does not — which is the whole reason it exists as a
+	 * method rather than as two conditions that happen to look alike.
 	 *
 	 * @return array<string, mixed>|null
 	 */
@@ -219,6 +235,11 @@ final class LocaleModule implements ModuleInterface {
 			return null;
 		}
 
+		/*
+		 * Language lookup reads options and runs extension filters, either of
+		 * which may call get_locale() again. The guard above answers that inner
+		 * call with the unfiltered locale instead of recursing.
+		 */
 		$this->resolving = true;
 
 		try {
@@ -233,6 +254,10 @@ final class LocaleModule implements ModuleInterface {
 	/**
 	 * Returns the locale this request should run in, resolved once.
 	 *
+	 * A language whose locale is missing or malformed leaves WordPress on the
+	 * site locale: a translated page in the site's own language is a smaller
+	 * failure than one in a locale that names no translation file at all.
+	 *
 	 * @return string Empty when the site locale must be left alone.
 	 */
 	private function resolve_request_locale() {
@@ -240,30 +265,19 @@ final class LocaleModule implements ModuleInterface {
 			return $this->resolved;
 		}
 
-		/*
-		 * Language lookup reads options and runs extension filters, either of
-		 * which may call get_locale() again. Answer that inner call with the
-		 * unfiltered locale instead of recursing.
-		 */
-		if ( $this->resolving || ! $this->is_switchable_request() ) {
+		// Mid-resolution, so nothing is settled yet and the memo stays empty
+		// for the outer call that is still on its way to filling it.
+		if ( $this->resolving ) {
 			return '';
 		}
 
-		$this->resolving = true;
+		$language = $this->resolve_request_language();
 
-		try {
-			$language = $this->url_manager->request_has_language_prefix()
-				? $this->url_manager->get_current_language()
-				: null;
+		$locale = null !== $language && isset( $language['locale'] ) && is_scalar( $language['locale'] )
+			? trim( (string) $language['locale'] )
+			: '';
 
-			$locale = is_array( $language ) && isset( $language['locale'] ) && is_scalar( $language['locale'] )
-				? trim( (string) $language['locale'] )
-				: '';
-
-			$this->resolved = preg_match( '/^[A-Za-z]{2,3}(?:_[A-Za-z0-9]{2,12}){0,3}$/', $locale ) ? $locale : '';
-		} finally {
-			$this->resolving = false;
-		}
+		$this->resolved = preg_match( '/^[A-Za-z]{2,3}(?:_[A-Za-z0-9]{2,12}){0,3}$/', $locale ) ? $locale : '';
 
 		return $this->resolved;
 	}

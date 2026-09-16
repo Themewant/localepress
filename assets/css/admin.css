@@ -314,17 +314,17 @@
 }
 
 .column-localepress_language {
-	width: 130px;
+	width: 90px;
 }
 
 .column-localepress_translations {
 	width: 140px;
 }
 
-.localepress-list-native-name {
-	display: block;
-	margin-top: 2px;
-	color: #646970;
+.localepress-list-language {
+	display: inline-flex;
+	align-items: center;
+	white-space: nowrap;
 }
 
 .localepress-unassigned {
