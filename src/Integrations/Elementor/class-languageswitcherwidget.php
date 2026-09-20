@@ -707,14 +707,14 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		}
 
 		/*
-		 * Styled inline rather than from a stylesheet. This markup exists only
-		 * inside the editor, and a rule shipped in the frontend stylesheet for
-		 * it would be downloaded by every visitor to describe something none of
-		 * them can ever be shown.
+		 * Styled from assets/css/elementor-editor.css, which ElementorWidgetModule
+		 * enqueues on the editor's own hook. This markup exists only inside the
+		 * editor, and a rule shipped in the frontend stylesheet for it would be
+		 * downloaded by every visitor to describe something none of them can
+		 * ever be shown.
 		 */
 		printf(
-			'<div class="localepress-elementor-placeholder" style="%1$s">%2$s</div>',
-			esc_attr( 'padding:1em;border:1px dashed currentColor;border-radius:4px;opacity:.7;font-size:13px;text-align:center;' ),
+			'<div class="localepress-elementor-placeholder">%1$s</div>',
 			esc_html__( 'No language can be shown here yet. Register a second language, or widen the Missing translation setting.', 'localepress' )
 		);
 	}

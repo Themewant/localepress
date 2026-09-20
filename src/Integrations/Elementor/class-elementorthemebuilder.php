@@ -43,6 +43,21 @@ final class ElementorThemeBuilder {
 	const LOCATION_META_KEY = '_elementor_location';
 
 	/**
+	 * Post type holding Theme Builder templates and popups.
+	 */
+	const POST_TYPE = 'elementor_library';
+
+	/**
+	 * Taxonomy recording what kind of document a template is.
+	 */
+	const TYPE_TAXONOMY = 'elementor_library_type';
+
+	/**
+	 * Meta key recording the same thing that taxonomy term does.
+	 */
+	const TEMPLATE_TYPE_META_KEY = '_elementor_template_type';
+
+	/**
 	 * Sub-conditions whose identifier names a user rather than content.
 	 *
 	 * @var array<int, string>
@@ -82,6 +97,100 @@ final class ElementorThemeBuilder {
 	) {
 		$this->post_translations = $post_translations;
 		$this->term_translations = $term_translations;
+	}
+
+	/**
+	 * Returns the metadata a translated template needs to behave like its source.
+	 *
+	 * Element data is not among them. What a document holds is copied by the
+	 * Elementor service, which validates it and rolls back when it cannot; these
+	 * are the keys that say what the document is and where it belongs.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function meta_keys() {
+		return array(
+			self::TEMPLATE_TYPE_META_KEY,
+			self::CONDITIONS_META_KEY,
+			self::POPUP_SETTINGS_META_KEY,
+			self::LOCATION_META_KEY,
+		);
+	}
+
+	/**
+	 * Reports whether the Theme Builder is present.
+	 *
+	 * The constant, not a class of the Theme Builder's. Elementor Pro registers
+	 * its modules on `elementor_pro/init`, long after LocalePress composes its
+	 * own, so asking for one of those classes here answers no on every site that
+	 * has them. The constant is defined as the plugin file is read, which is
+	 * before any of this.
+	 *
+	 * @return bool
+	 */
+	public function is_available() {
+		$available = defined( 'ELEMENTOR_PRO_VERSION' );
+
+		/**
+		 * Filters whether the Elementor Pro Theme Builder integration is available.
+		 *
+		 * @param bool $available Whether Elementor Pro is present.
+		 */
+		return (bool) apply_filters( 'localepress_elementor_pro_available', $available );
+	}
+
+	/**
+	 * Returns the template one location should render in one language.
+	 *
+	 * A location ranks the templates that matched by how specific their conditions
+	 * are, and knows nothing about language, so a template and its translation
+	 * claiming the same thing tie and the answer falls to whichever sorted first.
+	 * What settles it is that every candidate of one translation group answers
+	 * with the same identifier: the translation written in the language being
+	 * read, and when there is none, the template the group was translated from. A
+	 * language nobody has written this template for therefore gets the source
+	 * language's, and a location that renders all of its matches rather than one —
+	 * popups — renders each of them once instead of once per translation.
+	 *
+	 * Zero means the identifier that came in is already the best answer.
+	 *
+	 * @param int    $template_id Template post identifier.
+	 * @param string $language_id Language being rendered.
+	 * @return int Zero when no other template applies.
+	 */
+	public function resolve_template_id( $template_id, $language_id ) {
+		$template_id = absint( $template_id );
+		$language_id = (string) $language_id;
+
+		if ( 0 === $template_id || '' === $language_id ) {
+			return 0;
+		}
+
+		$post_type = get_post_type( $template_id );
+
+		if ( ! is_string( $post_type ) || ! $this->post_translations->supports_post_type( $post_type ) ) {
+			return 0;
+		}
+
+		$own_language = $this->post_translations->get_post_language_id( $template_id );
+
+		if ( '' === $own_language || $language_id === $own_language ) {
+			return 0;
+		}
+
+		$translated = $this->translate_template_id( $template_id, $language_id );
+
+		if ( 0 < $translated ) {
+			return $translated;
+		}
+
+		$source = absint( $this->post_translations->get_source_post_id( $template_id ) );
+
+		if ( 0 === $source || $source === $template_id ) {
+			return 0;
+		}
+
+		return 'publish' === get_post_status( $source ) ? $source : 0;
 	}
 
 	/**

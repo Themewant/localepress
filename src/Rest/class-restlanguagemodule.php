@@ -355,22 +355,11 @@ final class RestLanguageModule implements ModuleInterface {
 	 * @return array<int, mixed>
 	 */
 	public function add_language_to_preload_paths( $preload_paths, $context ) {
-		if ( ! is_array( $preload_paths ) || ! is_object( $context ) || ! isset( $context->post ) ) {
+		if ( ! is_array( $preload_paths ) ) {
 			return $preload_paths;
 		}
 
-		$post = $context->post;
-
-		if ( ! $post instanceof \WP_Post || ! $this->post_translations->supports_post_type( $post->post_type ) ) {
-			return $preload_paths;
-		}
-
-		$language_id = $this->post_translations->get_post_language_id( $post->ID );
-
-		if ( '' === $language_id ) {
-
-			$language_id = $this->language_manager->get_default_id();
-		}
+		$language_id = $this->editor_language_id( $context );
 
 		if ( '' === $language_id ) {
 			return $preload_paths;
@@ -414,6 +403,45 @@ final class RestLanguageModule implements ModuleInterface {
 	}
 
 	/**
+	 * Returns the language an editor screen is working in.
+	 *
+	 * The post being edited answers it wherever there is one. The Site Editor has
+	 * no post in its context — it opens a template part by slug — so screens that
+	 * know their own language say so through the filter instead, and without one
+	 * the default language is a better answer than no answer: an unfiltered list
+	 * mixes every language, which is the thing being prevented.
+	 *
+	 * @param mixed $context Block editor context, where one exists.
+	 * @return string Empty only when the site has no languages.
+	 */
+	private function editor_language_id( $context = null ) {
+		$language_id = '';
+		$post        = is_object( $context ) && isset( $context->post ) ? $context->post : null;
+
+		if ( $post instanceof \WP_Post && $this->post_translations->supports_post_type( $post->post_type ) ) {
+			$language_id = $this->post_translations->get_post_language_id( $post->ID );
+		}
+
+		/**
+		 * Filters the language an editor screen is working in.
+		 *
+		 * An empty string leaves the answer to the post being edited, and then to
+		 * the default language. A screen that opens content the post context does
+		 * not describe — the Site Editor — answers here.
+		 *
+		 * @param string $language_id Language identifier, or an empty string.
+		 * @param mixed  $context     Block editor context, where one exists.
+		 */
+		$filtered = apply_filters( 'localepress_editor_language_id', $language_id, $context );
+
+		if ( is_string( $filtered ) && '' !== $filtered && null !== $this->language_manager->find( $filtered ) ) {
+			return $filtered;
+		}
+
+		return '' !== $language_id ? $language_id : $this->language_manager->get_default_id();
+	}
+
+	/**
 	 * Loads the middleware that appends the language to editor REST requests.
 	 *
 	 * @return void
@@ -439,6 +467,7 @@ final class RestLanguageModule implements ModuleInterface {
 				array(
 					'routes'          => array_values( $routes ),
 					'defaultLanguage' => $this->language_manager->get_default_id(),
+					'language'        => $this->editor_language_id(),
 					'field'           => 'localepress_language_id',
 				)
 			) . ';',

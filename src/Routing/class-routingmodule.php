@@ -2271,14 +2271,27 @@ final class RoutingModule implements ModuleInterface {
 	}
 
 	/**
-	 * Compares URLs after harmless trailing-slash normalization.
+	 * Compares URLs after harmless trailing-slash and encoding normalization.
+	 *
+	 * Percent-encoding is decoded on both sides because the two URLs reach this
+	 * from different places and spell the same address differently. What a reader
+	 * asked for arrives exactly as their browser sent it, and a browser sending
+	 * `%e0%a6%ac` is as correct as one sending `%E0%A6%AC`. What this builds
+	 * passes through wp_sanitize_redirect(), which encodes in upper case. Compared
+	 * as written, the same address reads as two, and the redirect meant to correct
+	 * it sends the reader to the address they already asked for — which is a loop
+	 * with no way out of it, because every hop encodes the same way again.
+	 *
+	 * Decoding can only make two addresses read as one. That direction is the safe
+	 * one: its cost is a correction not made, against a redirect that never ends.
 	 *
 	 * @param string $first  First URL.
 	 * @param string $second Second URL.
 	 * @return bool
 	 */
 	private function same_url( $first, $second ) {
-		return untrailingslashit( $first ) === untrailingslashit( $second );
+		return rawurldecode( untrailingslashit( (string) $first ) )
+			=== rawurldecode( untrailingslashit( (string) $second ) );
 	}
 
 	/**

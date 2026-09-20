@@ -191,6 +191,14 @@ final class LanguageSwitcher {
 	 * walker, so they need this inner markup on its own, without the surrounding
 	 * switcher structure that render() adds.
 	 *
+	 * The flag and the label are handed over as one element rather than two. An
+	 * anchor LocalePress did not write is an anchor it cannot predict: a page
+	 * builder that lays its menu links out as a flex row and spreads their
+	 * children apart — which is how a link gets its label at one end and its
+	 * submenu arrow at the other — would put the flag at one end of the link and
+	 * the language at the other. Inside one element there is nothing to spread,
+	 * and the link keeps whatever alignment the menu was given.
+	 *
 	 * @param array<string, mixed> $item Prepared switcher item.
 	 * @param array<string, mixed> $args Switcher arguments.
 	 * @return string
@@ -200,7 +208,11 @@ final class LanguageSwitcher {
 			return '';
 		}
 
-		return $this->render_language_content( $item['language'], $this->normalize_args( $args ), $item );
+		$content = $this->render_language_content( $item['language'], $this->normalize_args( $args ), $item );
+
+		return '' === $content
+			? ''
+			: '<span class="localepress-switcher__content">' . $content . '</span>';
 	}
 
 	/**
@@ -687,9 +699,24 @@ final class LanguageSwitcher {
 	 */
 	private function strip_region( $label ) {
 		$stripped = preg_replace( '/\s*\([^()]*\)\s*$/u', '', $label );
-		$stripped = is_string( $stripped ) ? trim( $stripped ) : '';
+		$stripped = is_string( $stripped ) ? trim( $stripped ) : $label;
+		$stripped = '' === $stripped ? $label : $stripped;
 
-		return '' === $stripped ? $label : $stripped;
+		/*
+		 * A parenthesis is how English writes the region — "Spanish (Dominican
+		 * Republic)" — and how WordPress writes the native name of a locale whose
+		 * own language uses one. The Romance locales do not: their native names
+		 * join the region with a preposition, so "Español de República
+		 * Dominicana" and "Português do Brasil" arrive whole and read, in a
+		 * switcher, as four words where every neighbour has one.
+		 *
+		 * The preposition has to be surrounded by the label rather than open it,
+		 * so a name that simply begins with one of these words keeps it.
+		 */
+		$shortened = preg_replace( '/\s+(?:de|del|des|do|da|du)\s+\S.*$/ui', '', $stripped );
+		$shortened = is_string( $shortened ) ? trim( $shortened ) : '';
+
+		return '' === $shortened ? $stripped : $shortened;
 	}
 
 	/**

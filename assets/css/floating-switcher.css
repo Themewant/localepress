@@ -1,3 +1,31 @@
+/**
+ * The floating switcher, and nothing else.
+ *
+ * Loaded only on a page that prints one, so a site that placed its switcher
+ * in a menu or a template never pays for the strip it does not use.
+ *
+ * Everything here is scoped to `.localepress-switcher--floating`, because this
+ * is the one switcher that is not part of a theme's design. Every other
+ * placement sits inside a header, a footer, or a post and inherits the type and
+ * color around it; this one is drawn over the page and has nothing to inherit
+ * from, so it brings its own. The colors are custom properties rather than
+ * literals for exactly that reason - a theme overrides the four of them and the
+ * strip belongs to it again.
+ *
+ * Table of contents
+ *
+ *  1. Strip shell and palette
+ *  2. Placement
+ *  3. List and links
+ *  4. Vertical placements
+ *  5. Flags, unavailable items and dropdown
+ *  6. Media queries
+ */
+
+/* ------------------------------------------------------------------------
+ * 1. Strip shell and palette
+ * ------------------------------------------------------------------------ */
+
 /*
  * The floating switcher, and nothing else. Loaded only on a page that prints
  * one, so a site that placed its switcher in a menu or a template never pays
@@ -26,14 +54,11 @@
 	line-height: 1.2;
 }
 
-@media ( prefers-color-scheme: dark ) {
-	.localepress-switcher--floating {
-		--localepress-floating-bg: #2a2a2e;
-		--localepress-floating-text: #f2f2f4;
-		--localepress-floating-current-bg: #f2f2f4;
-		--localepress-floating-current-text: #101012;
-	}
-}
+/* End 1. Strip shell and palette */
+
+/* ------------------------------------------------------------------------
+ * 2. Placement
+ * ------------------------------------------------------------------------ */
 
 /*
  * Halfway down the side of the screen, flush against the edge it was given.
@@ -44,6 +69,7 @@
  * the screen, not about the text, so it stays on the right in a right-to-left
  * language instead of crossing over to meet the writing direction.
  */
+
 .localepress-switcher--floating.localepress-switcher--at-middle-right {
 	top: 50%;
 	right: 0;
@@ -64,6 +90,7 @@
  * The corners keep a margin instead: a strip wedged into a corner reads as a
  * rendering fault, and there is no edge for it to be flush against there.
  */
+
 .localepress-switcher--floating.localepress-switcher--at-bottom-right {
 	inset: auto 1rem 1rem auto;
 }
@@ -85,17 +112,17 @@
  * a switcher in a top corner lands underneath it. The two offsets are the two
  * heights the admin bar itself uses, at the width where it changes.
  */
+
 .admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
 .admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
 	top: calc( 1rem + 32px );
 }
 
-@media screen and ( max-width: 782px ) {
-	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
-	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
-		top: calc( 1rem + 46px );
-	}
-}
+/* End 2. Placement */
+
+/* ------------------------------------------------------------------------
+ * 3. List and links
+ * ------------------------------------------------------------------------ */
 
 /*
  * No padding of its own: the pinned side of the strip has to reach the edge of
@@ -104,6 +131,7 @@
  * direction of the stack is the shared stylesheet's business, so a horizontal
  * floater stays a row.
  */
+
 .localepress-switcher--floating .localepress-switcher__list {
 	gap: 0.3rem;
 	align-items: stretch;
@@ -114,6 +142,7 @@
  * current one can be filled in without a panel behind it, and so the strip has
  * no edges of its own to line up against the page.
  */
+
 .localepress-switcher--floating .localepress-switcher__link,
 .localepress-switcher--floating .localepress-switcher__unavailable,
 .localepress-switcher--floating .localepress-switcher__dropdown > summary {
@@ -135,6 +164,7 @@
  * survive that. `is-current` is the renderer's own class, so this follows the
  * same item every layout and every context calls current.
  */
+
 .localepress-switcher--floating .localepress-switcher__item.is-current .localepress-switcher__link {
 	background: var( --localepress-floating-current-bg );
 	color: var( --localepress-floating-current-text );
@@ -153,17 +183,11 @@
 	transform: translateX( 2px );
 }
 
-@media ( prefers-reduced-motion: reduce ) {
-	.localepress-switcher--floating .localepress-switcher__link,
-	.localepress-switcher--floating .localepress-switcher__dropdown > summary {
-		transition: none;
-	}
+/* End 3. List and links */
 
-	.localepress-switcher--floating .localepress-switcher__link:hover,
-	.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
-		transform: none;
-	}
-}
+/* ------------------------------------------------------------------------
+ * 4. Vertical placements
+ * ------------------------------------------------------------------------ */
 
 /*
  * The side against the screen is squared off so the strip reads as attached to
@@ -171,6 +195,7 @@
  * two middle positions touch an edge; a corner keeps its margin and stays
  * round on all four sides.
  */
+
 .localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__link,
 .localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__unavailable {
 	border-top-right-radius: 0;
@@ -185,12 +210,19 @@
 	padding-left: 0.7rem;
 }
 
+/* End 4. Vertical placements */
+
+/* ------------------------------------------------------------------------
+ * 5. Flags, unavailable items and dropdown
+ * ------------------------------------------------------------------------ */
+
 /*
  * Flags are square-cropped to a circle here and nowhere else. In a menu or a
  * post a flag sits beside body text at its own proportions; in the strip it is
  * a marker read before the label is, and a row of circles scans as a column in
  * a way a row of differently shaped rectangles does not.
  */
+
 .localepress-switcher--floating .localepress-switcher__flag {
 	width: 1.5em;
 	height: 1.5em;
@@ -200,6 +232,7 @@
 }
 
 /* An unreachable language is shown without pretending to be a button. */
+
 .localepress-switcher--floating .localepress-switcher__unavailable {
 	box-shadow: none;
 	font-weight: 500;
@@ -210,12 +243,31 @@
  * control. Its panel is drawn by the shared stylesheet and positioned by the
  * shared script, so only the summary needs the pill treatment above.
  */
+
 .localepress-switcher--floating .localepress-switcher__dropdown[open] > .localepress-switcher__list {
 	padding: 0.4rem;
 	border: 0;
 	border-radius: 12px;
 	background: var( --localepress-floating-bg );
 	box-shadow: 0 8px 28px rgba( 0, 0, 0, 0.18 );
+}
+
+/* End 5. Flags, unavailable items and dropdown */
+
+/* ------------------------------------------------------------------------
+ * 6. Media queries
+ *
+ * Grouped here, at the end of the file, so every responsive and preference
+ * override for this stylesheet is read in one place.
+ * ------------------------------------------------------------------------ */
+
+/* Narrow viewports. */
+
+@media screen and ( max-width: 782px ) {
+	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
+	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
+		top: calc( 1rem + 46px );
+	}
 }
 
 /*
@@ -226,6 +278,7 @@
  * language. Browsers without `:has()` keep the full labels, which is the same
  * strip, only wider.
  */
+
 @media screen and ( max-width: 600px ) {
 	.localepress-switcher--floating {
 		font-size: 0.8125rem;
@@ -258,6 +311,7 @@
  * `overflow-y` above would clip an open dropdown panel, which is drawn outside
  * the strip. A dropdown is one control tall and needs no scrolling of its own.
  */
+
 @media screen and ( max-width: 600px ) {
 	.localepress-switcher--floating.localepress-switcher--dropdown {
 		overflow: visible;
@@ -265,8 +319,37 @@
 	}
 }
 
+/* Colour scheme. */
+
+@media ( prefers-color-scheme: dark ) {
+	.localepress-switcher--floating {
+		--localepress-floating-bg: #2a2a2e;
+		--localepress-floating-text: #f2f2f4;
+		--localepress-floating-current-bg: #f2f2f4;
+		--localepress-floating-current-text: #101012;
+	}
+}
+
+/* Reduced motion. */
+
+@media ( prefers-reduced-motion: reduce ) {
+	.localepress-switcher--floating .localepress-switcher__link,
+	.localepress-switcher--floating .localepress-switcher__dropdown > summary {
+		transition: none;
+	}
+
+	.localepress-switcher--floating .localepress-switcher__link:hover,
+	.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
+		transform: none;
+	}
+}
+
+/* Print. */
+
 @media print {
 	.localepress-switcher--floating {
 		display: none;
 	}
 }
+
+/* End 6. Media queries */

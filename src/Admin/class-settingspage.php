@@ -636,39 +636,51 @@ final class SettingsPage {
 		}
 		?>
 		<div class="localepress-matrix-scroll">
-		<table class="widefat striped localepress-settings-table localepress-default-term-table"><thead><tr><th scope="col"><?php esc_html_e( 'Taxonomy', 'localepress' ); ?></th>
-		<?php
-		foreach ( $languages as $language ) :
-			?>
-			<th scope="col"><?php echo esc_html( $language['native_name'] ); ?></th><?php endforeach; ?></tr></thead><tbody>
-		<?php
-		foreach ( $taxonomies as $taxonomy ) :
-			?>
-			<?php
-			$object  = get_taxonomy( $taxonomy );
-			$label   = $object ? $object->labels->name : $taxonomy;
-			$grouped = $this->terms_by_language( $taxonomy );
-			?>
-			<tr><th scope="row"><span class="localepress-matrix-label"><?php echo esc_html( $label ); ?></span> <code><?php echo esc_html( $taxonomy ); ?></code></th>
-			<?php
-			foreach ( $languages as $language ) :
-				?>
-				<?php
-				$terms      = isset( $grouped[ $language['id'] ] ) ? $grouped[ $language['id'] ] : array();
-				$selected   = isset( $map[ $taxonomy ][ $language['id'] ] ) ? absint( $map[ $taxonomy ][ $language['id'] ] ) : 0;
-				$aria_label = sprintf(
-					/* translators: 1: taxonomy label, 2: language native name. */
-					__( '%1$s default for %2$s', 'localepress' ),
-					$label,
-					$language['native_name']
-				);
-				?>
-				<td><select name="default_terms[<?php echo esc_attr( $taxonomy ); ?>][<?php echo esc_attr( $language['id'] ); ?>]" aria-label="<?php echo esc_attr( $aria_label ); ?>"><option value="0"><?php esc_html_e( 'Translation of the site default', 'localepress' ); ?></option>
-				<?php
-				foreach ( $terms as $term ) :
-					?>
-				<option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $selected, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option><?php endforeach; ?></select></td><?php endforeach; ?>
-		</tr><?php endforeach; ?></tbody></table>
+			<table class="widefat striped localepress-settings-table localepress-default-term-table">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Taxonomy', 'localepress' ); ?></th>
+						<?php foreach ( $languages as $language ) : ?>
+							<th scope="col"><?php echo esc_html( $language['native_name'] ); ?></th>
+						<?php endforeach; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $taxonomies as $taxonomy ) : ?>
+						<?php
+						$object  = get_taxonomy( $taxonomy );
+						$label   = $object ? $object->labels->name : $taxonomy;
+						$grouped = $this->terms_by_language( $taxonomy );
+						?>
+						<tr>
+							<th scope="row">
+								<span class="localepress-matrix-label"><?php echo esc_html( $label ); ?></span>
+								<code><?php echo esc_html( $taxonomy ); ?></code>
+							</th>
+							<?php foreach ( $languages as $language ) : ?>
+								<?php
+								$terms      = isset( $grouped[ $language['id'] ] ) ? $grouped[ $language['id'] ] : array();
+								$selected   = isset( $map[ $taxonomy ][ $language['id'] ] ) ? absint( $map[ $taxonomy ][ $language['id'] ] ) : 0;
+								$aria_label = sprintf(
+									/* translators: 1: taxonomy label, 2: language native name. */
+									__( '%1$s default for %2$s', 'localepress' ),
+									$label,
+									$language['native_name']
+								);
+								?>
+								<td>
+									<select name="default_terms[<?php echo esc_attr( $taxonomy ); ?>][<?php echo esc_attr( $language['id'] ); ?>]" aria-label="<?php echo esc_attr( $aria_label ); ?>">
+										<option value="0"><?php esc_html_e( 'Translation of the site default', 'localepress' ); ?></option>
+										<?php foreach ( $terms as $term ) : ?>
+											<option value="<?php echo esc_attr( $term->term_id ); ?>" <?php selected( $selected, $term->term_id ); ?>><?php echo esc_html( $term->name ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</td>
+							<?php endforeach; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
 		</div>
 		<?php
 	}
@@ -781,37 +793,47 @@ final class SettingsPage {
 		$columns = count( $languages ) + 1;
 		?>
 		<div class="localepress-matrix-scroll">
-		<table class="widefat striped localepress-settings-table localepress-menu-location-table"><thead><tr><th scope="col"><?php esc_html_e( 'Theme location', 'localepress' ); ?></th>
-		<?php
-		foreach ( $languages as $language ) :
-			?>
-			<th scope="col"><?php echo esc_html( $language['native_name'] ); ?></th><?php endforeach; ?></tr></thead><tbody>
-		<?php
-		if ( empty( $locations ) ) :
-			?>
-			<tr><td colspan="<?php echo esc_attr( $columns ); ?>"><?php esc_html_e( 'The active theme has no registered menu locations.', 'localepress' ); ?></td></tr><?php endif; ?>
-		<?php
-		foreach ( $locations as $location => $label ) :
-			?>
-			<tr><th scope="row"><?php echo esc_html( $label ); ?></th>
-			<?php
-			foreach ( $languages as $language ) :
-				?>
-				<?php
-				$selected   = isset( $assignments[ $location ][ $language['id'] ] ) ? absint( $assignments[ $location ][ $language['id'] ] ) : 0;
-				$aria_label = sprintf(
-					/* translators: 1: theme location label, 2: language native name. */
-					__( '%1$s menu for %2$s', 'localepress' ),
-					$label,
-					$language['native_name']
-				);
-				?>
-				<td><select name="menu_locations[<?php echo esc_attr( $location ); ?>][<?php echo esc_attr( $language['id'] ); ?>]" aria-label="<?php echo esc_attr( $aria_label ); ?>"><option value="0"><?php esc_html_e( 'Use WordPress default', 'localepress' ); ?></option>
-				<?php
-				foreach ( $menus as $menu ) :
-					?>
-				<option value="<?php echo esc_attr( $menu->term_id ); ?>" <?php selected( $selected, $menu->term_id ); ?>><?php echo esc_html( $menu->name ); ?></option><?php endforeach; ?></select></td><?php endforeach; ?>
-		</tr><?php endforeach; ?></tbody></table>
+			<table class="widefat striped localepress-settings-table localepress-menu-location-table">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Theme location', 'localepress' ); ?></th>
+						<?php foreach ( $languages as $language ) : ?>
+							<th scope="col"><?php echo esc_html( $language['native_name'] ); ?></th>
+						<?php endforeach; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php if ( empty( $locations ) ) : ?>
+						<tr>
+							<td colspan="<?php echo esc_attr( $columns ); ?>"><?php esc_html_e( 'The active theme has no registered menu locations.', 'localepress' ); ?></td>
+						</tr>
+					<?php endif; ?>
+					<?php foreach ( $locations as $location => $label ) : ?>
+						<tr>
+							<th scope="row"><?php echo esc_html( $label ); ?></th>
+							<?php foreach ( $languages as $language ) : ?>
+								<?php
+								$selected   = isset( $assignments[ $location ][ $language['id'] ] ) ? absint( $assignments[ $location ][ $language['id'] ] ) : 0;
+								$aria_label = sprintf(
+									/* translators: 1: theme location label, 2: language native name. */
+									__( '%1$s menu for %2$s', 'localepress' ),
+									$label,
+									$language['native_name']
+								);
+								?>
+								<td>
+									<select name="menu_locations[<?php echo esc_attr( $location ); ?>][<?php echo esc_attr( $language['id'] ); ?>]" aria-label="<?php echo esc_attr( $aria_label ); ?>">
+										<option value="0"><?php esc_html_e( 'Use WordPress default', 'localepress' ); ?></option>
+										<?php foreach ( $menus as $menu ) : ?>
+											<option value="<?php echo esc_attr( $menu->term_id ); ?>" <?php selected( $selected, $menu->term_id ); ?>><?php echo esc_html( $menu->name ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</td>
+							<?php endforeach; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
 		</div>
 		<?php
 	}

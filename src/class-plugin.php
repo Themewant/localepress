@@ -21,6 +21,7 @@ use LocalePress\Admin\StringTranslationModule;
 use LocalePress\Admin\StringTranslationQuery;
 use LocalePress\Admin\MediaTranslationFields;
 use LocalePress\Admin\TermTranslationModule;
+use LocalePress\Admin\TranslationActions;
 use LocalePress\Admin\TranslationDashboardModule;
 use LocalePress\Admin\TranslationDashboardQuery;
 use LocalePress\Content\CommentLanguageModule;
@@ -43,13 +44,33 @@ use LocalePress\Infrastructure\OptionsLanguageRepository;
 use LocalePress\Integrations\Elementor\ElementorCompatibility;
 use LocalePress\Integrations\Cache\CacheCompatibilityModule;
 use LocalePress\Integrations\Elementor\ElementorModule;
+use LocalePress\Integrations\Elementor\ElementorSiteEditor;
 use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
 use LocalePress\Integrations\Elementor\ElementorThemeBuilderModule;
 use LocalePress\Integrations\Elementor\ElementorWidgetModule;
+use LocalePress\Integrations\ElementsKit\ElementsKitModule;
+use LocalePress\Integrations\ElementsKit\ElementsKitTemplates;
+use LocalePress\Integrations\EssentialAddons\EssentialAddonsAdmin;
+use LocalePress\Integrations\EssentialAddons\EssentialAddonsModule;
+use LocalePress\Integrations\EssentialAddons\EssentialAddonsTemplates;
+use LocalePress\Integrations\HappyAddons\HappyAddonsModule;
+use LocalePress\Integrations\HappyAddons\HappyAddonsTemplates;
+use LocalePress\Integrations\HeaderFooter\HeaderFooterModule;
+use LocalePress\Integrations\HeaderFooter\HeaderFooterTemplates;
+use LocalePress\Integrations\JegKit\JegKitDashboard;
+use LocalePress\Integrations\JegKit\JegKitModule;
+use LocalePress\Integrations\JegKit\JegKitTemplates;
+use LocalePress\Integrations\RoyalAddons\RoyalAddonsModule;
+use LocalePress\Integrations\RoyalAddons\RoyalAddonsTemplates;
 use LocalePress\Integrations\Seo\RankMathProvider;
 use LocalePress\Integrations\Seo\SeoMetaModule;
 use LocalePress\Integrations\Seo\SeoPressProvider;
 use LocalePress\Integrations\Seo\YoastSeoProvider;
+use LocalePress\Integrations\SiteEditor\SiteEditorModule;
+use LocalePress\Integrations\SiteEditor\SiteEditorSidebar;
+use LocalePress\Integrations\SiteEditor\TemplatePartLifecycle;
+use LocalePress\Integrations\SiteEditor\TemplatePartRoutes;
+use LocalePress\Integrations\SiteEditor\TemplateParts;
 use LocalePress\Integrations\Wpml\WpmlConfigModule;
 use LocalePress\Integrations\Wpml\WpmlConfigReader;
 use LocalePress\Language\BrowserLanguageDetector;
@@ -360,6 +381,19 @@ final class Plugin {
 			$this->plugin_settings
 		);
 
+		// Held in a variable because two builders store a template's language the
+		// same way — an Elementor document whose translation has to be published
+		// before a location may render it — and both integrations resolve it here.
+		$elementor_documents = new ElementorThemeBuilder(
+			$this->post_translation_manager,
+			$this->term_translation_manager
+		);
+
+		// Held in a variable because the administration screen offers the same
+		// assignments the frontend reads, and the two must agree on what a slug
+		// means in a language before either of them is registered.
+		$template_parts = new TemplateParts( $this->language_manager, $this->post_translation_manager );
+
 		$modules = array(
 
 			new LocaleModule( $this->language_url_manager ),
@@ -453,13 +487,79 @@ final class Plugin {
 			new ElementorModule( $this->elementor_compatibility ),
 
 			new ElementorThemeBuilderModule(
-				new ElementorThemeBuilder(
+				$elementor_documents,
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new HeaderFooterModule(
+				new HeaderFooterTemplates(
+					$elementor_documents,
 					$this->post_translation_manager,
 					$this->term_translation_manager
 				),
 				$this->post_translation_manager,
 				$this->language_url_manager
 			),
+
+			new EssentialAddonsModule(
+				new EssentialAddonsTemplates( $elementor_documents ),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new ElementsKitModule(
+				new ElementsKitTemplates( $elementor_documents, $this->post_translation_manager ),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new HappyAddonsModule(
+				new HappyAddonsTemplates( $elementor_documents, $this->post_translation_manager ),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new RoyalAddonsModule(
+				new RoyalAddonsTemplates(
+					$elementor_documents,
+					$this->post_translation_manager,
+					$this->term_translation_manager
+				),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new JegKitModule(
+				new JegKitTemplates(
+					$elementor_documents,
+					$this->post_translation_manager,
+					$this->term_translation_manager
+				),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			/*
+			 * Not among the administration modules below, though it only ever acts
+			 * on an administration screen. Half of what it does is answering one of
+			 * the builder's own REST routes, and a REST request is not an
+			 * administration request: `is_admin()` is false while it is served. Its
+			 * two hooks decide for themselves where they belong.
+			 */
+			new JegKitDashboard(
+				new JegKitTemplates(
+					$elementor_documents,
+					$this->post_translation_manager,
+					$this->term_translation_manager
+				),
+				$this->post_translation_manager,
+				$this->language_manager
+			),
+
+			new SiteEditorModule( $template_parts, $this->language_url_manager ),
+			new TemplatePartLifecycle( $template_parts, $this->post_translation_manager ),
+			new TemplatePartRoutes( $template_parts ),
 
 			new ElementorWidgetModule(),
 			new SyncModule(
@@ -545,6 +645,25 @@ final class Plugin {
 			$modules[] = new TermTranslationModule( $this->term_translation_manager, $this->language_manager );
 			$modules[] = new MediaTranslationFields( $this->post_translation_manager, $this->language_manager );
 			$modules[] = new AdminTextDirectionModule( $this->post_translation_manager, $this->language_manager );
+			$modules[] = new SiteEditorSidebar( $template_parts, $this->language_manager );
+			$modules[] = new EssentialAddonsAdmin(
+				new EssentialAddonsTemplates( $elementor_documents ),
+				$this->post_translation_manager,
+				$this->language_manager
+			);
+
+			/*
+			 * Administration only, though it hangs on none of the hooks the
+			 * modules above do. Elementor's Theme Builder answers `admin_init`
+			 * with a document of its own and ends the request there, so the one
+			 * hook this has is the one Elementor fires while preparing it.
+			 */
+			$modules[] = new ElementorSiteEditor(
+				$elementor_documents,
+				$this->post_translation_manager,
+				$this->language_manager,
+				new TranslationActions()
+			);
 		}
 
 		/**

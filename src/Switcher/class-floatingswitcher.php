@@ -194,6 +194,14 @@ final class FloatingSwitcher implements ModuleInterface {
 	 * frame: the editor also renders the page for its own template and popup
 	 * previews, which announce themselves nowhere in the URL.
 	 *
+	 * The Theme Builder screen is the case that makes this worth asking twice.
+	 * It draws each header and footer in a frame of the real front end, and the
+	 * floater would be printed over that frame the way it is printed over a
+	 * page — except that Elementor disables every interaction inside it, so
+	 * what a reader would see is a language switcher that does not switch. A
+	 * render Elementor calls static is a picture of the site rather than the
+	 * site, and nothing that has to be clicked belongs in a picture.
+	 *
 	 * @return bool
 	 */
 	private function in_elementor_editor() {
@@ -205,6 +213,15 @@ final class FloatingSwitcher implements ModuleInterface {
 
 		if ( ! is_object( $elementor ) ) {
 			return false;
+		}
+
+		if (
+			isset( $elementor->frontend )
+			&& is_object( $elementor->frontend )
+			&& method_exists( $elementor->frontend, 'is_static_render_mode' )
+			&& $elementor->frontend->is_static_render_mode()
+		) {
+			return true;
 		}
 
 		foreach ( array(

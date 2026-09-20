@@ -210,6 +210,38 @@ final class TranslationListTable {
 	}
 
 	/**
+	 * Returns the language marker as markup instead of printing it.
+	 *
+	 * A list table a plugin builds for a screen of its own runs neither of the
+	 * column hooks above, so an integration has to place the cells itself. Both
+	 * columns are captured rather than rewritten to return strings, so a screen
+	 * that borrows them shows exactly what the post list shows, and keeps showing
+	 * it when one of them changes.
+	 *
+	 * @param int $post_id Post identifier.
+	 * @return string
+	 */
+	public function get_language_markup( $post_id ) {
+		ob_start();
+		$this->render_language_column( absint( $post_id ) );
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Returns the translation status and action links as markup.
+	 *
+	 * @param int $post_id Post identifier.
+	 * @return string
+	 */
+	public function get_translations_markup( $post_id ) {
+		ob_start();
+		$this->render_translations_column( absint( $post_id ) );
+
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Primes all relationships used by the current list screen in two queries.
 	 *
 	 * @param array<int, WP_Post> $posts Queried posts.

@@ -19,8 +19,12 @@
 	/**
 	 * Reads the language currently selected in the editor.
 	 *
-	 * Falls back to the default language so a brand new post, which has no
-	 * assignment yet, still receives a consistent list.
+	 * The field comes first because the post editor lets someone change a post's
+	 * language without reloading, and from that moment the field is the only
+	 * thing that knows. The Site Editor has no such field: it opens a template
+	 * part rather than a post, so the language the page was rendered for is the
+	 * answer there. Failing both, the default language keeps a list consistent
+	 * rather than mixing every language.
 	 *
 	 * @return {string} Language identifier, or an empty string when unknown.
 	 */
@@ -31,7 +35,7 @@
 			return field.value;
 		}
 
-		return config.defaultLanguage || '';
+		return config.language || config.defaultLanguage || '';
 	}
 
 	/**

@@ -47,8 +47,14 @@ final class PostTypeSupport {
 		 * Filters the non-public post types LocalePress may translate.
 		 *
 		 * Adding a post type here only makes it eligible. It still has to be
-		 * returned from `localepress_supported_post_types` to be translated, and
-		 * it must register an administrative UI.
+		 * returned from `localepress_supported_post_types` to be translated.
+		 *
+		 * A post type declared here is exempt from the administrative UI
+		 * requirement the public types are held to. That requirement exists so a
+		 * site owner can reach what LocalePress offers to translate, and a type
+		 * named here is vouched for by whoever named it: a block theme's template
+		 * parts are edited in the Site Editor rather than through a list table,
+		 * and `show_ui` is false for exactly that reason.
 		 *
 		 * Example, for a header and footer builder:
 		 *
@@ -175,7 +181,7 @@ final class PostTypeSupport {
 				'attachment' === $post_type
 				|| ! $object
 				|| ( ! $object->public && ! $internal )
-				|| ! $object->show_ui
+				|| ( ! $object->show_ui && ! $internal )
 			) {
 				continue;
 			}

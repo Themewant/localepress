@@ -8,6 +8,7 @@
 namespace LocalePress\Integrations\Elementor;
 
 use Elementor\Widgets_Manager;
+use LocalePress\Assets;
 use LocalePress\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -32,11 +33,34 @@ final class ElementorWidgetModule implements ModuleInterface {
 	const CATEGORY = 'localepress';
 
 	/**
+	 * Handle of the stylesheet loaded inside the Elementor editor.
+	 */
+	const EDITOR_STYLE_HANDLE = 'localepress-elementor-editor';
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function register() {
 		add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
 		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
+		add_action( 'elementor/editor/after_enqueue_styles', array( $this, 'enqueue_editor_styles' ) );
+	}
+
+	/**
+	 * Loads the styles the widget placeholder needs.
+	 *
+	 * Enqueued on the editor's own hook, so the rule reaches the one place the
+	 * placeholder is drawn and no visitor ever downloads it.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_styles() {
+		wp_enqueue_style(
+			self::EDITOR_STYLE_HANDLE,
+			LOCALEPRESS_URL . 'assets/css/elementor-editor.css',
+			array(),
+			Assets::version( 'assets/css/elementor-editor.css' )
+		);
 	}
 
 	/**

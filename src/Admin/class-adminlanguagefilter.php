@@ -197,8 +197,16 @@ final class AdminLanguageFilter {
 	 * @return string
 	 */
 	private function get_current_admin_url() {
-		$request = isset( $_SERVER['REQUEST_URI'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+		/*
+		 * Not sanitize_text_field(): it deletes percent-encoded sequences, and a
+		 * search for a term written in any script but Latin is nothing else. The
+		 * filter links would come back holding a truncated search rather than the
+		 * one the screen is showing. esc_url_raw() below is the escaping this
+		 * needs, and it leaves percent-encoding alone.
+		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped by esc_url_raw() below; see above.
+		$request = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
+			? wp_unslash( $_SERVER['REQUEST_URI'] )
 			: '';
 
 		if ( '' === $request ) {
@@ -210,6 +218,8 @@ final class AdminLanguageFilter {
 		$file = '' === $path ? 'index.php' : basename( $path );
 		$args = wp_parse_url( $request, PHP_URL_QUERY );
 
-		return admin_url( $file . ( is_string( $args ) && '' !== $args ? '?' . $args : '' ) );
+		return esc_url_raw(
+			admin_url( $file . ( is_string( $args ) && '' !== $args ? '?' . $args : '' ) )
+		);
 	}
 }

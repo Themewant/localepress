@@ -1,3 +1,35 @@
+/**
+ * LocalePress admin styles.
+ *
+ * Loaded only on LocalePress screens and on the list tables, meta boxes and
+ * term forms the plugin adds a column or a field to. Every selector is
+ * prefixed with `localepress` so nothing here can reach another plugin's
+ * markup; the few core class names that appear are always qualified by a
+ * LocalePress ancestor.
+ *
+ * Table of contents
+ *
+ *  1. Languages screen
+ *  2. Language editor form
+ *  3. Settings screen shell
+ *  4. Setup wizard
+ *  5. Settings matrices: menu locations and default terms
+ *  6. Term forms and list table columns
+ *  7. Translation state chips
+ *  8. Translation meta box
+ *  9. Translation dashboard
+ * 10. String translation screen
+ * 11. Language flags
+ * 12. Flag select listbox
+ * 13. Setup wizard language list
+ * 14. Settings: switcher usage snippet
+ * 15. Media queries
+ */
+
+/* ------------------------------------------------------------------------
+ * 1. Languages screen
+ * ------------------------------------------------------------------------ */
+
 .localepress-heading {
 	display: flex;
 	align-items: center;
@@ -67,9 +99,21 @@
 	vertical-align: middle;
 }
 
+/* End 1. Languages screen */
+
+/* ------------------------------------------------------------------------
+ * 2. Language editor form
+ * ------------------------------------------------------------------------ */
+
 .localepress-language-form {
 	max-width: 760px;
 }
+
+/* End 2. Language editor form */
+
+/* ------------------------------------------------------------------------
+ * 3. Settings screen shell
+ * ------------------------------------------------------------------------ */
 
 .localepress-settings {
 	max-width: 1180px;
@@ -128,16 +172,11 @@
 	border-top: 1px solid #c3c4c7;
 }
 
-@media screen and ( max-width: 782px ) {
-	.localepress-checkbox-grid {
-		grid-template-columns: 1fr;
-	}
+/* End 3. Settings screen shell */
 
-	.localepress-settings-tabs {
-		display: flex;
-		flex-wrap: wrap;
-	}
-}
+/* ------------------------------------------------------------------------
+ * 4. Setup wizard
+ * ------------------------------------------------------------------------ */
 
 .localepress-setup-wizard {
 	max-width: 980px;
@@ -215,18 +254,11 @@
 	gap: 18px;
 }
 
-@media screen and ( max-width: 782px ) {
-	.localepress-wizard-progress li {
-		padding-right: 2px;
-		padding-left: 2px;
-		font-size: 10px;
-	}
+/* End 4. Setup wizard */
 
-	.localepress-wizard-progress span {
-		width: 26px;
-		height: 26px;
-	}
-}
+/* ------------------------------------------------------------------------
+ * 5. Settings matrices: menu locations and default terms
+ * ------------------------------------------------------------------------ */
 
 .localepress-settings-table th,
 .localepress-settings-table td {
@@ -243,6 +275,7 @@
  * `display: block` tables, so the table keeps real table layout and the cells
  * keep the padding `.widefat` gives them.
  */
+
 .localepress-matrix-scroll {
 	margin-top: 12px;
 	overflow-x: auto;
@@ -268,6 +301,7 @@
 }
 
 /* The first column labels the row, so it stays narrow and never wraps. */
+
 .localepress-menu-location-table th[scope="row"],
 .localepress-menu-location-table thead th:first-child,
 .localepress-default-term-table th[scope="row"],
@@ -287,6 +321,7 @@
 }
 
 /* Wide enough for the placeholder option, which is the longest label here. */
+
 .localepress-menu-location-table select,
 .localepress-default-term-table select {
 	width: 100%;
@@ -294,15 +329,11 @@
 	max-width: 100%;
 }
 
-@media screen and ( max-width: 782px ) {
-	.localepress-menu-location-table th,
-	.localepress-menu-location-table td,
-	.localepress-default-term-table th,
-	.localepress-default-term-table td {
-		padding: 10px;
-		min-width: 200px;
-	}
-}
+/* End 5. Settings matrices: menu locations and default terms */
+
+/* ------------------------------------------------------------------------
+ * 6. Term forms and list table columns
+ * ------------------------------------------------------------------------ */
 
 .term-localepress-language-wrap select {
 	width: 100%;
@@ -330,6 +361,12 @@
 .localepress-unassigned {
 	color: #646970;
 }
+
+/* End 6. Term forms and list table columns */
+
+/* ------------------------------------------------------------------------
+ * 7. Translation state chips
+ * ------------------------------------------------------------------------ */
 
 .localepress-list-translations,
 .localepress-translations-heading {
@@ -441,6 +478,12 @@ a.localepress-translation-state:focus {
 	box-shadow: 0 0 0 2px #2271b1;
 }
 
+/* End 7. Translation state chips */
+
+/* ------------------------------------------------------------------------
+ * 8. Translation meta box
+ * ------------------------------------------------------------------------ */
+
 .localepress-meta-box-translations {
 	margin-top: 14px;
 	padding-top: 12px;
@@ -527,6 +570,12 @@ a.localepress-translation-state:focus {
 	color: #8c8f94;
 }
 
+/* End 8. Translation meta box */
+
+/* ------------------------------------------------------------------------
+ * 9. Translation dashboard
+ * ------------------------------------------------------------------------ */
+
 .localepress-translation-dashboard .search-box {
 	margin-bottom: 8px;
 }
@@ -597,6 +646,12 @@ a.localepress-dashboard-state:focus {
 	color: #8c8f94;
 }
 
+/* End 9. Translation dashboard */
+
+/* ------------------------------------------------------------------------
+ * 10. String translation screen
+ * ------------------------------------------------------------------------ */
+
 .localepress-string-filters {
 	display: flex;
 	align-items: center;
@@ -635,6 +690,7 @@ a.localepress-dashboard-state:focus {
  * whatever other plugins enqueue after this file. Anything less loses the
  * moment one of them styles textareas inside a list table.
  */
+
 .localepress-string-translation-page td.column-translation textarea.localepress-string-translation {
 	box-sizing: border-box;
 	display: block;
@@ -671,6 +727,7 @@ a.localepress-dashboard-state:focus {
  * than in the single-language view. They still resize, and a long value still
  * scrolls, so nothing is lost by not showing three lines of every one.
  */
+
 .localepress-string-translation-page td.column-translation .localepress-string-translations--labelled textarea.localepress-string-translation {
 	height: 54px;
 	min-height: 0;
@@ -694,28 +751,13 @@ a.localepress-dashboard-state:focus {
  * Originals are short labels and headings; the space they would waste is worth
  * more to a cell holding one box per language.
  */
+
 .localepress-strings-all-languages .column-original {
 	width: 22%;
 }
 
 .localepress-strings-all-languages .column-translation {
 	width: auto;
-}
-
-/*
- * Core names a list table cell after its column, so this one carries a bare
- * "translation" class as well as "column-translation". Polylang styles that
- * exact class for its own strings screen -- it turns the cell into a flex
- * container and gives labels a percentage width -- and its admin stylesheet
- * loads on every admin screen, this one included. A td that is no longer a
- * table-cell drops out of the column it belongs to, which is what collapses
- * the field to a few characters wide. Undo it for our table only, and only
- * above the width where core stacks the cells on purpose.
- */
-@media screen and (min-width: 783px) {
-	.localepress-string-translation-page table.wp-list-table td.column-translation {
-		display: table-cell;
-	}
 }
 
 .localepress-string-translation-page td.column-translation label.localepress-string-language {
@@ -727,60 +769,11 @@ a.localepress-dashboard-state:focus {
 	margin-bottom: 0;
 }
 
-@media screen and (max-width: 782px) {
-	.localepress-heading {
-		align-items: flex-start;
-		flex-direction: column;
-	}
+/* End 10. String translation screen */
 
-	.localepress-order-column {
-		width: auto;
-		text-align: left;
-	}
-
-	.column-localepress_language,
-	.column-localepress_translations {
-		width: auto;
-	}
-
-	.localepress-translation-dashboard th[class*="column-language_"],
-	.localepress-translation-dashboard td[class*="column-language_"] {
-		width: auto;
-		text-align: left;
-	}
-
-	.localepress-string-filters {
-		align-items: stretch;
-		flex-direction: column;
-	}
-
-	.localepress-string-filters select,
-	.localepress-string-filters .button,
-	.localepress-string-filters .search-box,
-	.localepress-string-filters .search-box input {
-		width: 100%;
-		margin: 0;
-	}
-
-	.localepress-string-translation-page .column-identity,
-	.localepress-string-translation-page .column-original,
-	.localepress-string-translation-page .column-translation {
-		width: auto;
-	}
-
-	/*
-	 * A flag and a language code still fit beside a usable box in what a stacked
-	 * list table leaves next to its column name, so the pairs stay side by side
-	 * on a phone and only the boxes get shorter.
-	 */
-	.localepress-string-translation-page td.column-translation textarea.localepress-string-translation {
-		min-height: 52px;
-	}
-
-	.localepress-string-translation-page td.column-translation .localepress-string-translations--labelled textarea.localepress-string-translation {
-		height: 48px;
-	}
-}
+/* ------------------------------------------------------------------------
+ * 11. Language flags
+ * ------------------------------------------------------------------------ */
 
 /* Language flags. */
 
@@ -815,7 +808,14 @@ a.localepress-dashboard-state:focus {
 	margin-right: 5px;
 }
 
+/* End 11. Language flags */
+
+/* ------------------------------------------------------------------------
+ * 12. Flag select listbox
+ * ------------------------------------------------------------------------ */
+
 /* Language select enhanced with a flag beside every option. */
+
 .localepress-flag-select {
 	position: relative;
 	max-width: 25em;
@@ -827,6 +827,7 @@ a.localepress-dashboard-state:focus {
  * keeps the native select out of sight once the listbox has replaced it, and
  * keeps an option the search filtered out from holding on to its row.
  */
+
 .localepress-flag-select.is-enhanced > select[hidden],
 .localepress-flag-select .localepress-flag-select__panel[hidden],
 .localepress-flag-select .localepress-flag-select__option[hidden],
@@ -881,6 +882,7 @@ a.localepress-dashboard-state:focus {
  * The popup chrome lives on the panel rather than the list, so the search field
  * stays fixed at the top while only the options below it scroll.
  */
+
 .localepress-flag-select__panel {
 	position: absolute;
 	z-index: 100;
@@ -942,6 +944,7 @@ a.localepress-dashboard-state:focus {
  * Rendered for every option, including the languages with no bundled flag, so
  * the labels stay on one vertical line down the whole list.
  */
+
 .localepress-flag-select__flag {
 	display: inline-flex;
 	flex: 0 0 18px;
@@ -959,7 +962,14 @@ a.localepress-dashboard-state:focus {
 	white-space: nowrap;
 }
 
+/* End 12. Flag select listbox */
+
+/* ------------------------------------------------------------------------
+ * 13. Setup wizard language list
+ * ------------------------------------------------------------------------ */
+
 /* Setup wizard: the language list and the URL format choices. */
+
 .localepress-wizard-languages {
 	margin: 0 0 16px;
 }
@@ -1000,7 +1010,14 @@ a.localepress-dashboard-state:focus {
 	max-width: 420px;
 }
 
+/* End 13. Setup wizard language list */
+
+/* ------------------------------------------------------------------------
+ * 14. Settings: switcher usage snippet
+ * ------------------------------------------------------------------------ */
+
 /* Settings > Switcher: the shortcode that mirrors the controls above it. */
+
 .localepress-usage {
 	max-width: 780px;
 	margin: 0 0 16px;
@@ -1063,3 +1080,124 @@ a.localepress-dashboard-state:focus {
 .localepress-domain-panel .localepress-language-code {
 	min-width: 160px;
 }
+
+/* End 14. Settings: switcher usage snippet */
+
+/* ------------------------------------------------------------------------
+ * 15. Media queries
+ *
+ * Grouped here, at the end of the file, so every responsive and preference
+ * override for this stylesheet is read in one place.
+ * ------------------------------------------------------------------------ */
+
+/* Narrow viewports. */
+
+@media screen and ( max-width: 782px ) {
+	.localepress-checkbox-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.localepress-settings-tabs {
+		display: flex;
+		flex-wrap: wrap;
+	}
+}
+
+@media screen and ( max-width: 782px ) {
+	.localepress-wizard-progress li {
+		padding-right: 2px;
+		padding-left: 2px;
+		font-size: 10px;
+	}
+
+	.localepress-wizard-progress span {
+		width: 26px;
+		height: 26px;
+	}
+}
+
+@media screen and ( max-width: 782px ) {
+	.localepress-menu-location-table th,
+	.localepress-menu-location-table td,
+	.localepress-default-term-table th,
+	.localepress-default-term-table td {
+		padding: 10px;
+		min-width: 200px;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.localepress-heading {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.localepress-order-column {
+		width: auto;
+		text-align: left;
+	}
+
+	.column-localepress_language,
+	.column-localepress_translations {
+		width: auto;
+	}
+
+	.localepress-translation-dashboard th[class*="column-language_"],
+	.localepress-translation-dashboard td[class*="column-language_"] {
+		width: auto;
+		text-align: left;
+	}
+
+	.localepress-string-filters {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.localepress-string-filters select,
+	.localepress-string-filters .button,
+	.localepress-string-filters .search-box,
+	.localepress-string-filters .search-box input {
+		width: 100%;
+		margin: 0;
+	}
+
+	.localepress-string-translation-page .column-identity,
+	.localepress-string-translation-page .column-original,
+	.localepress-string-translation-page .column-translation {
+		width: auto;
+	}
+
+	/*
+	 * A flag and a language code still fit beside a usable box in what a stacked
+	 * list table leaves next to its column name, so the pairs stay side by side
+	 * on a phone and only the boxes get shorter.
+	 */
+	.localepress-string-translation-page td.column-translation textarea.localepress-string-translation {
+		min-height: 52px;
+	}
+
+	.localepress-string-translation-page td.column-translation .localepress-string-translations--labelled textarea.localepress-string-translation {
+		height: 48px;
+	}
+}
+
+/* Wider viewports. */
+
+/*
+ * Core names a list table cell after its column, so this one carries a bare
+ * "translation" class as well as "column-translation". Polylang styles that
+ * exact class for its own strings screen -- it turns the cell into a flex
+ * container and gives labels a percentage width -- and its admin stylesheet
+ * loads on every admin screen, this one included. A td that is no longer a
+ * table-cell drops out of the column it belongs to, which is what collapses
+ * the field to a few characters wide. Undo it for our table only, and only
+ * above the width where core stacks the cells on purpose.
+ */
+
+@media screen and (min-width: 783px) {
+	.localepress-string-translation-page table.wp-list-table td.column-translation {
+		display: table-cell;
+	}
+}
+
+/* End 15. Media queries */

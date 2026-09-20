@@ -59,8 +59,20 @@ $localepress_delete_site_data = static function () {
 	foreach ( $theme_mod_options as $option_name ) {
 		$theme_mods = get_option( $option_name, array() );
 
-		if ( is_array( $theme_mods ) && array_key_exists( 'localepress_nav_menu_locations', $theme_mods ) ) {
-			unset( $theme_mods['localepress_nav_menu_locations'] );
+		if ( ! is_array( $theme_mods ) ) {
+			continue;
+		}
+
+		$changed = false;
+
+		foreach ( array( 'localepress_nav_menu_locations', 'localepress_template_parts' ) as $theme_mod ) {
+			if ( array_key_exists( $theme_mod, $theme_mods ) ) {
+				unset( $theme_mods[ $theme_mod ] );
+				$changed = true;
+			}
+		}
+
+		if ( $changed ) {
 			update_option( $option_name, $theme_mods );
 		}
 	}

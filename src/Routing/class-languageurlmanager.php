@@ -1393,8 +1393,21 @@ final class LanguageUrlManager {
 	 */
 	public function get_current_request_url() {
 		$home_parts = wp_parse_url( LanguageHostResolver::site_url() );
-		$uri        = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+
+		/*
+		 * Not sanitize_text_field(). It deletes every percent-encoded sequence it
+		 * finds, and a slug written in any script but Latin is nothing else:
+		 * `/home-page-বাংলা/` arrives as `/home-page-%e0%a6%ac%e0%a6%be%e2%80%a6/`
+		 * and would come back as `/home-page-/`. Every caller comparing this
+		 * against a permalink would then find them different, and the redirect
+		 * meant to correct the address would send the reader to the address they
+		 * already asked for, forever. The escaping this needs is what the return
+		 * does: esc_url_raw() drops what does not belong in a URL and leaves
+		 * percent-encoding intact.
+		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped by esc_url_raw() below; see above.
+		$uri = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
+			? wp_unslash( $_SERVER['REQUEST_URI'] )
 			: '/';
 
 		if ( false === $home_parts || ! isset( $home_parts['host'] ) ) {

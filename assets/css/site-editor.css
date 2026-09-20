@@ -1,0 +1,118 @@
+/**
+ * Language panel in the WordPress Site Editor.
+ *
+ * Only what the editor's own components do not already give. The buttons are
+ * `Button`, so their sizing, focus ring, and hover come from the editor; what is
+ * here is the table that holds them and the colors that tell the three actions
+ * apart at a glance.
+ *
+ * @package LocalePress
+ */
+
+.localepress-site-editor__section {
+	padding: 16px;
+}
+
+.localepress-site-editor__section + .localepress-site-editor__section {
+	padding-top: 0;
+}
+
+.localepress-site-editor__heading {
+	margin: 0 0 8px;
+	color: #1e1e1e;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.4;
+	text-transform: uppercase;
+}
+
+.localepress-site-editor__current {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+}
+
+.localepress-site-editor__flag {
+	display: block;
+	width: 18px;
+	height: 12px;
+	border-radius: 1px;
+	box-shadow: 0 0 0 1px rgba( 0, 0, 0, 0.12 );
+}
+
+.localepress-site-editor__code {
+	font-size: 11px;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.localepress-site-editor__table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.localepress-site-editor__table td,
+.localepress-site-editor__table th {
+	padding: 2px 0;
+	font-weight: 400;
+	text-align: start;
+	vertical-align: middle;
+}
+
+.localepress-site-editor__flag-cell {
+	width: 18px;
+	padding-inline-end: 8px !important;
+}
+
+.localepress-site-editor__name-cell {
+	font-size: 13px;
+}
+
+/* One control each, so the column is only ever as wide as a button. */
+
+.localepress-site-editor__icon-cell {
+	width: 28px;
+	text-align: center !important;
+}
+
+.localepress-site-editor__button.is-edit:not( :disabled ) {
+	color: #3858e9;
+}
+
+.localepress-site-editor__button.is-add:not( :disabled ) {
+	color: #3858e9;
+}
+
+.localepress-site-editor__button.is-delete:not( :disabled ) {
+	color: #cc1818;
+}
+
+/*
+ * The one mark in the table that is not a control: it says which language the
+ * rest of the site falls back to.
+ */
+
+.localepress-site-editor__default {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	background-color: #3858e9;
+	-webkit-mask-image: url( 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.8.8-5 4.7 1.3 6.8L12 17.3 5.9 20.6 7.2 13.8l-5-4.7 6.8-.8L12 2z"/></svg>' );
+	mask-image: url( 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.8.8-5 4.7 1.3 6.8L12 17.3 5.9 20.6 7.2 13.8l-5-4.7 6.8-.8L12 2z"/></svg>' );
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	vertical-align: middle;
+}
+
+.localepress-site-editor__empty {
+	margin: 0;
+	color: #757575;
+	font-size: 13px;
+}
+
+.localepress-site-editor .components-notice {
+	margin: 16px 16px 0;
+}
