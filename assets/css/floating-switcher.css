@@ -47,6 +47,14 @@
 	--localepress-floating-current-text: #ffffff;
 	--localepress-floating-radius: 999px;
 
+	/*
+	 * How far a pill moves when it is pointed at, and in which direction. Each
+	 * placement below sets the sign, because only the placement knows which
+	 * side of the screen the strip is pinned to. Zero here so a strip with no
+	 * placement class still has somewhere to read the value from.
+	 */
+	--localepress-floating-shift: 0px;
+
 	position: fixed;
 	z-index: 9990;
 	max-width: calc( 100vw - 1rem );
@@ -68,9 +76,17 @@
  * The physical properties are deliberate. A right-hand strip is a choice about
  * the screen, not about the text, so it stays on the right in a right-to-left
  * language instead of crossing over to meet the writing direction.
+ *
+ * Each placement also sets the hover shift, because the direction a pill should
+ * move when it is pointed at follows from the side it is pinned to: away from
+ * that side and into the page, never further out towards the edge it is already
+ * against. A strip on the right therefore moves left, and one on the left moves
+ * right, which is the same gesture read from either side of the screen.
  */
 
 .localepress-switcher--floating.localepress-switcher--at-middle-right {
+	--localepress-floating-shift: -6px;
+
 	top: 50%;
 	right: 0;
 	bottom: auto;
@@ -79,6 +95,8 @@
 }
 
 .localepress-switcher--floating.localepress-switcher--at-middle-left {
+	--localepress-floating-shift: 6px;
+
 	top: 50%;
 	right: auto;
 	bottom: auto;
@@ -92,18 +110,26 @@
  */
 
 .localepress-switcher--floating.localepress-switcher--at-bottom-right {
+	--localepress-floating-shift: -6px;
+
 	inset: auto 1rem 1rem auto;
 }
 
 .localepress-switcher--floating.localepress-switcher--at-bottom-left {
+	--localepress-floating-shift: 6px;
+
 	inset: auto auto 1rem 1rem;
 }
 
 .localepress-switcher--floating.localepress-switcher--at-top-right {
+	--localepress-floating-shift: -6px;
+
 	inset: 1rem 1rem auto auto;
 }
 
 .localepress-switcher--floating.localepress-switcher--at-top-left {
+	--localepress-floating-shift: 6px;
+
 	inset: 1rem auto auto 1rem;
 }
 
@@ -130,10 +156,15 @@
  * would leave a seam. The gap between pills is the only spacing here, and the
  * direction of the stack is the shared stylesheet's business, so a horizontal
  * floater stays a row.
+ *
+ * The gap has to be wide enough to read as air between separate pills rather
+ * than as a seam in one divided block, and wide enough that the pill moving
+ * under the pointer is seen to move rather than seen to collide with the pills
+ * above and below it.
  */
 
 .localepress-switcher--floating .localepress-switcher__list {
-	gap: 0.3rem;
+	gap: 0.5rem;
 	align-items: stretch;
 }
 
@@ -170,17 +201,16 @@
 	color: var( --localepress-floating-current-text );
 }
 
+/*
+ * One rule for all six placements. The distance is the same everywhere and the
+ * direction comes from the placement that set it, so a pill always steps in
+ * from the edge it is pinned to and never out through it. Writing it once is
+ * also what gives the four corners the movement they had no rule for before.
+ */
+
 .localepress-switcher--floating .localepress-switcher__link:hover,
 .localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
-	transform: translateX( 0 ) scale( 1.03 );
-}
-
-.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__link:hover {
-	transform: translateX( -2px );
-}
-
-.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__link:hover {
-	transform: translateX( 2px );
+	transform: translateX( var( --localepress-floating-shift ) ) scale( 1.03 );
 }
 
 /* End 3. List and links */
@@ -281,6 +311,16 @@
 
 @media screen and ( max-width: 600px ) {
 	.localepress-switcher--floating {
+		/*
+		 * A box that scrolls on one axis scrolls on both: `overflow-y` below
+		 * makes `overflow-x` compute to `auto` too, and a pill stepping sideways
+		 * inside it would reach past the content box and raise a scrollbar
+		 * across the strip. There is also nothing to step away from here, since
+		 * a finger does not hover; a tap that leaves `:hover` stuck behind it
+		 * would leave one pill displaced instead.
+		 */
+		--localepress-floating-shift: 0px;
+
 		font-size: 0.8125rem;
 		max-height: 70vh;
 		overflow-y: auto;

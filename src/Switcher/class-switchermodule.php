@@ -9,6 +9,7 @@ namespace LocalePress\Switcher;
 
 use LocalePress\Assets;
 use LocalePress\Contracts\ModuleInterface;
+use LocalePress\Language\FlagRegistry;
 use LocalePress\Language\LanguageManager;
 use LocalePress\Routing\LanguageUrlManager;
 use LocalePress\Settings\PluginSettings;
@@ -57,6 +58,20 @@ final class SwitcherModule implements ModuleInterface {
 	private $language_manager;
 
 	/**
+	 * Language URL service.
+	 *
+	 * @var LanguageUrlManager|null
+	 */
+	private $url_manager;
+
+	/**
+	 * Script handles the navigation block's editor preview is attached to.
+	 *
+	 * @var array<int, string>
+	 */
+	private $preview_handles = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param LanguageSwitcher          $switcher         Switcher service.
@@ -75,6 +90,7 @@ final class SwitcherModule implements ModuleInterface {
 		$this->switcher          = $switcher;
 		$this->navigation_menu   = $navigation_menu;
 		$this->language_manager  = $language_manager;
+		$this->url_manager       = $url_manager;
 		$this->navigation_block  = new NavigationSwitcherBlock( $switcher );
 		$this->floating_switcher = new FloatingSwitcher( $switcher, $settings, $url_manager );
 	}
@@ -85,6 +101,7 @@ final class SwitcherModule implements ModuleInterface {
 	public function register() {
 		add_shortcode( 'localepress_switcher', array( $this, 'render_shortcode' ) );
 		add_action( 'init', array( $this, 'register_assets_and_block' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'add_preview_languages' ) );
 		add_action( 'widgets_init', array( $this, 'register_classic_widget' ) );
 		$this->navigation_menu->register();
 		$this->floating_switcher->register();
@@ -194,29 +211,74 @@ final class SwitcherModule implements ModuleInterface {
 			wp_set_script_translations( $handle, 'localepress', LOCALEPRESS_PATH . 'languages' );
 
 			if ( $needs_languages ) {
-				wp_add_inline_script(
-					$handle,
-					'window.localePressSwitcherLanguages = ' . wp_json_encode( $this->get_editor_languages() ) . ';',
-					'before'
-				);
+				$this->preview_handles[] = $handle;
 			}
 		}
 	}
 
 	/**
-	 * Returns the enabled languages the editor preview renders.
+	 * Hands the editor preview the languages it draws the switcher from.
 	 *
-	 * @return array<int, array<string, string>>
+	 * This waits for an editor screen rather than riding along with the block
+	 * registration on `init`. Deciding whether a language has anything published
+	 * in it is a database question, and asking it on every front end request to
+	 * describe a panel nobody is looking at would be a page's worth of queries
+	 * spent on nothing.
+	 *
+	 * @return void
+	 */
+	public function add_preview_languages() {
+		if ( empty( $this->preview_handles ) ) {
+			return;
+		}
+
+		$payload = 'window.localePressSwitcherLanguages = '
+			. wp_json_encode( $this->get_editor_languages() ) . ';';
+
+		foreach ( $this->preview_handles as $handle ) {
+			wp_add_inline_script( $handle, $payload, 'before' );
+		}
+	}
+
+	/**
+	 * Returns the languages the editor preview renders, and what it judges them by.
+	 *
+	 * Every language is sent, disabled ones included, because the panel offers to
+	 * show them and a preview cannot honor that from a list they were already
+	 * filtered out of. Each one carries what a control here can ask about it: the
+	 * flag it would show, whether the site publishes in it at all, and whether it
+	 * is the language the switcher marks as current.
+	 *
+	 * @return array<int, array<string, mixed>>
 	 */
 	private function get_editor_languages() {
-		$languages = array();
+		$languages  = array();
+		$default_id = $this->language_manager->get_default_id();
+		$flags      = new FlagRegistry();
 
-		foreach ( $this->language_manager->get_languages( true ) as $language ) {
+		foreach ( $this->language_manager->get_languages( false ) as $language ) {
+			$language_id = isset( $language['id'] ) ? (string) $language['id'] : '';
+
+			if ( '' === $language_id ) {
+				continue;
+			}
+
 			$languages[] = array(
-				'id'            => isset( $language['id'] ) ? (string) $language['id'] : '',
+				'id'            => $language_id,
 				'name'          => isset( $language['name'] ) ? (string) $language['name'] : '',
 				'native_name'   => isset( $language['native_name'] ) ? (string) $language['native_name'] : '',
 				'language_code' => isset( $language['language_code'] ) ? (string) $language['language_code'] : '',
+				'enabled'       => ! empty( $language['enabled'] ),
+				'is_default'    => $language_id === $default_id,
+				'flag_url'      => $flags->get_flag_url( $language ),
+				/*
+				 * The renderer asks this of the page being read. A template has no
+				 * page, so the preview asks it of the site, which is the part of
+				 * the same question a template can be judged by.
+				 */
+				'has_content'   => null === $this->url_manager
+					? true
+					: (bool) $this->url_manager->language_has_content( $language_id ),
 			);
 		}
 

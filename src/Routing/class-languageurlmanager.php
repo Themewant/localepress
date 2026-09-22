@@ -127,6 +127,17 @@ final class LanguageUrlManager {
 	private $hosts;
 
 	/**
+	 * Request host, once it has been confirmed to be one this site answers on.
+	 *
+	 * Null until the question has been asked; an empty string means the request
+	 * arrived on a host that serves no language here, so the answer is not
+	 * looked up again.
+	 *
+	 * @var string|null
+	 */
+	private $routed_request_host = null;
+
+	/**
 	 * Language resolver for requests that carry no page address.
 	 *
 	 * @var BackgroundLanguageResolver
@@ -1387,6 +1398,43 @@ final class LanguageUrlManager {
 	}
 
 	/**
+	 * Returns the request host, but only once it is one this site answers on.
+	 *
+	 * `LanguageHostResolver::get_request_host()` reads the Host header and
+	 * checks that it is shaped like a hostname. That is the right answer for
+	 * the callers that ask "which language did this address name", because a
+	 * host naming none is exactly what they are looking for.
+	 *
+	 * It is the wrong answer for a caller building an absolute URL to put on
+	 * the page. The Host header is written by whoever sent the request, so a
+	 * server with a catch-all virtual host will answer for any name at all, and
+	 * an address built from that name is one the site never chose: a canonical
+	 * link, an `og:url`, or every switcher link on the page, pointing somewhere
+	 * else entirely — and pointing there for every later reader once a page
+	 * cache has stored the response.
+	 *
+	 * So this asks the further question the other callers do not need: is this
+	 * a host the site is configured to serve? It is the same test
+	 * `HostOriginModule` already applies before rewriting content URLs onto the
+	 * request host, asked here for the URLs the page is built from.
+	 *
+	 * @return string Empty when the request host serves no language here.
+	 */
+	private function get_routed_request_host() {
+		if ( null !== $this->routed_request_host ) {
+			return $this->routed_request_host;
+		}
+
+		$host = $this->hosts->get_request_host();
+
+		$this->routed_request_host = '' === $host || $this->request_host_serves_no_language()
+			? ''
+			: $host;
+
+		return $this->routed_request_host;
+	}
+
+	/**
 	 * Returns the current request URL using the configured site origin.
 	 *
 	 * @return string
@@ -1395,19 +1443,20 @@ final class LanguageUrlManager {
 		$home_parts = wp_parse_url( LanguageHostResolver::site_url() );
 
 		/*
+		 * Sanitized by esc_url_raw(), the sanitizer an address takes: it drops
+		 * what does not belong in a URL, including the encoded newlines a header
+		 * injection would be carried on, and leaves percent-encoding intact.
+		 *
 		 * Not sanitize_text_field(). It deletes every percent-encoded sequence it
 		 * finds, and a slug written in any script but Latin is nothing else:
 		 * `/home-page-বাংলা/` arrives as `/home-page-%e0%a6%ac%e0%a6%be%e2%80%a6/`
 		 * and would come back as `/home-page-/`. Every caller comparing this
 		 * against a permalink would then find them different, and the redirect
 		 * meant to correct the address would send the reader to the address they
-		 * already asked for, forever. The escaping this needs is what the return
-		 * does: esc_url_raw() drops what does not belong in a URL and leaves
-		 * percent-encoding intact.
+		 * already asked for, forever.
 		 */
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped by esc_url_raw() below; see above.
 		$uri = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
-			? wp_unslash( $_SERVER['REQUEST_URI'] )
+			? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) )
 			: '/';
 
 		if ( false === $home_parts || ! isset( $home_parts['host'] ) ) {
@@ -1420,10 +1469,14 @@ final class LanguageUrlManager {
 		/*
 		 * Under host routing the configured site host names one specific language,
 		 * so building the current URL from it would rewrite every request onto that
-		 * language. The host the request actually arrived on is the truthful one.
+		 * language. The host the request actually arrived on is the truthful one —
+		 * as long as it is one this site answers on. A request carrying any other
+		 * Host header is answered at the configured address instead, because this
+		 * URL is what canonical links, switcher links and redirect comparisons are
+		 * built from, and none of them may name a host the site never chose.
 		 */
 		if ( $this->hosts->uses_host_routing() ) {
-			$request_host = $this->hosts->get_request_host();
+			$request_host = $this->get_routed_request_host();
 			$host         = '' === $request_host ? $host : $request_host;
 		}
 

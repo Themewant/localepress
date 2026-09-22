@@ -198,15 +198,18 @@ final class AdminLanguageFilter {
 	 */
 	private function get_current_admin_url() {
 		/*
-		 * Not sanitize_text_field(): it deletes percent-encoded sequences, and a
-		 * search for a term written in any script but Latin is nothing else. The
-		 * filter links would come back holding a truncated search rather than the
-		 * one the screen is showing. esc_url_raw() below is the escaping this
-		 * needs, and it leaves percent-encoding alone.
+		 * Sanitized by esc_url_raw(), which is the sanitizer an address takes.
+		 * It drops every character that cannot appear in a URL — the encoded
+		 * newlines a header injection would be carried on among them — while
+		 * leaving percent-encoding intact.
+		 *
+		 * That last part is why sanitize_text_field() is not used here: it
+		 * deletes percent-encoded sequences, and a search for a term written in
+		 * any script but Latin is nothing else. The filter links would come back
+		 * holding a truncated search rather than the one the screen is showing.
 		 */
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped by esc_url_raw() below; see above.
 		$request = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
-			? wp_unslash( $_SERVER['REQUEST_URI'] )
+			? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) )
 			: '';
 
 		if ( '' === $request ) {

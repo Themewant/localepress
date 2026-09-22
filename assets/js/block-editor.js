@@ -69,11 +69,27 @@
 			return next( options );
 		}
 
+		/*
+		 * The Site Editor edits the site rather than a page, and a header has to
+		 * lead somewhere in every language. Its listings therefore ask to be
+		 * answered with the untranslated originals as well, so a language nothing
+		 * has been written in yet is still something that can be worked on.
+		 */
+		var fallbackParam = config.fallbackParam || 'lang_fallback';
+
 		if ( typeof options.data === 'undefined' || null === options.data ) {
 			options.path +=
 				( options.path.indexOf( '?' ) >= 0 ? '&' : '?' ) + 'lang=' + encodeURIComponent( language );
+
+			if ( config.fallback ) {
+				options.path += '&' + fallbackParam + '=1';
+			}
 		} else {
 			options.data.lang = language;
+
+			if ( config.fallback ) {
+				options.data[ fallbackParam ] = '1';
+			}
 		}
 
 		return next( options );

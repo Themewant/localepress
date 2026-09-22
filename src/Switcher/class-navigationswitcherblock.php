@@ -116,7 +116,14 @@ final class NavigationSwitcherBlock {
 	}
 
 	/**
-	 * Renders the current language as a submenu holding the other languages.
+	 * Renders the current language as a submenu holding every language.
+	 *
+	 * The language on the toggle is listed inside it as well, marked as the
+	 * current one. That is how a language menu is read everywhere else: the
+	 * closed control names where you are, and opening it shows the full set with
+	 * your place in it — a list that silently omits the language you are reading
+	 * reads as a list of the languages that exist. "Hide the current language"
+	 * takes it out for anyone who wants the shorter list.
 	 *
 	 * @param array<int, array<string, mixed>> $items      Switcher items.
 	 * @param array<string, mixed>             $attributes Block attributes.
@@ -147,8 +154,13 @@ final class NavigationSwitcherBlock {
 			$children[] = $this->build_navigation_block( 'core/navigation-link', $item, $attributes, $context );
 		}
 
+		/*
+		 * A submenu with nothing under it is a menu item wearing an arrow that
+		 * opens onto nothing, so the one language left renders as the plain link
+		 * it would have been.
+		 */
 		if ( empty( $children ) ) {
-			return '';
+			return $this->render_navigation_block( 'core/navigation-link', $parent, $attributes, $context );
 		}
 
 		$submenu = new WP_Block(

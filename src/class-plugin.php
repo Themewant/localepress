@@ -68,9 +68,12 @@ use LocalePress\Integrations\Seo\SeoPressProvider;
 use LocalePress\Integrations\Seo\YoastSeoProvider;
 use LocalePress\Integrations\SiteEditor\SiteEditorModule;
 use LocalePress\Integrations\SiteEditor\SiteEditorSidebar;
-use LocalePress\Integrations\SiteEditor\TemplatePartLifecycle;
-use LocalePress\Integrations\SiteEditor\TemplatePartRoutes;
+use LocalePress\Integrations\SiteEditor\BlockTemplateLifecycle;
+use LocalePress\Integrations\SiteEditor\SiteEditorPanel;
+use LocalePress\Integrations\SiteEditor\SiteEditorRoutes;
 use LocalePress\Integrations\SiteEditor\TemplateParts;
+use LocalePress\Integrations\SiteEditor\TemplateResolver;
+use LocalePress\Integrations\SiteEditor\Templates;
 use LocalePress\Integrations\Wpml\WpmlConfigModule;
 use LocalePress\Integrations\Wpml\WpmlConfigReader;
 use LocalePress\Language\BrowserLanguageDetector;
@@ -85,6 +88,10 @@ use LocalePress\Media\MediaModule;
 use LocalePress\Media\MediaTranslationManager;
 use LocalePress\Navigation\MenuLanguageManager;
 use LocalePress\Navigation\MenuLocationsModule;
+use LocalePress\Navigation\NavigationBlockModule;
+use LocalePress\Navigation\NavigationLinkTranslator;
+use LocalePress\Navigation\NavigationMenuRoutes;
+use LocalePress\Navigation\NavigationMenus;
 use LocalePress\Navigation\NavigationModule;
 use LocalePress\Rest\RestLanguageModule;
 use LocalePress\Routing\HostOriginModule;
@@ -393,6 +400,14 @@ final class Plugin {
 		// assignments the frontend reads, and the two must agree on what a slug
 		// means in a language before either of them is registered.
 		$template_parts = new TemplateParts( $this->language_manager, $this->post_translation_manager );
+		$templates      = new Templates( $this->language_manager, $this->post_translation_manager );
+
+		// The third thing the Site Editor edits that belongs to a language.
+		$navigation_menus = new NavigationMenus(
+			$this->post_translation_manager,
+			$this->language_manager,
+			new NavigationLinkTranslator( $this->post_translation_manager, $this->term_translation_manager )
+		);
 
 		$modules = array(
 
@@ -461,6 +476,10 @@ final class Plugin {
 				$this->menu_language_manager,
 				$this->post_translation_manager,
 				$this->term_translation_manager,
+				$this->language_url_manager
+			),
+			new NavigationBlockModule(
+				$this->post_translation_manager,
 				$this->language_url_manager
 			),
 			new SwitcherModule(
@@ -558,8 +577,13 @@ final class Plugin {
 			),
 
 			new SiteEditorModule( $template_parts, $this->language_url_manager ),
-			new TemplatePartLifecycle( $template_parts, $this->post_translation_manager ),
-			new TemplatePartRoutes( $template_parts ),
+			new TemplateResolver( $templates, $this->language_url_manager ),
+			new BlockTemplateLifecycle( $template_parts, $this->post_translation_manager ),
+			new BlockTemplateLifecycle( $templates, $this->post_translation_manager ),
+			new SiteEditorRoutes( $template_parts ),
+			new SiteEditorRoutes( $templates ),
+			new SiteEditorPanel( $template_parts, $templates, $this->language_manager, $navigation_menus ),
+			new NavigationMenuRoutes( $navigation_menus ),
 
 			new ElementorWidgetModule(),
 			new SyncModule(
@@ -645,7 +669,7 @@ final class Plugin {
 			$modules[] = new TermTranslationModule( $this->term_translation_manager, $this->language_manager );
 			$modules[] = new MediaTranslationFields( $this->post_translation_manager, $this->language_manager );
 			$modules[] = new AdminTextDirectionModule( $this->post_translation_manager, $this->language_manager );
-			$modules[] = new SiteEditorSidebar( $template_parts, $this->language_manager );
+			$modules[] = new SiteEditorSidebar( $template_parts, $templates, $this->language_manager, $navigation_menus );
 			$modules[] = new EssentialAddonsAdmin(
 				new EssentialAddonsTemplates( $elementor_documents ),
 				$this->post_translation_manager,

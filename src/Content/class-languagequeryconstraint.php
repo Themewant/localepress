@@ -59,6 +59,91 @@ final class LanguageQueryConstraint {
 	}
 
 	/**
+	 * Constrains a post query to one language, falling back to the original.
+	 *
+	 * Some listings are navigation rather than content. A header's page list is
+	 * the case that names the rest: it is how a reader moves around the site, so
+	 * a language nobody has translated the pages into must still be given
+	 * somewhere to go. Answering it with nothing is not "this language has
+	 * nothing here" — it is a site with no way out of the page you are on.
+	 *
+	 * So the rule is widened by exactly one step: the requested language's
+	 * version where it exists, and the default language's version where it does
+	 * not. A page that has been translated is therefore never shown twice, and a
+	 * page written only in some third language is not offered either, because it
+	 * is not what this listing would fall back to.
+	 *
+	 * @param array<string, string> $clauses             SQL clauses.
+	 * @param string                $language_id         Requested language identifier.
+	 * @param string                $default_language_id Default language identifier.
+	 * @return array<string, string>
+	 */
+	public function apply_to_posts_with_fallback( array $clauses, $language_id, $default_language_id ) {
+		if ( ! isset( $clauses['join'], $clauses['where'] ) || '' === (string) $language_id ) {
+			return $clauses;
+		}
+
+		if ( (string) $language_id === (string) $default_language_id ) {
+			return $this->apply_to_posts( $clauses, $language_id, $default_language_id );
+		}
+
+		if ( false === strpos( $clauses['join'], self::POST_ALIAS ) ) {
+			$clauses['join'] .= $this->posts_join_clause();
+		}
+
+		$condition = $this->posts_fallback_condition( $language_id, $default_language_id );
+
+		if ( '' !== $condition ) {
+			$clauses['where'] .= ' AND ' . $condition;
+		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Returns the fallback language test on its own.
+	 *
+	 * The `NOT EXISTS` is what keeps a translated page from appearing twice: the
+	 * default-language original is admitted only while nothing in its group
+	 * answers for the language being read.
+	 *
+	 * @param string $language_id         Requested language identifier.
+	 * @param string $default_language_id Default language identifier.
+	 * @return string Empty when no language was asked for.
+	 */
+	public function posts_fallback_condition( $language_id, $default_language_id ) {
+		global $wpdb;
+
+		if ( '' === (string) $language_id ) {
+			return '';
+		}
+
+		if ( (string) $language_id === (string) $default_language_id ) {
+			return $this->posts_language_condition( $language_id, $default_language_id );
+		}
+
+		$table = DatabaseTranslationRepository::assignments_table();
+
+		// The SQL aliases are fixed LocalePress identifiers; only the values are variable.
+		return $wpdb->prepare(
+			'(localepress_route_language.post_id IS NULL
+				OR localepress_route_language.language_id = %s
+				OR (
+					localepress_route_language.language_id = %s
+					AND NOT EXISTS (
+						SELECT 1 FROM %i AS localepress_route_translated
+						WHERE localepress_route_translated.group_id = localepress_route_language.group_id
+						AND localepress_route_translated.language_id = %s
+					)
+				))',
+			(string) $language_id,
+			(string) $default_language_id,
+			$table,
+			(string) $language_id
+		);
+	}
+
+	/**
 	 * Returns the join that carries each post's language assignment.
 	 *
 	 * WordPress answers some pages without WP_Query — the adjacent post links,

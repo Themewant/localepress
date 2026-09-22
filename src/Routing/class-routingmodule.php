@@ -908,6 +908,22 @@ final class RoutingModule implements ModuleInterface {
 			return $clauses;
 		}
 
+		/**
+		 * Filters whether one post query falls back to the untranslated original.
+		 *
+		 * A listing that is navigation rather than content says true here: a
+		 * header's page list has to lead somewhere even in a language nobody has
+		 * translated the pages into. Everything else stays exact, so an archive in
+		 * one language never quietly fills up with another's posts.
+		 *
+		 * @param bool     $fallback    Whether untranslated originals are included.
+		 * @param WP_Query $query       Query being constrained.
+		 * @param string   $language_id Language being read.
+		 */
+		if ( apply_filters( 'localepress_language_query_fallback', false, $query, $language_id ) ) {
+			return $this->constraint->apply_to_posts_with_fallback( $clauses, $language_id, $default['id'] );
+		}
+
 		return $this->constraint->apply_to_posts( $clauses, $language_id, $default['id'] );
 	}
 

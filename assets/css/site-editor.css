@@ -116,3 +116,34 @@
 .localepress-site-editor .components-notice {
 	margin: 16px 16px 0;
 }
+
+/*
+ * The language of what is open is a choice rather than a label, so it is a
+ * select — sized to fill the row beside its flag, which is the one thing about
+ * it the editor's own component cannot know.
+ */
+
+.localepress-site-editor__current .localepress-site-editor__select {
+	flex: 1;
+	min-width: 0;
+}
+
+.localepress-site-editor__button.is-link:not( :disabled ) {
+	color: #3858e9;
+}
+
+/*
+ * Adopting an existing template opens under the row that asked for it, and is
+ * indented to the name column so it reads as part of that row rather than as a
+ * second list.
+ */
+
+.localepress-site-editor__linking-row td {
+	padding: 4px 0 10px 26px !important;
+}
+
+.localepress-site-editor__linking {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}

@@ -483,6 +483,10 @@ final class RoyalAddonsTemplates {
 			return;
 		}
 
+		// Elementor's own hook, called rather than declared: it is how a document
+		// announces itself to that pipeline, so the name belongs to Elementor and
+		// prefixing it would announce nothing.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		do_action( 'elementor/post/render', $template_id );
 	}
 

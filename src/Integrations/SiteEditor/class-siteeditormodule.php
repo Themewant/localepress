@@ -268,6 +268,35 @@ final class SiteEditorModule implements ModuleInterface {
 	}
 
 	/**
+	 * Offers the Site Editor's listings what has not been translated yet.
+	 *
+	 * Not hooked up. It is what `localepress_editor_language_fallback` does when
+	 * a site turns it on, and it is kept here because the reasoning is worth
+	 * keeping with the code that would act on it:
+	 *
+	 *     add_filter( 'localepress_editor_language_fallback', array(
+	 *         $site_editor_module, 'offer_untranslated_originals'
+	 *     ) );
+	 *
+	 * The editor lists one language, the way the post editor does, so a Bengali
+	 * menu is built out of Bengali pages and nothing else. Offering the English
+	 * ones beside them reads as help and is not: an editor picks one, and the
+	 * Bengali header now carries an English page, which nothing later corrects.
+	 * Where a language has nothing yet, the list is empty and says so, and the
+	 * answer to that is to write the page, not to be handed another language's.
+	 *
+	 * The front end is the opposite case and keeps its own fallback: a reader on
+	 * a Bengali page is not choosing anything, and a header that came back empty
+	 * is not a header with nothing to say — it is a page with no way off it.
+	 *
+	 * @param mixed $fallback Whether the originals are offered so far.
+	 * @return bool
+	 */
+	public function offer_untranslated_originals( $fallback ) {
+		return $fallback || $this->parts->is_site_editor();
+	}
+
+	/**
 	 * Hides translated parts from the template part block's variations.
 	 *
 	 * WordPress offers every template part as its own variation in the inserter,

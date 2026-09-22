@@ -40,6 +40,20 @@ final class RestLanguageModule implements ModuleInterface {
 	const QUERY_VAR = 'localepress_rest_language';
 
 	/**
+	 * Query variable marking a collection that may fall back to the original.
+	 *
+	 * @var string
+	 */
+	const FALLBACK_VAR = 'localepress_rest_language_fallback';
+
+	/**
+	 * Request parameter asking for the fallback.
+	 *
+	 * @var string
+	 */
+	const FALLBACK_PARAM = 'lang_fallback';
+
+	/**
 	 * Editor script handle.
 	 *
 	 * @var string
@@ -130,6 +144,8 @@ final class RestLanguageModule implements ModuleInterface {
 		add_filter( 'terms_clauses', array( $this, 'filter_terms_by_language' ), 10, 3 );
 		add_filter( 'block_editor_rest_api_preload_paths', array( $this, 'add_language_to_preload_paths' ), 50, 2 );
 
+		add_filter( 'localepress_language_query_fallback', array( $this, 'answer_collection_fallback' ), 10, 2 );
+
 		add_filter( 'localepress_new_term_language_id', array( $this, 'filter_new_term_language' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_script' ) );
 	}
@@ -141,14 +157,14 @@ final class RestLanguageModule implements ModuleInterface {
 	 */
 	public function register_collection_filters() {
 		foreach ( $this->post_translations->get_supported_post_types() as $post_type ) {
-			add_filter( "rest_{$post_type}_query", array( $this, 'mark_collection_args' ) );
+			add_filter( "rest_{$post_type}_query", array( $this, 'mark_collection_args' ), 10, 2 );
 		}
 
 		foreach ( $this->term_translations->get_supported_taxonomies() as $taxonomy ) {
-			add_filter( "rest_{$taxonomy}_query", array( $this, 'mark_collection_args' ) );
+			add_filter( "rest_{$taxonomy}_query", array( $this, 'mark_collection_args' ), 10, 2 );
 		}
 
-		add_filter( 'rest_post_search_query', array( $this, 'mark_collection_args' ) );
+		add_filter( 'rest_post_search_query', array( $this, 'mark_collection_args' ), 10, 2 );
 	}
 
 	/**
@@ -269,10 +285,11 @@ final class RestLanguageModule implements ModuleInterface {
 	/**
 	 * Records the captured language on a filterable REST collection.
 	 *
-	 * @param array<string, mixed> $args Prepared query arguments.
+	 * @param array<string, mixed>  $args    Prepared query arguments.
+	 * @param \WP_REST_Request|null $request Request the collection answers.
 	 * @return array<string, mixed>
 	 */
-	public function mark_collection_args( $args ) {
+	public function mark_collection_args( $args, $request = null ) {
 		$language_id = $this->request_language_id();
 
 		if ( ! is_array( $args ) || '' === $language_id ) {
@@ -281,7 +298,54 @@ final class RestLanguageModule implements ModuleInterface {
 
 		$args[ self::QUERY_VAR ] = $language_id;
 
+		/*
+		 * And nothing else is to add one. A REST request carries no language in
+		 * its address — /wp-json/wp/v2/pages is the same URL whichever language
+		 * is being edited — so the routing module reads the default language
+		 * from it and constrains the query to that as well. Two languages in one
+		 * WHERE clause can only be satisfied by a row in both, and no row is, so
+		 * every collection asked for in a language other than the default came
+		 * back empty. The language on the request is the explicit one and is the
+		 * only one that may answer here.
+		 */
+		$args['localepress_skip_language_filter'] = true;
+
+		if ( $this->request_wants_fallback( $request ) ) {
+			$args[ self::FALLBACK_VAR ] = true;
+		}
+
 		return $args;
+	}
+
+	/**
+	 * Reports whether a request asked to be answered with untranslated originals.
+	 *
+	 * @param mixed $request Request being answered.
+	 * @return bool
+	 */
+	private function request_wants_fallback( $request ) {
+		if ( ! is_object( $request ) || ! method_exists( $request, 'get_param' ) ) {
+			return false;
+		}
+
+		$requested = $request->get_param( self::FALLBACK_PARAM );
+
+		return is_scalar( $requested ) && ! in_array( (string) $requested, array( '', '0', 'false' ), true );
+	}
+
+	/**
+	 * Lets a marked collection answer with the originals it has no translation of.
+	 *
+	 * @param mixed $fallback Whether the query falls back so far.
+	 * @param mixed $query    Query being constrained.
+	 * @return bool
+	 */
+	public function answer_collection_fallback( $fallback, $query ) {
+		if ( $fallback || ! $query instanceof WP_Query ) {
+			return (bool) $fallback;
+		}
+
+		return (bool) $query->get( self::FALLBACK_VAR );
 	}
 
 	/**
@@ -365,7 +429,8 @@ final class RestLanguageModule implements ModuleInterface {
 			return $preload_paths;
 		}
 
-		$routes = $this->get_filterable_routes();
+		$fallback = $this->editor_wants_fallback( $context );
+		$routes   = $this->get_filterable_routes();
 
 		foreach ( $preload_paths as $index => $path ) {
 			$is_pair = is_array( $path );
@@ -388,6 +453,10 @@ final class RestLanguageModule implements ModuleInterface {
 			}
 
 			$params['lang'] = $language_id;
+
+			if ( $fallback ) {
+				$params[ self::FALLBACK_PARAM ] = '1';
+			}
 
 			ksort( $params );
 			$rebuilt = add_query_arg( urlencode_deep( $params ), $parts['path'] );
@@ -442,6 +511,31 @@ final class RestLanguageModule implements ModuleInterface {
 	}
 
 	/**
+	 * Reports whether an editor screen's listings may fall back to the originals.
+	 *
+	 * The post editor says no. Someone writing a Bengali page is choosing a
+	 * parent, a category, a link target, and offering them the English ones is
+	 * the mixing this module exists to prevent.
+	 *
+	 * The Site Editor says yes, because what it edits is the site rather than a
+	 * page: a header has to lead somewhere in every language, including the ones
+	 * nothing has been translated into yet. A screen answers for itself through
+	 * the filter.
+	 *
+	 * @param mixed $context Block editor context, where one exists.
+	 * @return bool
+	 */
+	private function editor_wants_fallback( $context = null ) {
+		/**
+		 * Filters whether an editor screen's listings include untranslated originals.
+		 *
+		 * @param bool  $fallback Whether the originals are offered.
+		 * @param mixed $context  Block editor context, where one exists.
+		 */
+		return (bool) apply_filters( 'localepress_editor_language_fallback', false, $context );
+	}
+
+	/**
 	 * Loads the middleware that appends the language to editor REST requests.
 	 *
 	 * @return void
@@ -469,6 +563,8 @@ final class RestLanguageModule implements ModuleInterface {
 					'defaultLanguage' => $this->language_manager->get_default_id(),
 					'language'        => $this->editor_language_id(),
 					'field'           => 'localepress_language_id',
+					'fallback'        => $this->editor_wants_fallback(),
+					'fallbackParam'   => self::FALLBACK_PARAM,
 				)
 			) . ';',
 			'before'
@@ -556,9 +652,16 @@ final class RestLanguageModule implements ModuleInterface {
 
 		$default_id = $this->language_manager->get_default_id();
 
-		return 'terms' === $type
-			? $this->constraint->apply_to_terms( $clauses, $language_id, $default_id )
-			: $this->constraint->apply_to_posts( $clauses, $language_id, $default_id );
+		if ( 'terms' === $type ) {
+			return $this->constraint->apply_to_terms( $clauses, $language_id, $default_id );
+		}
+
+		/** This filter is documented in src/Routing/class-routingmodule.php */
+		if ( apply_filters( 'localepress_language_query_fallback', false, $query, $language_id ) ) {
+			return $this->constraint->apply_to_posts_with_fallback( $clauses, $language_id, $default_id );
+		}
+
+		return $this->constraint->apply_to_posts( $clauses, $language_id, $default_id );
 	}
 
 	/**

@@ -55,6 +55,13 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 	private $building_calendar = false;
 
 	/**
+	 * Whether the `query` filter is attached at this moment.
+	 *
+	 * @var bool
+	 */
+	private $reading_queries = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param LanguageUrlManager     $url_manager       Language URL service.
@@ -82,12 +89,17 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 		 * The calendar takes none of this. It runs four queries of its own with
 		 * no filter on any of them, so the only way in is to know when it is
 		 * running and read the SQL on its way to the database.
+		 *
+		 * Only the three hooks that mark the window are registered here. The
+		 * `query` filter is not: it is the one hook in this plugin that every
+		 * statement the site runs would pass through, and a filter that reads
+		 * all of them to act on four belongs attached for those four alone. It
+		 * is added when a calendar opens and removed when it closes.
 		 */
 		add_filter( 'get_calendar_args', array( $this, 'open_calendar' ) );
 		add_filter( 'pre_render_block', array( $this, 'open_calendar_block' ), 10, 2 );
 		add_filter( 'widget_display_callback', array( $this, 'open_calendar_widget' ), 10, 2 );
 		add_filter( 'get_calendar', array( $this, 'close_calendar' ) );
-		add_filter( 'query', array( $this, 'filter_calendar_query' ) );
 	}
 
 	/**
@@ -255,6 +267,7 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 		}
 
 		$this->building_calendar = true;
+		$this->read_queries();
 
 		if ( ! is_array( $args ) ) {
 			return $args;
@@ -288,9 +301,44 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 			&& 'core/calendar' === $block['blockName']
 		) {
 			$this->open_calendar_without_args();
+
+			/*
+			 * A calendar that renders closes itself through `get_calendar`, which
+			 * core applies on the cached path as well as the uncached one. This
+			 * covers the calendar that never renders at all: another callback on
+			 * `pre_render_block` returning content short-circuits the block, and
+			 * without something to close the window behind it the reader would be
+			 * left open for the rest of the request.
+			 *
+			 * Only when a window was actually opened: a request this module does
+			 * not filter opens none, and has nothing to close.
+			 */
+			if ( $this->building_calendar ) {
+				add_filter( 'render_block', array( $this, 'close_calendar_block' ), 10, 2 );
+			}
 		}
 
 		return $pre;
+	}
+
+	/**
+	 * Closes a calendar block that has finished rendering, or never rendered.
+	 *
+	 * @param string               $content Rendered block content.
+	 * @param array<string, mixed> $block   Parsed block.
+	 * @return string Unmodified.
+	 */
+	public function close_calendar_block( $content, $block ) {
+		if ( ! is_array( $block ) || ! isset( $block['blockName'] ) || 'core/calendar' !== $block['blockName'] ) {
+			return $content;
+		}
+
+		$this->building_calendar = false;
+		$this->stop_reading_queries();
+
+		remove_filter( 'render_block', array( $this, 'close_calendar_block' ), 10 );
+
+		return $content;
 	}
 
 	/**
@@ -319,6 +367,7 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 		}
 
 		$this->building_calendar = true;
+		$this->read_queries();
 
 		// Nothing can distinguish one language's calendar from another's in the
 		// stored key here, so the stored calendar is not reused.
@@ -333,8 +382,39 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 	 */
 	public function close_calendar( $output ) {
 		$this->building_calendar = false;
+		$this->stop_reading_queries();
 
 		return $output;
+	}
+
+	/**
+	 * Starts reading the SQL being sent to the database.
+	 *
+	 * @return void
+	 */
+	private function read_queries() {
+		if ( $this->reading_queries ) {
+			return;
+		}
+
+		$this->reading_queries = true;
+
+		add_filter( 'query', array( $this, 'filter_calendar_query' ) );
+	}
+
+	/**
+	 * Stops reading the SQL being sent to the database.
+	 *
+	 * @return void
+	 */
+	private function stop_reading_queries() {
+		if ( ! $this->reading_queries ) {
+			return;
+		}
+
+		$this->reading_queries = false;
+
+		remove_filter( 'query', array( $this, 'filter_calendar_query' ) );
 	}
 
 	/**
@@ -344,6 +424,13 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 	 * those reading the posts table. The language test goes immediately after
 	 * the query's own `WHERE` rather than at the end, because these queries
 	 * carry `ORDER BY` and `LIMIT` that nothing may follow.
+	 *
+	 * The `building_calendar` test is kept although this is now attached only
+	 * inside that window: the two answer to different things going wrong. The
+	 * attachment bounds which statements this can ever see; the flag is what a
+	 * statement is measured against once it is seen, and a window left open by
+	 * something unforeseen still rewrites nothing while the flag says no
+	 * calendar is being built.
 	 *
 	 * @param string $sql Query about to run.
 	 * @return string

@@ -115,6 +115,10 @@ final class LanguageSwitcherWidget extends WP_Widget {
 
 		echo isset( $args['before_widget'] ) ? $args['before_widget'] : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Theme markup.
 
+		// WordPress core's hook, which every widget applies to its own title. A
+		// prefixed name here would be a second hook nothing listens to, and the
+		// title would stop passing through the filters the site already has.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		if ( '' !== (string) $title ) {
