@@ -402,7 +402,8 @@ final class LanguageDetectionModule implements ModuleInterface {
 	 * @return array<string, mixed>|null
 	 */
 	private function get_remembered_language() {
-		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+		// An array-shaped cookie (`name[]=x`) would reach sanitize_title() as an array.
+		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) || ! is_string( $_COOKIE[ self::COOKIE_NAME ] ) ) {
 			return null;
 		}
 
@@ -442,7 +443,11 @@ final class LanguageDetectionModule implements ModuleInterface {
 			return;
 		}
 
-		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) && sanitize_title( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) === $slug ) {
+		if (
+			isset( $_COOKIE[ self::COOKIE_NAME ] )
+			&& is_string( $_COOKIE[ self::COOKIE_NAME ] )
+			&& sanitize_title( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) === $slug
+		) {
 			return;
 		}
 

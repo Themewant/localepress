@@ -131,6 +131,7 @@ final class JegKitDashboard implements ModuleInterface {
 	public function answer_template_languages( $result, $server, $request ) {
 		if (
 			! $result instanceof WP_REST_Response
+			|| $result->is_error()
 			|| ! $request instanceof WP_REST_Request
 			|| self::TEMPLATE_LIST_ROUTE !== $request->get_route()
 			|| ! $this->answering_languages()

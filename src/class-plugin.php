@@ -580,10 +580,10 @@ final class Plugin {
 			new TemplateResolver( $templates, $this->language_url_manager ),
 			new BlockTemplateLifecycle( $template_parts, $this->post_translation_manager ),
 			new BlockTemplateLifecycle( $templates, $this->post_translation_manager ),
-			new SiteEditorRoutes( $template_parts ),
-			new SiteEditorRoutes( $templates ),
+			new SiteEditorRoutes( $template_parts, $this->language_manager ),
+			new SiteEditorRoutes( $templates, $this->language_manager ),
 			new SiteEditorPanel( $template_parts, $templates, $this->language_manager, $navigation_menus ),
-			new NavigationMenuRoutes( $navigation_menus ),
+			new NavigationMenuRoutes( $navigation_menus, $this->language_manager ),
 
 			new ElementorWidgetModule(),
 			new SyncModule(

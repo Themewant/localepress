@@ -158,13 +158,44 @@ final class RestLanguageModule implements ModuleInterface {
 	public function register_collection_filters() {
 		foreach ( $this->post_translations->get_supported_post_types() as $post_type ) {
 			add_filter( "rest_{$post_type}_query", array( $this, 'mark_collection_args' ), 10, 2 );
+			add_filter( "rest_{$post_type}_collection_params", array( $this, 'add_collection_params' ) );
 		}
 
 		foreach ( $this->term_translations->get_supported_taxonomies() as $taxonomy ) {
 			add_filter( "rest_{$taxonomy}_query", array( $this, 'mark_collection_args' ), 10, 2 );
+			add_filter( "rest_{$taxonomy}_collection_params", array( $this, 'add_collection_params' ) );
 		}
 
 		add_filter( 'rest_post_search_query', array( $this, 'mark_collection_args' ), 10, 2 );
+	}
+
+	/**
+	 * Declares the language parameters on a filterable collection.
+	 *
+	 * They are read from the request in rest_pre_dispatch either way. Declaring
+	 * them puts them in the route's schema, so an OPTIONS request and the index
+	 * at /wp-json/ say they exist.
+	 *
+	 * @param array<string, mixed> $params Collection parameters.
+	 * @return array<string, mixed>
+	 */
+	public function add_collection_params( $params ) {
+		if ( ! is_array( $params ) ) {
+			return $params;
+		}
+
+		$params['lang'] = array(
+			'description'       => __( 'Limit results to one language. An unknown language answers in the default language.', 'localepress' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+		);
+
+		$params[ self::FALLBACK_PARAM ] = array(
+			'description' => __( 'Include originals that have no translation in the requested language.', 'localepress' ),
+			'type'        => 'boolean',
+		);
+
+		return $params;
 	}
 
 	/**

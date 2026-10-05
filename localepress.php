@@ -3,9 +3,11 @@
  * Plugin Name: LocalePress
  * Description: A lightweight multilingual foundation for WordPress.
  * Plugin URI:  https://shapekode.com/
- * Author:      ShapeKode
+ * Author:      shapekode22
  * Author URI:  https://profiles.wordpress.org/shapekode22/
  * Version:     1.0.0
+ * Requires at least: 6.4
+ * Requires PHP: 7.4
  * License:     GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: localepress
@@ -13,6 +15,7 @@
  *
  * @package LocalePress
  */
+
 
 defined( 'ABSPATH' ) || exit;
 

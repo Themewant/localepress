@@ -9,6 +9,7 @@ namespace LocalePress\Navigation;
 
 use LocalePress\Admin\AdminModule;
 use LocalePress\Contracts\ModuleInterface;
+use LocalePress\Language\LanguageManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -41,12 +42,21 @@ final class NavigationMenuRoutes implements ModuleInterface {
 	private $menus;
 
 	/**
+	 * Language manager.
+	 *
+	 * @var LanguageManager
+	 */
+	private $language_manager;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param NavigationMenus $menus Menu language service.
+	 * @param NavigationMenus $menus            Menu language service.
+	 * @param LanguageManager $language_manager Language manager.
 	 */
-	public function __construct( NavigationMenus $menus ) {
-		$this->menus = $menus;
+	public function __construct( NavigationMenus $menus, LanguageManager $language_manager ) {
+		$this->menus            = $menus;
+		$this->language_manager = $language_manager;
 	}
 
 	/**
@@ -88,9 +98,18 @@ final class NavigationMenuRoutes implements ModuleInterface {
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 
-		$arguments = array(
+		/*
+		 * Removal keeps the unvalidated argument: a translation left behind by a
+		 * language since deleted from the registry still has to be removable.
+		 */
+		$removal = array(
 			'slug'     => $menu,
 			'language' => $language,
+		);
+
+		$arguments = array(
+			'slug'     => $menu,
+			'language' => array_merge( $language, array( 'validate_callback' => array( $this, 'validate_language' ) ) ),
 		);
 
 		register_rest_route(
@@ -107,7 +126,7 @@ final class NavigationMenuRoutes implements ModuleInterface {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'remove' ),
 					'permission_callback' => array( $this, 'may_manage' ),
-					'args'                => $arguments,
+					'args'                => $removal,
 				),
 			)
 		);
@@ -166,6 +185,24 @@ final class NavigationMenuRoutes implements ModuleInterface {
 			'localepress_forbidden',
 			__( 'You are not allowed to manage menu languages.', 'localepress' ),
 			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
+	 * Refuses a language the registry does not know before any callback runs.
+	 *
+	 * @param mixed $value Requested language identifier.
+	 * @return true|WP_Error
+	 */
+	public function validate_language( $value ) {
+		if ( is_string( $value ) && null !== $this->language_manager->find( sanitize_text_field( $value ) ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'localepress_language_not_found',
+			__( 'The requested language does not exist.', 'localepress' ),
+			array( 'status' => 400 )
 		);
 	}
 

@@ -97,6 +97,13 @@ final class AdminNoticeGate implements ModuleInterface {
 	const OWN_FUNCTION_PREFIX = 'localepress';
 
 	/**
+	 * Style handle carrying the notice-hiding rule.
+	 *
+	 * @var string
+	 */
+	const STYLE_HANDLE = 'localepress-notice-gate';
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function register() {
@@ -110,7 +117,7 @@ final class AdminNoticeGate implements ModuleInterface {
 			add_action( $hook, array( $this, 'detach_foreign_notices' ), PHP_INT_MIN );
 		}
 
-		add_action( 'admin_head', array( $this, 'print_styles' ), PHP_INT_MAX );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
@@ -133,7 +140,7 @@ final class AdminNoticeGate implements ModuleInterface {
 	 *
 	 * @return void
 	 */
-	public function print_styles() {
+	public function enqueue_styles() {
 		if ( ! $this->is_gated_screen() ) {
 			return;
 		}
@@ -150,10 +157,13 @@ final class AdminNoticeGate implements ModuleInterface {
 			'#wpbody-content div.updated:not(.localepress-notice)',
 		);
 
-		printf(
-			'<style id="localepress-notice-gate">%s{display:none!important;}</style>',
-			esc_html( implode( ',', $selectors ) )
-		);
+		/*
+		 * A handle of its own rather than the admin stylesheet, because not
+		 * every LocalePress screen loads that one.
+		 */
+		wp_register_style( self::STYLE_HANDLE, false, array(), LOCALEPRESS_VERSION );
+		wp_enqueue_style( self::STYLE_HANDLE );
+		wp_add_inline_style( self::STYLE_HANDLE, implode( ',', $selectors ) . '{display:none!important;}' );
 	}
 
 	/**

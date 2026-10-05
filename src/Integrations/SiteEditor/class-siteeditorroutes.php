@@ -9,6 +9,7 @@ namespace LocalePress\Integrations\SiteEditor;
 
 use LocalePress\Admin\AdminModule;
 use LocalePress\Contracts\ModuleInterface;
+use LocalePress\Language\LanguageManager;
 use WP_Error;
 use WP_Post;
 use WP_REST_Request;
@@ -65,12 +66,21 @@ final class SiteEditorRoutes implements ModuleInterface {
 	private $templates;
 
 	/**
+	 * Language manager.
+	 *
+	 * @var LanguageManager
+	 */
+	private $language_manager;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param BlockTemplates $templates Template translation service.
+	 * @param BlockTemplates  $templates        Template translation service.
+	 * @param LanguageManager $language_manager Language manager.
 	 */
-	public function __construct( BlockTemplates $templates ) {
-		$this->templates = $templates;
+	public function __construct( BlockTemplates $templates, LanguageManager $language_manager ) {
+		$this->templates        = $templates;
+		$this->language_manager = $language_manager;
 	}
 
 	/**
@@ -113,9 +123,18 @@ final class SiteEditorRoutes implements ModuleInterface {
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 
-		$arguments = array(
+		/*
+		 * Removal keeps the unvalidated argument: a translation left behind by a
+		 * language since deleted from the registry still has to be removable.
+		 */
+		$removal = array(
 			'slug'     => $slug,
 			'language' => $language,
+		);
+
+		$arguments = array(
+			'slug'     => $slug,
+			'language' => array_merge( $language, array( 'validate_callback' => array( $this, 'validate_language' ) ) ),
 		);
 
 		$this->register_route(
@@ -131,7 +150,7 @@ final class SiteEditorRoutes implements ModuleInterface {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'remove' ),
 					'permission_callback' => array( $this, 'may_manage' ),
-					'args'                => $arguments,
+					'args'                => $removal,
 				),
 			)
 		);
@@ -191,6 +210,24 @@ final class SiteEditorRoutes implements ModuleInterface {
 			'localepress_forbidden',
 			__( 'You are not allowed to manage template languages.', 'localepress' ),
 			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
+	 * Refuses a language the registry does not know before any callback runs.
+	 *
+	 * @param mixed $value Requested language identifier.
+	 * @return true|WP_Error
+	 */
+	public function validate_language( $value ) {
+		if ( is_string( $value ) && null !== $this->language_manager->find( sanitize_text_field( $value ) ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'localepress_language_not_found',
+			__( 'The requested language does not exist.', 'localepress' ),
+			array( 'status' => 400 )
 		);
 	}
 
