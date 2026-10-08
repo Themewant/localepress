@@ -50,6 +50,8 @@ use LocalePress\Integrations\Elementor\ElementorThemeBuilderModule;
 use LocalePress\Integrations\Elementor\ElementorWidgetModule;
 use LocalePress\Integrations\ElementsKit\ElementsKitModule;
 use LocalePress\Integrations\ElementsKit\ElementsKitTemplates;
+use LocalePress\Integrations\ElementPack\ElementPackModule;
+use LocalePress\Integrations\ElementPack\ElementPackTemplates;
 use LocalePress\Integrations\EssentialAddons\EssentialAddonsAdmin;
 use LocalePress\Integrations\EssentialAddons\EssentialAddonsModule;
 use LocalePress\Integrations\EssentialAddons\EssentialAddonsTemplates;
@@ -529,6 +531,12 @@ final class Plugin {
 
 			new ElementsKitModule(
 				new ElementsKitTemplates( $elementor_documents, $this->post_translation_manager ),
+				$this->post_translation_manager,
+				$this->language_url_manager
+			),
+
+			new ElementPackModule(
+				new ElementPackTemplates( $elementor_documents, $this->post_translation_manager ),
 				$this->post_translation_manager,
 				$this->language_url_manager
 			),

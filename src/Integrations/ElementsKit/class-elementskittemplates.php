@@ -69,14 +69,17 @@ final class ElementsKitTemplates {
 	const PLUGIN_CLASS = 'ElementsKit_Lite';
 
 	/**
-	 * Class that resolves and caches the two template identifiers.
+	 * Classes that resolve and cache the two template identifiers, each mapped to
+	 * the class that enqueues a template's generated Elementor stylesheet.
+	 *
+	 * ElementsKit Pro replaces the free header and footer module with its own,
+	 * so on a site running both only the Pro activator is live. It is listed
+	 * first so that it is the one asked.
 	 */
-	const ACTIVATOR_CLASS = '\\ElementsKit_Lite\\Modules\\Header_Footer\\Activator';
-
-	/**
-	 * Class that enqueues a template's generated Elementor stylesheet.
-	 */
-	const UTILS_CLASS = '\\ElementsKit_Lite\\Utils';
+	const ACTIVATOR_CLASSES = array(
+		'\\ElementsKit\\Modules\\Header_Footer\\Activator'      => '\\ElementsKit\\Utils',
+		'\\ElementsKit_Lite\\Modules\\Header_Footer\\Activator' => '\\ElementsKit_Lite\\Utils',
+	);
 
 	/**
 	 * Elementor document language resolution.
@@ -152,8 +155,33 @@ final class ElementsKitTemplates {
 	 * @return bool
 	 */
 	public function can_resolve() {
-		return class_exists( self::ACTIVATOR_CLASS )
-			&& method_exists( self::ACTIVATOR_CLASS, 'template_ids' );
+		return '' !== $this->activator_class();
+	}
+
+	/**
+	 * Returns the activator the builder is actually running.
+	 *
+	 * Only an activator that already has its instance counts. Asking one that
+	 * does not would make it create that instance, and its constructor hooks
+	 * the header and footer onto `wp` a second time — with Pro active the free
+	 * activator was never started, and starting it here printed every header
+	 * and footer twice.
+	 *
+	 * @return string Empty when the header and footer module is not running.
+	 */
+	private function activator_class() {
+		foreach ( array_keys( self::ACTIVATOR_CLASSES ) as $class ) {
+			if (
+				class_exists( $class )
+				&& property_exists( $class, 'instance' )
+				&& null !== $class::$instance
+				&& method_exists( $class, 'template_ids' )
+			) {
+				return $class;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -178,13 +206,15 @@ final class ElementsKitTemplates {
 	 * @return array<int, mixed> The header identifier, then the footer's.
 	 */
 	public function get_source_template_ids() {
-		if ( ! $this->can_resolve() ) {
+		$activator = $this->activator_class();
+
+		if ( '' === $activator ) {
 			return array();
 		}
 
 		wp_cache_delete( self::CACHE_KEY );
 
-		$ids = call_user_func( array( self::ACTIVATOR_CLASS, 'template_ids' ) );
+		$ids = call_user_func( array( $activator, 'template_ids' ) );
 
 		return is_array( $ids ) ? $ids : array();
 	}
@@ -211,13 +241,16 @@ final class ElementsKitTemplates {
 	 */
 	public function render_css( $template_id ) {
 		$template_id = absint( $template_id );
+		$activator   = $this->activator_class();
 
-		if ( 0 === $template_id || ! class_exists( self::UTILS_CLASS ) ) {
+		if ( 0 === $template_id || '' === $activator ) {
 			return;
 		}
 
-		if ( method_exists( self::UTILS_CLASS, 'render_elementor_content_css' ) ) {
-			call_user_func( array( self::UTILS_CLASS, 'render_elementor_content_css' ), $template_id );
+		$utils = self::ACTIVATOR_CLASSES[ $activator ];
+
+		if ( class_exists( $utils ) && method_exists( $utils, 'render_elementor_content_css' ) ) {
+			call_user_func( array( $utils, 'render_elementor_content_css' ), $template_id );
 		}
 	}
 

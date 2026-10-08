@@ -42,7 +42,7 @@ You choose the URL format in the settings. You can use a directory prefix (`exam
 
 = Does it work with my theme and page builder? =
 
-LocalePress works with classic and block themes. In block themes, templates and template parts such as the header and footer can be translated per language from the Site Editor. Elementor pages and the header and footer builders of Elementor Pro, Elementor Header & Footer Builder, Essential Addons, ElementsKit, Happy Elementor Addons for Elementor are supported.
+LocalePress works with classic and block themes. In block themes, templates and template parts such as the header and footer can be translated per language from the Site Editor. Elementor pages and the header and footer builders of Elementor Pro, Elementor Header & Footer Builder, Essential Addons, ElementsKit, Element Pack, Happy Elementor Addons for Elementor are supported.
 
 = How do I add a language switcher? =
 

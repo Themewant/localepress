@@ -131,9 +131,27 @@ final class AdminModule implements ModuleInterface {
 			self::capability(),
 			'localepress',
 			array( $this->page, 'render' ),
-			'dashicons-translation',
+			self::menu_icon(),
 			81
 		);
+	}
+
+	/**
+	 * Returns the LocalePress logo as a data URI for the admin menu.
+	 *
+	 * Falls back to a dashicon when the SVG file cannot be read.
+	 *
+	 * @return string
+	 */
+	private static function menu_icon() {
+		$file = LOCALEPRESS_PATH . 'assets/icons/localepress-menu-icon.svg';
+		$svg  = is_readable( $file ) ? file_get_contents( $file ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local plugin file.
+
+		if ( false === $svg || '' === $svg ) {
+			return 'dashicons-translation';
+		}
+
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for admin menu SVG icons.
 	}
 
 	/**
