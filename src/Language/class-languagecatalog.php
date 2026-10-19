@@ -2,10 +2,10 @@
 /**
  * WordPress language catalog.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -68,11 +68,11 @@ final class LanguageCatalog {
 		}
 
 		/**
-		 * Filters language presets shown in the LocalePress setup selector.
+		 * Filters language presets shown in the ShapeTranslate setup selector.
 		 *
 		 * @param array<string, array<string, mixed>> $catalog Language presets keyed by locale.
 		 */
-		$catalog = apply_filters( 'localepress_language_catalog', $catalog );
+		$catalog = apply_filters( 'shapetranslate_language_catalog', $catalog );
 		$catalog = is_array( $catalog ) ? $this->normalize_catalog( $catalog ) : array();
 
 		uasort(

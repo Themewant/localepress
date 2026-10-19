@@ -2,17 +2,17 @@
 /**
  * What the Site Editor language panel knows about the template on screen.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Admin\AdminModule;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Navigation\NavigationMenuRoutes;
-use LocalePress\Navigation\NavigationMenus;
+use ShapeTranslate\Admin\AdminModule;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Navigation\NavigationMenuRoutes;
+use ShapeTranslate\Navigation\NavigationMenus;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -40,7 +40,7 @@ final class SiteEditorPanel implements ModuleInterface {
 	/**
 	 * REST namespace.
 	 */
-	const NAMESPACE = 'localepress/v1';
+	const NAMESPACE = 'shapetranslate/v1';
 
 	/**
 	 * Route serving the panel's description of one template.
@@ -127,7 +127,7 @@ final class SiteEditorPanel implements ModuleInterface {
 		 * the one thing they do not recognise: they read a slug out of the
 		 * address and a menu is opened by identifier.
 		 */
-		add_filter( 'localepress_editor_language_id', array( $this, 'answer_editor_language' ), 20 );
+		add_filter( 'shapetranslate_editor_language_id', array( $this, 'answer_editor_language' ), 20 );
 	}
 
 	/**
@@ -200,8 +200,8 @@ final class SiteEditorPanel implements ModuleInterface {
 		}
 
 		return new WP_Error(
-			'localepress_forbidden',
-			__( 'You are not allowed to read template languages.', 'localepress' ),
+			'shapetranslate_forbidden',
+			__( 'You are not allowed to read template languages.', 'shapetranslate' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}

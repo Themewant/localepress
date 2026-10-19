@@ -2,13 +2,13 @@
 /**
  * Renders a block theme's templates in the language being read.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -100,11 +100,11 @@ final class TemplateResolver implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_non_public_post_types', array( $this, 'declare_post_type' ) );
-		add_filter( 'localepress_supported_post_types', array( $this, 'support_post_type' ) );
-		add_filter( 'localepress_settings', array( $this, 'enable_translation' ) );
-		add_filter( 'localepress_language_rest_routes', array( $this, 'keep_templates_unfiltered' ) );
-		add_filter( 'localepress_editor_language_id', array( $this, 'answer_editor_language' ), 10, 2 );
+		add_filter( 'shapetranslate_non_public_post_types', array( $this, 'declare_post_type' ) );
+		add_filter( 'shapetranslate_supported_post_types', array( $this, 'support_post_type' ) );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_translation' ) );
+		add_filter( 'shapetranslate_language_rest_routes', array( $this, 'keep_templates_unfiltered' ) );
+		add_filter( 'shapetranslate_editor_language_id', array( $this, 'answer_editor_language' ), 10, 2 );
 
 		add_action( 'pre_get_posts', array( $this, 'never_narrow_templates' ), 10000 );
 
@@ -116,7 +116,7 @@ final class TemplateResolver implements ModuleInterface {
 	/**
 	 * Declares the template post type eligible for translation.
 	 *
-	 * @param mixed $post_types Post types LocalePress may translate.
+	 * @param mixed $post_types Post types ShapeTranslate may translate.
 	 * @return mixed
 	 */
 	public function declare_post_type( $post_types ) {
@@ -153,7 +153,7 @@ final class TemplateResolver implements ModuleInterface {
 	 * starts selected because until it is, nothing else here has anything to work
 	 * with: templates carry no language, so there is nothing to resolve.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_translation( $settings ) {
@@ -220,7 +220,7 @@ final class TemplateResolver implements ModuleInterface {
 		 * @param array<int, string> $templates   Files WordPress asked for.
 		 * @param string             $language_id Language being rendered.
 		 */
-		$widened = apply_filters( 'localepress_template_hierarchy', $widened, $templates, $language_id );
+		$widened = apply_filters( 'shapetranslate_template_hierarchy', $widened, $templates, $language_id );
 
 		return is_array( $widened ) && ! empty( $widened ) ? array_values( array_unique( $widened ) ) : $templates;
 	}
@@ -248,7 +248,7 @@ final class TemplateResolver implements ModuleInterface {
 		}
 
 		if ( Templates::POST_TYPE === $post_type ) {
-			$query->set( 'localepress_skip_language_filter', true );
+			$query->set( 'shapetranslate_skip_language_filter', true );
 		}
 	}
 
@@ -346,7 +346,7 @@ final class TemplateResolver implements ModuleInterface {
 		 * @param string $language_id Language identifier, or an empty string.
 		 */
 		$filtered = apply_filters(
-			'localepress_template_language',
+			'shapetranslate_template_language',
 			null === $language ? '' : (string) $language['id']
 		);
 
@@ -367,6 +367,6 @@ final class TemplateResolver implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_translate_templates', true );
 	}
 }

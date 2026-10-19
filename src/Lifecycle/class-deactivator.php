@@ -2,12 +2,12 @@
 /**
  * Plugin deactivation.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Lifecycle;
+namespace ShapeTranslate\Lifecycle;
 
-use LocalePress\Routing\RoutingModule;
+use ShapeTranslate\Routing\RoutingModule;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 final class Deactivator {
 
 	/**
-	 * Deactivates LocalePress without deleting language data.
+	 * Deactivates ShapeTranslate without deleting language data.
 	 *
 	 * @param bool $network_wide Whether the plugin is being network deactivated.
 	 * @return void
@@ -35,6 +35,6 @@ final class Deactivator {
 			$deactivate_site();
 		}
 
-		do_action( 'localepress_deactivated' );
+		do_action( 'shapetranslate_deactivated' );
 	}
 }

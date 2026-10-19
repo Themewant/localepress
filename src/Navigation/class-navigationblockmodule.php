@@ -2,14 +2,14 @@
 /**
  * Block theme navigation language integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Post;
 use WP_Query;
 
@@ -89,15 +89,15 @@ final class NavigationBlockModule implements ModuleInterface {
 	public function register() {
 		add_filter( 'render_block_data', array( $this, 'open_listing_scope' ), 20 );
 		add_filter( 'render_block', array( $this, 'close_listing_scope' ), 20, 2 );
-		add_filter( 'localepress_language_query_fallback', array( $this, 'answer_listing_fallback' ), 10, 2 );
+		add_filter( 'shapetranslate_language_query_fallback', array( $this, 'answer_listing_fallback' ), 10, 2 );
 
 		if ( ! $this->translating_menus() ) {
 			return;
 		}
 
-		add_filter( 'localepress_non_public_post_types', array( $this, 'declare_post_type' ) );
-		add_filter( 'localepress_supported_post_types', array( $this, 'support_post_type' ) );
-		add_filter( 'localepress_settings', array( $this, 'enable_menu_translation' ) );
+		add_filter( 'shapetranslate_non_public_post_types', array( $this, 'declare_post_type' ) );
+		add_filter( 'shapetranslate_supported_post_types', array( $this, 'support_post_type' ) );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_menu_translation' ) );
 		add_filter( 'get_edit_post_link', array( $this, 'filter_menu_edit_link' ), 10, 2 );
 
 		// Runs before TranslationLifecycleModule::assign_default_language() at priority 20.
@@ -107,7 +107,7 @@ final class NavigationBlockModule implements ModuleInterface {
 	/**
 	 * Declares the menu post type eligible for translation.
 	 *
-	 * @param mixed $post_types Post types LocalePress may translate.
+	 * @param mixed $post_types Post types ShapeTranslate may translate.
 	 * @return mixed
 	 */
 	public function declare_post_type( $post_types ) {
@@ -140,12 +140,12 @@ final class NavigationBlockModule implements ModuleInterface {
 	 * Selects menus in the translatable types a site has chosen.
 	 *
 	 * A site that keeps one menu for every language turns the whole module off
-	 * through `localepress_translate_navigation_menus` rather than by unticking a
+	 * through `shapetranslate_translate_navigation_menus` rather than by unticking a
 	 * row, because the type is not offered on the settings screen: it holds no
 	 * content a site owner recognizes as theirs, only the menus the Site Editor
 	 * writes for them.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_menu_translation( $settings ) {
@@ -233,7 +233,7 @@ final class NavigationBlockModule implements ModuleInterface {
 		 * @param bool     $fallback Whether the originals are included.
 		 * @param WP_Query $query    Listing being constrained.
 		 */
-		return (bool) apply_filters( 'localepress_navigation_listing_fallback', true, $query );
+		return (bool) apply_filters( 'shapetranslate_navigation_listing_fallback', true, $query );
 	}
 
 	/**
@@ -285,7 +285,7 @@ final class NavigationBlockModule implements ModuleInterface {
 	 * Sends a menu's edit link to the Site Editor, which is where menus are edited.
 	 *
 	 * The post type has no administrative screen of its own, so core answers with
-	 * nothing and every LocalePress list that offers to open a menu offers a link
+	 * nothing and every ShapeTranslate list that offers to open a menu offers a link
 	 * that goes nowhere.
 	 *
 	 * @param mixed $link    Edit link core produced.
@@ -352,7 +352,7 @@ final class NavigationBlockModule implements ModuleInterface {
 		 * @param string $language_id Language being read.
 		 */
 		$translation = (int) apply_filters(
-			'localepress_navigation_menu_id',
+			'shapetranslate_navigation_menu_id',
 			$translation,
 			$reference,
 			(string) $language['id']
@@ -409,6 +409,6 @@ final class NavigationBlockModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether navigation menus are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_translate_navigation_menus', true );
+		return (bool) apply_filters( 'shapetranslate_translate_navigation_menus', true );
 	}
 }

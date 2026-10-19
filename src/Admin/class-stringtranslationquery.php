@@ -2,13 +2,13 @@
 /**
  * String translation admin query service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Contracts\StringRepositoryInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Contracts\StringRepositoryInterface;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,7 +66,7 @@ final class StringTranslationQuery {
 		 *
 		 * @param array<int, array<string, mixed>> $languages Enabled language records.
 		 */
-		$filtered = apply_filters( 'localepress_string_translation_languages', $languages );
+		$filtered = apply_filters( 'shapetranslate_string_translation_languages', $languages );
 
 		if ( ! is_array( $filtered ) ) {
 			return $languages;
@@ -107,7 +107,7 @@ final class StringTranslationQuery {
 		 *
 		 * @param array<int, string> $groups Registered group names.
 		 */
-		$filtered = apply_filters( 'localepress_string_translation_groups', $groups );
+		$filtered = apply_filters( 'shapetranslate_string_translation_groups', $groups );
 
 		if ( ! is_array( $filtered ) ) {
 			return $groups;
@@ -143,7 +143,7 @@ final class StringTranslationQuery {
 		 *
 		 * @param array<string, mixed> $args Normalized query arguments.
 		 */
-		$filtered_args = apply_filters( 'localepress_string_translation_query_args', $args );
+		$filtered_args = apply_filters( 'shapetranslate_string_translation_query_args', $args );
 		$args          = $this->normalize_args( is_array( $filtered_args ) ? $filtered_args : $args );
 		$result        = $this->repository->query_definitions( $args );
 		$items         = isset( $result['items'] ) && is_array( $result['items'] ) ? $result['items'] : array();
@@ -177,7 +177,7 @@ final class StringTranslationQuery {
 		 * @param array<int, array<string, mixed>> $items Prepared rows.
 		 * @param array<string, mixed>             $args  Normalized query arguments.
 		 */
-		$filtered_items = apply_filters( 'localepress_string_translation_items', $items, $args );
+		$filtered_items = apply_filters( 'shapetranslate_string_translation_items', $items, $args );
 
 		return array(
 			'items' => is_array( $filtered_items ) ? array_values( $filtered_items ) : $items,

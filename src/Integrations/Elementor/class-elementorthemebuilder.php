@@ -2,13 +2,13 @@
 /**
  * Elementor Theme Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -121,7 +121,7 @@ final class ElementorThemeBuilder {
 	 * Reports whether the Theme Builder is present.
 	 *
 	 * The constant, not a class of the Theme Builder's. Elementor Pro registers
-	 * its modules on `elementor_pro/init`, long after LocalePress composes its
+	 * its modules on `elementor_pro/init`, long after ShapeTranslate composes its
 	 * own, so asking for one of those classes here answers no on every site that
 	 * has them. The constant is defined as the plugin file is read, which is
 	 * before any of this.
@@ -136,7 +136,7 @@ final class ElementorThemeBuilder {
 		 *
 		 * @param bool $available Whether Elementor Pro is present.
 		 */
-		return (bool) apply_filters( 'localepress_elementor_pro_available', $available );
+		return (bool) apply_filters( 'shapetranslate_elementor_pro_available', $available );
 	}
 
 	/**
@@ -296,7 +296,7 @@ final class ElementorThemeBuilder {
 	 *
 	 * Only a published translation is offered. Elementor drops a template that is
 	 * not published rather than falling back, so answering with the translated
-	 * draft LocalePress creates would leave the location empty — a site would
+	 * draft ShapeTranslate creates would leave the location empty — a site would
 	 * lose its header the moment someone started translating it.
 	 *
 	 * @param int    $template_id Template post identifier.

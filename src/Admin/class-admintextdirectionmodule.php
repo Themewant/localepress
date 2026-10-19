@@ -2,15 +2,15 @@
 /**
  * Admin text direction module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Language\LanguageTag;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageTag;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -89,7 +89,7 @@ final class AdminTextDirectionModule implements ModuleInterface {
 
 		$direction = LanguageTag::direction( $language );
 
-		return trim( $classes . ' localepress-dir-' . $direction );
+		return trim( $classes . ' shapetranslate-dir-' . $direction );
 	}
 
 	/**
@@ -143,7 +143,7 @@ final class AdminTextDirectionModule implements ModuleInterface {
 		if ( ! is_array( $language ) ) {
 			/** This filter is documented in src/Admin/class-translationmetabox.php */
 			$new_language_id = apply_filters(
-				'localepress_new_post_language_id',
+				'shapetranslate_new_post_language_id',
 				$this->languages->get_default_id(),
 				$post
 			);

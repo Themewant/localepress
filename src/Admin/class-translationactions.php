@@ -2,10 +2,10 @@
 /**
  * Translation admin action helper.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
 use WP_Post;
 
@@ -26,7 +26,7 @@ final class TranslationActions {
 	public function get_create_url( $source_post_id, $language_id ) {
 		$url = add_query_arg(
 			array(
-				'action'         => 'localepress_create_translation',
+				'action'         => 'shapetranslate_create_translation',
 				'source_post_id' => absint( $source_post_id ),
 				'language_id'    => $language_id,
 			),
@@ -35,7 +35,7 @@ final class TranslationActions {
 
 		return wp_nonce_url(
 			$url,
-			'localepress_create_translation_' . absint( $source_post_id ) . '_' . $language_id
+			'shapetranslate_create_translation_' . absint( $source_post_id ) . '_' . $language_id
 		);
 	}
 

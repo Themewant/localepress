@@ -2,14 +2,14 @@
 /**
  * REST routes managing the languages of a block theme's menus.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Admin\AdminModule;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Admin\AdminModule;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -32,7 +32,7 @@ final class NavigationMenuRoutes implements ModuleInterface {
 	/**
 	 * REST namespace.
 	 */
-	const NAMESPACE = 'localepress/v1';
+	const NAMESPACE = 'shapetranslate/v1';
 
 	/**
 	 * Menu language service.
@@ -182,8 +182,8 @@ final class NavigationMenuRoutes implements ModuleInterface {
 		}
 
 		return new WP_Error(
-			'localepress_forbidden',
-			__( 'You are not allowed to manage menu languages.', 'localepress' ),
+			'shapetranslate_forbidden',
+			__( 'You are not allowed to manage menu languages.', 'shapetranslate' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}
@@ -200,8 +200,8 @@ final class NavigationMenuRoutes implements ModuleInterface {
 		}
 
 		return new WP_Error(
-			'localepress_language_not_found',
-			__( 'The requested language does not exist.', 'localepress' ),
+			'shapetranslate_language_not_found',
+			__( 'The requested language does not exist.', 'shapetranslate' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -332,10 +332,10 @@ final class NavigationMenuRoutes implements ModuleInterface {
 		$status = is_array( $data ) && isset( $data['status'] ) ? absint( $data['status'] ) : 0;
 
 		$statuses = array(
-			'localepress_menu_not_found'      => 404,
-			'localepress_menu_not_translated' => 404,
-			'localepress_menu_exists'         => 409,
-			'localepress_link_self'           => 400,
+			'shapetranslate_menu_not_found'      => 404,
+			'shapetranslate_menu_not_translated' => 404,
+			'shapetranslate_menu_exists'         => 409,
+			'shapetranslate_link_self'           => 400,
 			'invalid_post'                    => 404,
 			'source_post_trashed'             => 409,
 			'duplicate_translation_language'  => 409,

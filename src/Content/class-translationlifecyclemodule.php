@@ -2,12 +2,12 @@
 /**
  * Translation relationship lifecycle module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,7 +45,7 @@ final class TranslationLifecycleModule implements ModuleInterface {
 		add_action( 'trashed_post', array( $this, 'post_trashed' ), 10, 2 );
 		add_action( 'untrashed_post', array( $this, 'post_untrashed' ), 10, 2 );
 		add_action( 'wp_after_insert_post', array( $this, 'assign_default_language' ), 20, 4 );
-		add_filter( 'localepress_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
+		add_filter( 'shapetranslate_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
 	}
 
 	/**
@@ -78,11 +78,11 @@ final class TranslationLifecycleModule implements ModuleInterface {
 		/**
 		 * Filters automatic default-language assignment for a saved post.
 		 *
-		 * @param bool     $assign  Whether LocalePress should persist the default.
+		 * @param bool     $assign  Whether ShapeTranslate should persist the default.
 		 * @param int      $post_id Post identifier.
 		 * @param \WP_Post $post    Saved post.
 		 */
-		$assign = apply_filters( 'localepress_auto_assign_default_post_language', true, absint( $post_id ), $post );
+		$assign = apply_filters( 'shapetranslate_auto_assign_default_post_language', true, absint( $post_id ), $post );
 
 		if ( $assign ) {
 			$this->translation_manager->assign_default_language( $post_id );
@@ -113,7 +113,7 @@ final class TranslationLifecycleModule implements ModuleInterface {
 			return;
 		}
 
-		do_action( 'localepress_translation_post_trashed', absint( $post_id ), $previous_status );
+		do_action( 'shapetranslate_translation_post_trashed', absint( $post_id ), $previous_status );
 	}
 
 	/**
@@ -129,7 +129,7 @@ final class TranslationLifecycleModule implements ModuleInterface {
 		}
 
 		do_action(
-			'localepress_translation_post_untrashed',
+			'shapetranslate_translation_post_untrashed',
 			absint( $post_id ),
 			$previous_status
 		);
@@ -152,7 +152,7 @@ final class TranslationLifecycleModule implements ModuleInterface {
 
 		return new WP_Error(
 			'language_in_use',
-			__( 'This language is assigned to content and cannot be deleted.', 'localepress' )
+			__( 'This language is assigned to content and cannot be deleted.', 'shapetranslate' )
 		);
 	}
 }

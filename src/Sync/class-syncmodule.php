@@ -2,14 +2,14 @@
 /**
  * Translation copy and synchronization module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Sync;
+namespace ShapeTranslate\Sync;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Settings\WorkflowSettings;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Settings\WorkflowSettings;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -75,7 +75,7 @@ final class SyncModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		add_action( 'localepress_translation_created', array( $this, 'copy_new_translation' ), 20, 5 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_new_translation' ), 20, 5 );
 		add_action( 'save_post', array( $this, 'synchronize_saved_post' ), 20, 2 );
 
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $filter ) {

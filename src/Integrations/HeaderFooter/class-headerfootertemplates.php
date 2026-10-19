@@ -2,14 +2,14 @@
 /**
  * Elementor Header & Footer Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\HeaderFooter;
+namespace ShapeTranslate\Integrations\HeaderFooter;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Term;
 
 defined( 'ABSPATH' ) || exit;
@@ -141,7 +141,7 @@ final class HeaderFooterTemplates {
 		 *
 		 * @param bool $available Whether the builder completed loading.
 		 */
-		return (bool) apply_filters( 'localepress_hfe_available', $available );
+		return (bool) apply_filters( 'shapetranslate_hfe_available', $available );
 	}
 
 	/**

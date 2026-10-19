@@ -2,10 +2,10 @@
 /**
  * Classic language switcher widget.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
 use WP_Widget;
 
@@ -28,7 +28,7 @@ final class LanguageSwitcherWidget extends WP_Widget {
 	 *
 	 * @var string
 	 */
-	const ID_BASE = 'localepress_language_switcher';
+	const ID_BASE = 'shapetranslate_language_switcher';
 
 	/**
 	 * Language switcher service.
@@ -47,10 +47,10 @@ final class LanguageSwitcherWidget extends WP_Widget {
 
 		parent::__construct(
 			self::ID_BASE,
-			__( 'Language Switcher', 'localepress' ),
+			__( 'Language Switcher', 'shapetranslate' ),
 			array(
-				'classname'                   => 'widget_localepress_switcher',
-				'description'                 => __( 'Links to this page in the other languages of the site.', 'localepress' ),
+				'classname'                   => 'widget_shapetranslate_switcher',
+				'description'                 => __( 'Links to this page in the other languages of the site.', 'shapetranslate' ),
 				'customize_selective_refresh' => true,
 				'show_instance_in_rest'       => true,
 			)
@@ -115,9 +115,6 @@ final class LanguageSwitcherWidget extends WP_Widget {
 
 		echo isset( $args['before_widget'] ) ? $args['before_widget'] : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Theme markup.
 
-		// WordPress core's hook, which every widget applies to its own title. A
-		// prefixed name here would be a second hook nothing listens to, and the
-		// title would stop passing through the filters the site already has.
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
@@ -180,45 +177,45 @@ final class LanguageSwitcherWidget extends WP_Widget {
 	public function form( $instance ) {
 		$instance = wp_parse_args( is_array( $instance ) ? $instance : array(), $this->defaults() );
 
-		$this->render_text_field( 'title', __( 'Title:', 'localepress' ), (string) $instance['title'] );
+		$this->render_text_field( 'title', __( 'Title:', 'shapetranslate' ), (string) $instance['title'] );
 
 		$this->render_select(
 			'display',
-			__( 'Show each language as:', 'localepress' ),
+			__( 'Show each language as:', 'shapetranslate' ),
 			(string) $instance['display'],
 			array(
-				'native_name'   => __( 'Native name', 'localepress' ),
-				'name'          => __( 'Name', 'localepress' ),
-				'language_code' => __( 'Language code', 'localepress' ),
+				'native_name'   => __( 'Native name', 'shapetranslate' ),
+				'name'          => __( 'Name', 'shapetranslate' ),
+				'language_code' => __( 'Language code', 'shapetranslate' ),
 			)
 		);
 
 		$this->render_select(
 			'layout',
-			__( 'Layout:', 'localepress' ),
+			__( 'Layout:', 'shapetranslate' ),
 			(string) $instance['layout'],
 			array(
-				'horizontal' => __( 'Horizontal list', 'localepress' ),
-				'vertical'   => __( 'Vertical list', 'localepress' ),
-				'dropdown'   => __( 'Dropdown', 'localepress' ),
+				'horizontal' => __( 'Horizontal list', 'shapetranslate' ),
+				'vertical'   => __( 'Vertical list', 'shapetranslate' ),
+				'dropdown'   => __( 'Dropdown', 'shapetranslate' ),
 			)
 		);
 
 		$this->render_select(
 			'unavailable_behavior',
-			__( 'Missing translation:', 'localepress' ),
+			__( 'Missing translation:', 'shapetranslate' ),
 			(string) $instance['unavailable_behavior'],
 			array(
-				'hide'     => __( 'Hide languages the site has no content in', 'localepress' ),
-				'disabled' => __( 'Show as unavailable', 'localepress' ),
-				'home'     => __( 'Link to language homepage', 'localepress' ),
-				'current'  => __( 'Keep current URL', 'localepress' ),
+				'hide'     => __( 'Hide languages the site has no content in', 'shapetranslate' ),
+				'disabled' => __( 'Show as unavailable', 'shapetranslate' ),
+				'home'     => __( 'Link to language homepage', 'shapetranslate' ),
+				'current'  => __( 'Keep current URL', 'shapetranslate' ),
 			)
 		);
 
-		$this->render_checkbox( 'hide_current', __( 'Hide current language', 'localepress' ), ! empty( $instance['hide_current'] ) );
-		$this->render_checkbox( 'show_flags', __( 'Show flags', 'localepress' ), ! empty( $instance['show_flags'] ) );
-		$this->render_checkbox( 'show_disabled', __( 'Show disabled languages as unavailable', 'localepress' ), ! empty( $instance['show_disabled'] ) );
+		$this->render_checkbox( 'hide_current', __( 'Hide current language', 'shapetranslate' ), ! empty( $instance['hide_current'] ) );
+		$this->render_checkbox( 'show_flags', __( 'Show flags', 'shapetranslate' ), ! empty( $instance['show_flags'] ) );
+		$this->render_checkbox( 'show_disabled', __( 'Show disabled languages as unavailable', 'shapetranslate' ), ! empty( $instance['show_disabled'] ) );
 	}
 
 	/**

@@ -14,7 +14,7 @@
  * page a header is seen on most, and a preview that guessed the other way would
  * show a shorter menu than the header it is previewing.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function ( blocks, blockEditor, components, element, i18n ) {
 	'use strict';
@@ -27,7 +27,7 @@
 	var SelectControl = components.SelectControl;
 	var ToggleControl = components.ToggleControl;
 	var __ = i18n.__;
-	var languages = window.localePressSwitcherLanguages || [];
+	var languages = window.shapeTranslateSwitcherLanguages || [];
 
 	/**
 	 * Returns the label a language shows for the selected display mode.
@@ -59,7 +59,7 @@
 	 * @return {string} Language identifier, or an empty string.
 	 */
 	function currentLanguageId() {
-		var editor = window.localePressEditor;
+		var editor = window.shapeTranslateEditor;
 		var index;
 
 		if ( editor && editor.language ) {
@@ -132,7 +132,7 @@
 	 * @return {Object} Label element.
 	 */
 	function itemContent( entry, attributes ) {
-		var classNames = [ 'wp-block-navigation-item__content', 'localepress-switcher__item' ];
+		var classNames = [ 'wp-block-navigation-item__content', 'shapetranslate-switcher__item' ];
 		var flag = null;
 
 		if ( entry.isCurrent ) {
@@ -140,12 +140,12 @@
 		}
 
 		if ( entry.isUnlinked ) {
-			classNames.push( 'localepress-switcher__item--unavailable' );
+			classNames.push( 'shapetranslate-switcher__item--unavailable' );
 		}
 
 		if ( attributes.showFlags && entry.language.flag_url ) {
 			flag = createElement( 'img', {
-				className: 'localepress-switcher__flag',
+				className: 'shapetranslate-switcher__flag',
 				src: entry.language.flag_url,
 				alt: '',
 				width: 16,
@@ -169,7 +169,7 @@
 	function submenuIcon() {
 		return createElement(
 			'span',
-			{ className: 'localepress-switcher-preview__icon', 'aria-hidden': true },
+			{ className: 'shapetranslate-switcher-preview__icon', 'aria-hidden': true },
 			createElement(
 				'svg',
 				{
@@ -251,7 +251,7 @@
 					'li',
 					{
 						key: entry.language.id,
-						className: 'wp-block-navigation-item localepress-switcher-preview__child'
+						className: 'wp-block-navigation-item shapetranslate-switcher-preview__child'
 					},
 					itemContent( entry, attributes )
 				)
@@ -265,33 +265,33 @@
 		return [
 			createElement(
 				'span',
-				{ key: 'toggle', className: 'localepress-switcher-preview__toggle' },
+				{ key: 'toggle', className: 'shapetranslate-switcher-preview__toggle' },
 				itemContent( parent, attributes ),
 				submenuIcon()
 			),
 			createElement(
 				'ul',
-				{ key: 'submenu', className: 'localepress-switcher-preview__submenu' },
+				{ key: 'submenu', className: 'shapetranslate-switcher-preview__submenu' },
 				children
 			)
 		];
 	}
 
-	blocks.registerBlockType( 'localepress/navigation-language-switcher', {
+	blocks.registerBlockType( 'shapetranslate/navigation-language-switcher', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
 			var entries = languages.length ? previewEntries( attributes ) : [];
 			var isSubmenu = !! attributes.dropdown && entries.length > 0;
-			var className = 'wp-block-navigation-item localepress-switcher-preview';
+			var className = 'wp-block-navigation-item shapetranslate-switcher-preview';
 			var blockProps;
 			var preview;
 
 			if ( isSubmenu ) {
-				className += ' has-child localepress-switcher-preview--submenu';
+				className += ' has-child shapetranslate-switcher-preview--submenu';
 
 				if ( props.isSelected ) {
-					className += ' localepress-switcher-preview--open';
+					className += ' shapetranslate-switcher-preview--open';
 				}
 			}
 
@@ -300,14 +300,14 @@
 			if ( ! languages.length ) {
 				preview = createElement(
 					'span',
-					{ className: 'wp-block-navigation-item__content localepress-switcher-preview__notice' },
-					__( 'Add languages in LocalePress to preview the switcher.', 'localepress' )
+					{ className: 'wp-block-navigation-item__content shapetranslate-switcher-preview__notice' },
+					__( 'Add languages in ShapeTranslate to preview the switcher.', 'shapetranslate' )
 				);
 			} else if ( ! entries.length ) {
 				preview = createElement(
 					'span',
-					{ className: 'wp-block-navigation-item__content localepress-switcher-preview__notice' },
-					__( 'These settings leave no language to show.', 'localepress' )
+					{ className: 'wp-block-navigation-item__content shapetranslate-switcher-preview__notice' },
+					__( 'These settings leave no language to show.', 'shapetranslate' )
 				);
 			} else if ( isSubmenu ) {
 				preview = renderSubmenu( entries, attributes );
@@ -323,24 +323,24 @@
 					null,
 					createElement(
 						PanelBody,
-						{ title: __( 'Switcher settings', 'localepress' ), initialOpen: true },
+						{ title: __( 'Switcher settings', 'shapetranslate' ), initialOpen: true },
 						createElement( SelectControl, {
-							label: __( 'Display', 'localepress' ),
+							label: __( 'Display', 'shapetranslate' ),
 							value: attributes.display,
 							options: [
-								{ label: __( 'Native name', 'localepress' ), value: 'native_name' },
-								{ label: __( 'Language name', 'localepress' ), value: 'name' },
-								{ label: __( 'Language code', 'localepress' ), value: 'language_code' }
+								{ label: __( 'Native name', 'shapetranslate' ), value: 'native_name' },
+								{ label: __( 'Language name', 'shapetranslate' ), value: 'name' },
+								{ label: __( 'Language code', 'shapetranslate' ), value: 'language_code' }
 							],
 							onChange: function ( value ) {
 								setAttributes( { display: value } );
 							}
 						} ),
 						createElement( ToggleControl, {
-							label: __( 'Show as a submenu', 'localepress' ),
+							label: __( 'Show as a submenu', 'shapetranslate' ),
 							help: __(
 								'Puts the current language in the menu, with every language listed below it.',
-								'localepress'
+								'shapetranslate'
 							),
 							checked: !! attributes.dropdown,
 							onChange: function ( value ) {
@@ -355,11 +355,11 @@
 							 * label on its own reads as though the whole thing would
 							 * disappear.
 							 */
-							label: __( 'Hide the current language', 'localepress' ),
+							label: __( 'Hide the current language', 'shapetranslate' ),
 							help: attributes.dropdown
 								? __(
 									'Leaves the current language on the submenu itself and out of the list below it.',
-									'localepress'
+									'shapetranslate'
 								)
 								: undefined,
 							checked: !! attributes.hideCurrent,
@@ -368,7 +368,7 @@
 							}
 						} ),
 						createElement( ToggleControl, {
-							label: __( 'Hide languages the site has no content in', 'localepress' ),
+							label: __( 'Hide languages the site has no content in', 'shapetranslate' ),
 							/*
 							 * The preview cannot show this working, because the rule
 							 * only bites on a page that has no translation and a
@@ -377,7 +377,7 @@
 							 */
 							help: __(
 								'Applies on pages that have no translation. The home page and archives answer in every language, so the preview keeps showing them.',
-								'localepress'
+								'shapetranslate'
 							),
 							checked: !! attributes.hideMissing,
 							onChange: function ( value ) {
@@ -385,28 +385,28 @@
 							}
 						} ),
 						createElement( SelectControl, {
-							label: __( 'Without a translation', 'localepress' ),
+							label: __( 'Without a translation', 'shapetranslate' ),
 							value: attributes.unavailableBehavior,
 							disabled: !! attributes.hideMissing,
 							options: [
-								{ label: __( 'Link to the home page', 'localepress' ), value: 'home' },
-								{ label: __( 'Keep the current route', 'localepress' ), value: 'current' },
-								{ label: __( 'Show without a link', 'localepress' ), value: 'disabled' },
-								{ label: __( 'Hide languages the site has no content in', 'localepress' ), value: 'hide' }
+								{ label: __( 'Link to the home page', 'shapetranslate' ), value: 'home' },
+								{ label: __( 'Keep the current route', 'shapetranslate' ), value: 'current' },
+								{ label: __( 'Show without a link', 'shapetranslate' ), value: 'disabled' },
+								{ label: __( 'Hide languages the site has no content in', 'shapetranslate' ), value: 'hide' }
 							],
 							onChange: function ( value ) {
 								setAttributes( { unavailableBehavior: value } );
 							}
 						} ),
 						createElement( ToggleControl, {
-							label: __( 'Show flags', 'localepress' ),
+							label: __( 'Show flags', 'shapetranslate' ),
 							checked: !! attributes.showFlags,
 							onChange: function ( value ) {
 								setAttributes( { showFlags: value } );
 							}
 						} ),
 						createElement( ToggleControl, {
-							label: __( 'Include disabled languages', 'localepress' ),
+							label: __( 'Include disabled languages', 'shapetranslate' ),
 							checked: !! attributes.showDisabled,
 							onChange: function ( value ) {
 								setAttributes( { showDisabled: value } );

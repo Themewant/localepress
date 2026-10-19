@@ -2,16 +2,16 @@
 /**
  * Per-language default term module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Taxonomy;
+namespace ShapeTranslate\Taxonomy;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\CurrentLanguageResolver;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\CurrentLanguageResolver;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\PluginSettings;
 use WP_Post;
 use WP_Term;
 
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * WordPress stores one default term per taxonomy, so a post saved without a
  * category lands in that single term whatever language it was written in. The
  * module answers the option read with the term that belongs to the language the
- * post is being saved in: the one chosen for that language in LocalePress >
+ * post is being saved in: the one chosen for that language in ShapeTranslate >
  * Settings > Content, or, when nothing was chosen there, the translation of the
  * stored default. A site that translated Uncategorized therefore gets a working
  * per-language default without configuring anything, and a site that wants a
@@ -58,7 +58,7 @@ final class DefaultTermModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const SEEDED_OPTION = 'localepress_seeded_default_term_languages';
+	const SEEDED_OPTION = 'shapetranslate_seeded_default_term_languages';
 
 	/**
 	 * Option prefix holding a custom taxonomy default term.
@@ -166,8 +166,8 @@ final class DefaultTermModule implements ModuleInterface {
 		add_action( 'wp_loaded', array( $this, 'register_taxonomy_filters' ) );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_request_language' ), 10, 3 );
 
-		add_action( 'localepress_language_registered', array( $this, 'seed_registered_language' ) );
-		add_action( 'localepress_language_updated', array( $this, 'seed_enabled_language' ), 10, 2 );
+		add_action( 'shapetranslate_language_registered', array( $this, 'seed_registered_language' ) );
+		add_action( 'shapetranslate_language_updated', array( $this, 'seed_enabled_language' ), 10, 2 );
 
 		add_action( 'admin_init', array( $this, 'seed_existing_languages' ) );
 
@@ -393,7 +393,7 @@ final class DefaultTermModule implements ModuleInterface {
 			 * @param string $language_id Post language identifier.
 			 */
 			$realign = apply_filters(
-				'localepress_realign_default_term',
+				'shapetranslate_realign_default_term',
 				true,
 				absint( $post_id ),
 				$taxonomy,
@@ -445,7 +445,7 @@ final class DefaultTermModule implements ModuleInterface {
 		 * @param int    $stored      Stored site-wide default term identifier.
 		 */
 		$filtered = absint(
-			apply_filters( 'localepress_default_term_id', $term_id, $taxonomy, $language_id, $stored )
+			apply_filters( 'shapetranslate_default_term_id', $term_id, $taxonomy, $language_id, $stored )
 		);
 
 		return 1 > $filtered ? $stored : $filtered;
@@ -493,7 +493,7 @@ final class DefaultTermModule implements ModuleInterface {
 		 * @param string $taxonomy    Taxonomy name.
 		 * @param string $language_id Target language identifier.
 		 */
-		$seed = apply_filters( 'localepress_seed_default_term', true, $stored, $taxonomy, $language_id );
+		$seed = apply_filters( 'shapetranslate_seed_default_term', true, $stored, $taxonomy, $language_id );
 
 		if ( ! $seed || ! get_term( $stored, $taxonomy ) instanceof WP_Term ) {
 			return;
@@ -560,7 +560,7 @@ final class DefaultTermModule implements ModuleInterface {
 		 * @param string $language_id Resolved language identifier.
 		 * @param string $taxonomy    Taxonomy name.
 		 */
-		$filtered = apply_filters( 'localepress_default_term_language_id', $language_id, $taxonomy );
+		$filtered = apply_filters( 'shapetranslate_default_term_language_id', $language_id, $taxonomy );
 
 		return is_scalar( $filtered ) ? $this->validate_language_id( (string) $filtered ) : '';
 	}
@@ -572,22 +572,22 @@ final class DefaultTermModule implements ModuleInterface {
 	 */
 	private function posted_language_id() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The meta box nonce is verified below.
-		if ( ! isset( $_POST['localepress_language_id'] ) || ! is_scalar( $_POST['localepress_language_id'] ) ) {
+		if ( ! isset( $_POST['shapetranslate_language_id'] ) || ! is_scalar( $_POST['shapetranslate_language_id'] ) ) {
 			return '';
 		}
 
 		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] )
 			? absint( wp_unslash( $_POST['post_ID'] ) )
 			: 0;
-		$nonce   = isset( $_POST['localepress_language_nonce'] ) && is_scalar( $_POST['localepress_language_nonce'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_language_nonce'] ) )
+		$nonce   = isset( $_POST['shapetranslate_language_nonce'] ) && is_scalar( $_POST['shapetranslate_language_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_language_nonce'] ) )
 			: '';
 
-		if ( ! wp_verify_nonce( $nonce, 'localepress_save_post_language_' . $post_id ) ) {
+		if ( ! wp_verify_nonce( $nonce, 'shapetranslate_save_post_language_' . $post_id ) ) {
 			return '';
 		}
 
-		$language_id = sanitize_text_field( wp_unslash( $_POST['localepress_language_id'] ) );
+		$language_id = sanitize_text_field( wp_unslash( $_POST['shapetranslate_language_id'] ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		return $this->validate_language_id( $language_id );
@@ -596,13 +596,33 @@ final class DefaultTermModule implements ModuleInterface {
 	/**
 	 * Returns the stored language of the post the editor is submitting.
 	 *
+	 * Only a save WordPress itself has signed is trusted: the classic editor's
+	 * `update-post_{ID}` nonce or the Quick Edit nonce, and only for a post the
+	 * current user may edit.
+	 *
 	 * @return string
 	 */
 	private function edited_post_language_id() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- An identifier used to read a stored language.
-		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+		if ( ! isset( $_POST['post_ID'] ) || ! is_scalar( $_POST['post_ID'] ) ) {
+			return '';
+		}
 
-		return 1 > $post_id ? '' : $this->post_translations->get_post_language_id( $post_id );
+		$is_editor_save = isset( $_POST['_wpnonce'] ) && is_scalar( $_POST['_wpnonce'] )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . absint( wp_unslash( $_POST['post_ID'] ) ) );
+		$is_quick_edit  = isset( $_POST['_inline_edit'] ) && is_scalar( $_POST['_inline_edit'] )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_inline_edit'] ) ), 'inlineeditnonce' );
+
+		if ( ! $is_editor_save && ! $is_quick_edit ) {
+			return '';
+		}
+
+		$post_id = absint( wp_unslash( $_POST['post_ID'] ) );
+
+		if ( 1 > $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			return '';
+		}
+
+		return $this->post_translations->get_post_language_id( $post_id );
 	}
 
 	/**

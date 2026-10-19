@@ -2,14 +2,14 @@
 /**
  * Royal Elementor Addons Theme Builder integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\RoyalAddons;
+namespace ShapeTranslate\Integrations\RoyalAddons;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -93,11 +93,11 @@ final class RoyalAddonsModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		foreach ( RoyalAddonsTemplates::CONDITION_OPTIONS as $option ) {
 			add_filter( 'option_' . $option, array( $this, 'translate_conditions' ) );
@@ -120,7 +120,7 @@ final class RoyalAddonsModule implements ModuleInterface {
 	 * footers for every language says so through the filter below, which leaves
 	 * the rest of the module inert on its own.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -281,7 +281,7 @@ final class RoyalAddonsModule implements ModuleInterface {
 			 * @param bool $prepare     Whether the styles are asked for.
 			 * @param int  $template_id Template identifier that will print.
 			 */
-			if ( ! apply_filters( 'localepress_royaladdons_template_styles', true, $template_id ) ) {
+			if ( ! apply_filters( 'shapetranslate_royaladdons_template_styles', true, $template_id ) ) {
 				continue;
 			}
 
@@ -322,7 +322,7 @@ final class RoyalAddonsModule implements ModuleInterface {
 		 * @param string               $language_id Language being read.
 		 */
 		$translated = apply_filters(
-			'localepress_royaladdons_conditions',
+			'shapetranslate_royaladdons_conditions',
 			$translated,
 			$conditions,
 			$language_id
@@ -391,7 +391,7 @@ final class RoyalAddonsModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether Royal Addons templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_royaladdons_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_royaladdons_translate_templates', true );
 	}
 
 	/**

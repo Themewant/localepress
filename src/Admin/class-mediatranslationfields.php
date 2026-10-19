@@ -2,14 +2,14 @@
 /**
  * Media modal language field.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,7 +30,7 @@ final class MediaTranslationFields implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const FIELD = 'localepress_language';
+	const FIELD = 'shapetranslate_language';
 
 	/**
 	 * Post translation relationship manager.
@@ -91,10 +91,10 @@ final class MediaTranslationFields implements ModuleInterface {
 		$current = (string) $this->translation_manager->get_post_language_id( $post->ID );
 
 		$fields[ self::FIELD ] = array(
-			'label' => __( 'Language', 'localepress' ),
+			'label' => __( 'Language', 'shapetranslate' ),
 			'input' => 'html',
 			'html'  => $this->render_select( $post->ID, $current ),
-			'helps' => __( 'Language this media item is described in. The file itself is shared.', 'localepress' ),
+			'helps' => __( 'Language this media item is described in. The file itself is shared.', 'shapetranslate' ),
 		);
 
 		return $fields;
@@ -152,11 +152,11 @@ final class MediaTranslationFields implements ModuleInterface {
 	private function render_select( $post_id, $current ) {
 		$name    = sprintf( 'attachments[%d][%s]', absint( $post_id ), self::FIELD );
 		$markup  = sprintf(
-			'<select name="%1$s" id="%1$s" class="localepress-media-language">',
+			'<select name="%1$s" id="%1$s" class="shapetranslate-media-language">',
 			esc_attr( $name )
 		);
 		$markup .= '' === $current
-			? '<option value="">' . esc_html__( 'Select a language', 'localepress' ) . '</option>'
+			? '<option value="">' . esc_html__( 'Select a language', 'shapetranslate' ) . '</option>'
 			: '';
 
 		foreach ( $this->language_manager->get_languages() as $language ) {

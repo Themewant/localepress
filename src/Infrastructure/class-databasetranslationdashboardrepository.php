@@ -2,12 +2,12 @@
 /**
  * Database-backed translation dashboard reporting.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Infrastructure;
+namespace ShapeTranslate\Infrastructure;
 
-use LocalePress\Contracts\TranslationDashboardRepositoryInterface;
+use ShapeTranslate\Contracts\TranslationDashboardRepositoryInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,13 +29,9 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 
 		$query_parts = $this->build_query_parts( $args );
 		$from        = 'FROM %i AS source_post
-			LEFT JOIN %i AS source_assignment ON source_assignment.post_id = source_post.ID
-			LEFT JOIN %i AS translation_group ON translation_group.group_id = source_assignment.group_id';
-		$values      = array(
-			$wpdb->posts,
-			DatabaseTranslationRepository::assignments_table(),
-			DatabaseTranslationRepository::groups_table(),
-		);
+			LEFT JOIN ' . DatabaseTranslationRepository::assignments_sql() . ' AS source_assignment ON source_assignment.post_id = source_post.ID
+			LEFT JOIN ' . DatabaseTranslationRepository::groups_sql() . ' AS translation_group ON translation_group.group_id = source_assignment.group_id';
+		$values      = array( $wpdb->posts );
 		$values      = array_merge( $values, $query_parts['values'] );
 		$where       = implode( ' AND ', $query_parts['where'] );
 		$count_sql   = "SELECT COUNT(*) {$from} WHERE {$where}";
@@ -136,7 +132,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 		return array(
 			'sql'    => '(source_post.post_title LIKE %s OR (
 				source_assignment.group_id IS NOT NULL AND EXISTS (
-					SELECT 1 FROM %i AS search_assignment
+					SELECT 1 FROM ' . DatabaseTranslationRepository::assignments_sql() . ' AS search_assignment
 					INNER JOIN %i AS search_post ON search_post.ID = search_assignment.post_id
 					WHERE search_assignment.group_id = source_assignment.group_id
 					AND search_post.post_title LIKE %s
@@ -144,7 +140,6 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 			))',
 			'values' => array(
 				$like,
-				DatabaseTranslationRepository::assignments_table(),
 				$wpdb->posts,
 				$like,
 			),
@@ -162,11 +157,12 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 
 		$language_placeholders = implode( ', ', array_fill( 0, count( $args['language_ids'] ), '%s' ) );
 		$language_count        = count( $args['language_ids'] );
+		$assignments           = DatabaseTranslationRepository::assignments_sql();
 		$default_is_enabled    = in_array( $args['default_language_id'], $args['language_ids'], true );
 
 		if ( 'missing' === $args['status'] ) {
 			$count_sql          = "SELECT COUNT(DISTINCT status_assignment.language_id)
-				FROM %i AS status_assignment
+				FROM {$assignments} AS status_assignment
 				INNER JOIN %i AS status_post ON status_post.ID = status_assignment.post_id
 				WHERE status_assignment.group_id = source_assignment.group_id
 				AND status_assignment.language_id IN ({$language_placeholders})";
@@ -176,7 +172,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 				'sql'    => "((source_assignment.post_id IS NULL AND {$unassigned_missing}) OR
 					(source_assignment.post_id IS NOT NULL AND ({$count_sql}) < %d))",
 				'values' => array_merge(
-					array( DatabaseTranslationRepository::assignments_table(), $wpdb->posts ),
+					array( $wpdb->posts ),
 					$args['language_ids'],
 					array( $language_count )
 				),
@@ -189,7 +185,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 
 		if ( 'completed' === $args['status'] ) {
 			$count_sql           = "SELECT COUNT(DISTINCT status_assignment.language_id)
-				FROM %i AS status_assignment
+				FROM {$assignments} AS status_assignment
 				INNER JOIN %i AS status_post ON status_post.ID = status_assignment.post_id
 				WHERE status_assignment.group_id = source_assignment.group_id
 				AND status_assignment.language_id IN ({$language_placeholders})
@@ -205,7 +201,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 
 			$values = array_merge(
 				$values,
-				array( DatabaseTranslationRepository::assignments_table(), $wpdb->posts ),
+				array( $wpdb->posts ),
 				$args['language_ids'],
 				$post_statuses,
 				array( $language_count )
@@ -219,7 +215,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 		}
 
 		$exists_sql       = "EXISTS (
-			SELECT 1 FROM %i AS status_assignment
+			SELECT 1 FROM {$assignments} AS status_assignment
 			INNER JOIN %i AS status_post ON status_post.ID = status_assignment.post_id
 			WHERE status_assignment.group_id = source_assignment.group_id
 			AND status_assignment.language_id IN ({$language_placeholders})
@@ -236,7 +232,7 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 
 		$values = array_merge(
 			$values,
-			array( DatabaseTranslationRepository::assignments_table(), $wpdb->posts ),
+			array( $wpdb->posts ),
 			$args['language_ids'],
 			$post_statuses
 		);
@@ -274,8 +270,9 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 			$status_values = $post_statuses;
 		}
 
-		$exists_sql = "EXISTS (
-			SELECT 1 FROM %i AS language_assignment
+		$assignments = DatabaseTranslationRepository::assignments_sql();
+		$exists_sql  = "EXISTS (
+			SELECT 1 FROM {$assignments} AS language_assignment
 			INNER JOIN %i AS language_post ON language_post.ID = language_assignment.post_id
 			WHERE language_assignment.group_id = source_assignment.group_id
 			AND language_assignment.language_id = %s{$status_sql}
@@ -293,7 +290,6 @@ final class DatabaseTranslationDashboardRepository implements TranslationDashboa
 		$values        = array_merge(
 			$values,
 			array(
-				DatabaseTranslationRepository::assignments_table(),
 				$wpdb->posts,
 				$args['language_id'],
 			),

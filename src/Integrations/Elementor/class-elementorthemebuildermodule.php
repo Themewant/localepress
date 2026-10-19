@@ -2,14 +2,14 @@
 /**
  * Elementor Theme Builder integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
  * nothing but words.
  *
  * Nothing here reaches into Elementor Pro. Every hook is one Elementor documents
- * and applies itself, so a template LocalePress never touched behaves exactly as
+ * and applies itself, so a template ShapeTranslate never touched behaves exactly as
  * it did before.
  */
 final class ElementorThemeBuilderModule implements ModuleInterface {
@@ -87,16 +87,16 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 		add_filter(
 			'elementor/theme/conditions/cache/regenerate/query_args',
 			array( $this, 'unscope_conditions_cache_query' )
 		);
 
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
-		add_action( 'localepress_elementor_document_copied', array( $this, 'refresh_conditions_cache' ), 10, 2 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
+		add_action( 'shapetranslate_elementor_document_copied', array( $this, 'refresh_conditions_cache' ), 10, 2 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		add_filter(
 			'elementor/theme/get_location_templates/template_id',
@@ -124,7 +124,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 	 * and popups for every language says so through the filter below, which leaves
 	 * the rest of the module inert on its own.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -191,7 +191,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 			return $query_args;
 		}
 
-		$query_args['localepress_skip_language_filter'] = true;
+		$query_args['shapetranslate_skip_language_filter'] = true;
 
 		return $query_args;
 	}
@@ -295,7 +295,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		$translate = apply_filters(
-			'localepress_elementor_translate_conditions',
+			'shapetranslate_elementor_translate_conditions',
 			true,
 			absint( $target_post_id ),
 			$language_id
@@ -372,7 +372,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 		 * @param string $language_id Language being rendered.
 		 */
 		$resolved_id = apply_filters(
-			'localepress_elementor_location_template_id',
+			'shapetranslate_elementor_location_template_id',
 			0 < $translated ? $translated : $template_id,
 			$template_id,
 			$location,
@@ -417,7 +417,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 		 * @param string               $language_id      Language being rendered.
 		 */
 		$translate = apply_filters(
-			'localepress_elementor_translate_condition_sub_id',
+			'shapetranslate_elementor_translate_condition_sub_id',
 			true,
 			$parsed_condition,
 			$language_id
@@ -488,7 +488,7 @@ final class ElementorThemeBuilderModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether Theme Builder templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_elementor_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_elementor_translate_templates', true );
 	}
 
 	/**

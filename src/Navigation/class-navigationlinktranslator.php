@@ -2,13 +2,13 @@
 /**
  * Rewrites a copied menu's links so they point at one language's content.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Term;
 

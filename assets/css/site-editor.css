@@ -6,18 +6,18 @@
  * here is the table that holds them and the colors that tell the three actions
  * apart at a glance.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-.localepress-site-editor__section {
+.shapetranslate-site-editor__section {
 	padding: 16px;
 }
 
-.localepress-site-editor__section + .localepress-site-editor__section {
+.shapetranslate-site-editor__section + .shapetranslate-site-editor__section {
 	padding-top: 0;
 }
 
-.localepress-site-editor__heading {
+.shapetranslate-site-editor__heading {
 	margin: 0 0 8px;
 	color: #1e1e1e;
 	font-size: 11px;
@@ -26,14 +26,14 @@
 	text-transform: uppercase;
 }
 
-.localepress-site-editor__current {
+.shapetranslate-site-editor__current {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	font-size: 13px;
 }
 
-.localepress-site-editor__flag {
+.shapetranslate-site-editor__flag {
 	display: block;
 	width: 18px;
 	height: 12px;
@@ -41,50 +41,50 @@
 	box-shadow: 0 0 0 1px rgba( 0, 0, 0, 0.12 );
 }
 
-.localepress-site-editor__code {
+.shapetranslate-site-editor__code {
 	font-size: 11px;
 	text-decoration: none;
 	text-transform: uppercase;
 }
 
-.localepress-site-editor__table {
+.shapetranslate-site-editor__table {
 	width: 100%;
 	border-collapse: collapse;
 }
 
-.localepress-site-editor__table td,
-.localepress-site-editor__table th {
+.shapetranslate-site-editor__table td,
+.shapetranslate-site-editor__table th {
 	padding: 2px 0;
 	font-weight: 400;
 	text-align: start;
 	vertical-align: middle;
 }
 
-.localepress-site-editor__flag-cell {
+.shapetranslate-site-editor__flag-cell {
 	width: 18px;
 	padding-inline-end: 8px !important;
 }
 
-.localepress-site-editor__name-cell {
+.shapetranslate-site-editor__name-cell {
 	font-size: 13px;
 }
 
 /* One control each, so the column is only ever as wide as a button. */
 
-.localepress-site-editor__icon-cell {
+.shapetranslate-site-editor__icon-cell {
 	width: 28px;
 	text-align: center !important;
 }
 
-.localepress-site-editor__button.is-edit:not( :disabled ) {
+.shapetranslate-site-editor__button.is-edit:not( :disabled ) {
 	color: #3858e9;
 }
 
-.localepress-site-editor__button.is-add:not( :disabled ) {
+.shapetranslate-site-editor__button.is-add:not( :disabled ) {
 	color: #3858e9;
 }
 
-.localepress-site-editor__button.is-delete:not( :disabled ) {
+.shapetranslate-site-editor__button.is-delete:not( :disabled ) {
 	color: #cc1818;
 }
 
@@ -93,7 +93,7 @@
  * rest of the site falls back to.
  */
 
-.localepress-site-editor__default {
+.shapetranslate-site-editor__default {
 	display: inline-block;
 	width: 18px;
 	height: 18px;
@@ -107,13 +107,13 @@
 	vertical-align: middle;
 }
 
-.localepress-site-editor__empty {
+.shapetranslate-site-editor__empty {
 	margin: 0;
 	color: #757575;
 	font-size: 13px;
 }
 
-.localepress-site-editor .components-notice {
+.shapetranslate-site-editor .components-notice {
 	margin: 16px 16px 0;
 }
 
@@ -123,12 +123,12 @@
  * it the editor's own component cannot know.
  */
 
-.localepress-site-editor__current .localepress-site-editor__select {
+.shapetranslate-site-editor__current .shapetranslate-site-editor__select {
 	flex: 1;
 	min-width: 0;
 }
 
-.localepress-site-editor__button.is-link:not( :disabled ) {
+.shapetranslate-site-editor__button.is-link:not( :disabled ) {
 	color: #3858e9;
 }
 
@@ -138,11 +138,11 @@
  * second list.
  */
 
-.localepress-site-editor__linking-row td {
+.shapetranslate-site-editor__linking-row td {
 	padding: 4px 0 10px 26px !important;
 }
 
-.localepress-site-editor__linking {
+.shapetranslate-site-editor__linking {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;

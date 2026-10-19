@@ -2,14 +2,14 @@
 /**
  * String translation admin module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\StringTranslation\StringManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\StringTranslation\StringManager;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -57,22 +57,22 @@ final class StringTranslationModule implements ModuleInterface {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'admin_post_localepress_save_string_translations', array( $this, 'save_translations' ) );
-		add_filter( 'set_screen_option_localepress_strings_per_page', array( $this, 'save_per_page' ), 10, 3 );
+		add_action( 'admin_post_shapetranslate_save_string_translations', array( $this, 'save_translations' ) );
+		add_filter( 'set_screen_option_shapetranslate_strings_per_page', array( $this, 'save_per_page' ), 10, 3 );
 	}
 
 	/**
-	 * Registers LocalePress -> String Translation.
+	 * Registers ShapeTranslate -> String Translation.
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
 		$this->hook_suffix = (string) add_submenu_page(
-			'localepress',
-			esc_html__( 'LocalePress String Translation', 'localepress' ),
-			esc_html__( 'String Translation', 'localepress' ),
+			'shapetranslate',
+			esc_html__( 'ShapeTranslate String Translation', 'shapetranslate' ),
+			esc_html__( 'String Translation', 'shapetranslate' ),
 			AdminModule::capability(),
-			'localepress-string-translations',
+			'shapetranslate-string-translations',
 			array( $this, 'render' )
 		);
 
@@ -90,9 +90,9 @@ final class StringTranslationModule implements ModuleInterface {
 		add_screen_option(
 			'per_page',
 			array(
-				'label'   => __( 'Strings per page', 'localepress' ),
+				'label'   => __( 'Strings per page', 'shapetranslate' ),
 				'default' => 20,
-				'option'  => 'localepress_strings_per_page',
+				'option'  => 'shapetranslate_strings_per_page',
 			)
 		);
 	}
@@ -106,7 +106,7 @@ final class StringTranslationModule implements ModuleInterface {
 	 * @return mixed
 	 */
 	public function save_per_page( $status, $option, $value ) {
-		if ( 'localepress_strings_per_page' !== $option ) {
+		if ( 'shapetranslate_strings_per_page' !== $option ) {
 			return $status;
 		}
 
@@ -125,8 +125,8 @@ final class StringTranslationModule implements ModuleInterface {
 		}
 
 		wp_enqueue_style(
-			'localepress-admin',
-			LOCALEPRESS_URL . 'assets/css/admin.css',
+			'shapetranslate-admin',
+			SHAPETRANSLATE_URL . 'assets/css/admin.css',
 			array(),
 			Assets::version( 'assets/css/admin.css' )
 		);
@@ -151,27 +151,27 @@ final class StringTranslationModule implements ModuleInterface {
 		$languages   = $table->get_languages();
 		$language_id = $args['language_id'];
 
-		echo '<div class="wrap localepress-string-translation-page">';
-		echo '<h1>' . esc_html__( 'String Translation', 'localepress' ) . '</h1>';
+		echo '<div class="wrap shapetranslate-string-translation-page">';
+		echo '<h1>' . esc_html__( 'String Translation', 'shapetranslate' ) . '</h1>';
 		$this->render_notice();
 
 		if ( empty( $languages ) ) {
-			echo '<div class="localepress-notice notice notice-warning inline"><p>';
-			esc_html_e( 'Enable at least one language before translating registered strings.', 'localepress' );
+			echo '<div class="shapetranslate-notice notice notice-warning inline"><p>';
+			esc_html_e( 'Enable at least one language before translating registered strings.', 'shapetranslate' );
 			echo '</p></div>';
 		}
 
 		$this->render_filters( $table, $args );
 
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		echo '<input type="hidden" name="action" value="localepress_save_string_translations" />';
+		echo '<input type="hidden" name="action" value="shapetranslate_save_string_translations" />';
 		echo '<input type="hidden" name="language_id" value="' . esc_attr( $language_id ) . '" />';
 		$this->render_redirect_fields( $args );
-		wp_nonce_field( 'localepress_save_string_translations_' . $language_id );
+		wp_nonce_field( 'shapetranslate_save_string_translations_' . $language_id );
 		$table->display();
 
 		if ( '' !== $language_id && $table->has_items() ) {
-			submit_button( __( 'Save translations', 'localepress' ) );
+			submit_button( __( 'Save translations', 'shapetranslate' ) );
 		}
 
 		echo '</form></div>';
@@ -197,7 +197,7 @@ final class StringTranslationModule implements ModuleInterface {
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		check_admin_referer( 'localepress_save_string_translations_' . $view );
+		check_admin_referer( 'shapetranslate_save_string_translations_' . $view );
 
 		// Verified above; the manager validates every ID and value before mutation.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -236,11 +236,11 @@ final class StringTranslationModule implements ModuleInterface {
 	 * @return void
 	 */
 	private function render_filters( $table, $args ) {
-		echo '<form method="get" class="localepress-string-filters">';
-		echo '<input type="hidden" name="page" value="localepress-string-translations" />';
-		echo '<label class="screen-reader-text" for="localepress-string-group">' . esc_html__( 'Filter by string group', 'localepress' ) . '</label>';
-		echo '<select id="localepress-string-group" name="localepress_group">';
-		echo '<option value="">' . esc_html__( 'All string groups', 'localepress' ) . '</option>';
+		echo '<form method="get" class="shapetranslate-string-filters">';
+		echo '<input type="hidden" name="page" value="shapetranslate-string-translations" />';
+		echo '<label class="screen-reader-text" for="shapetranslate-string-group">' . esc_html__( 'Filter by string group', 'shapetranslate' ) . '</label>';
+		echo '<select id="shapetranslate-string-group" name="shapetranslate_group">';
+		echo '<option value="">' . esc_html__( 'All string groups', 'shapetranslate' ) . '</option>';
 
 		foreach ( $table->get_groups() as $group ) {
 			printf(
@@ -252,17 +252,17 @@ final class StringTranslationModule implements ModuleInterface {
 		}
 
 		echo '</select>';
-		echo '<label class="screen-reader-text" for="localepress-string-language">' . esc_html__( 'Select translation language', 'localepress' ) . '</label>';
-		echo '<select id="localepress-string-language" name="localepress_language">';
+		echo '<label class="screen-reader-text" for="shapetranslate-string-language">' . esc_html__( 'Select translation language', 'shapetranslate' ) . '</label>';
+		echo '<select id="shapetranslate-string-language" name="shapetranslate_language">';
 
 		if ( empty( $table->get_languages() ) ) {
-			echo '<option value="">' . esc_html__( 'No enabled languages', 'localepress' ) . '</option>';
+			echo '<option value="">' . esc_html__( 'No enabled languages', 'shapetranslate' ) . '</option>';
 		} else {
 			printf(
 				'<option value="%1$s"%2$s>%3$s</option>',
 				esc_attr( StringTranslationQuery::ALL_LANGUAGES ),
 				selected( $args['language_id'], StringTranslationQuery::ALL_LANGUAGES, false ),
-				esc_html__( 'All languages', 'localepress' )
+				esc_html__( 'All languages', 'shapetranslate' )
 			);
 		}
 
@@ -276,8 +276,8 @@ final class StringTranslationModule implements ModuleInterface {
 		}
 
 		echo '</select>';
-		submit_button( __( 'Filter', 'localepress' ), '', 'filter_action', false );
-		$table->search_box( __( 'Search strings', 'localepress' ), 'localepress-strings' );
+		submit_button( __( 'Filter', 'shapetranslate' ), '', 'filter_action', false );
+		$table->search_box( __( 'Search strings', 'shapetranslate' ), 'shapetranslate-strings' );
 		echo '</form>';
 	}
 
@@ -289,7 +289,7 @@ final class StringTranslationModule implements ModuleInterface {
 	 */
 	private function render_redirect_fields( $args ) {
 		$fields = array(
-			'localepress_group' => $args['group'],
+			'shapetranslate_group' => $args['group'],
 			's'                 => $args['search'],
 			'paged'             => $args['page'],
 			'orderby'           => $args['orderby'],
@@ -319,10 +319,10 @@ final class StringTranslationModule implements ModuleInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$args = array(
-			'page'                      => 'localepress-string-translations',
-			'localepress_language'      => $language_id,
-			'localepress_group'         => isset( $redirect['localepress_group'] ) && is_scalar( $redirect['localepress_group'] )
-				? sanitize_text_field( $redirect['localepress_group'] )
+			'page'                      => 'shapetranslate-string-translations',
+			'shapetranslate_language'      => $language_id,
+			'shapetranslate_group'         => isset( $redirect['shapetranslate_group'] ) && is_scalar( $redirect['shapetranslate_group'] )
+				? sanitize_text_field( $redirect['shapetranslate_group'] )
 				: '',
 			's'                         => isset( $redirect['s'] ) && is_scalar( $redirect['s'] )
 				? sanitize_text_field( $redirect['s'] )
@@ -334,7 +334,7 @@ final class StringTranslationModule implements ModuleInterface {
 			'order'                     => isset( $redirect['order'] ) && 'DESC' === strtoupper( sanitize_text_field( $redirect['order'] ) )
 				? 'DESC'
 				: 'ASC',
-			'localepress_string_notice' => null === $error ? 'saved' : 'invalid',
+			'shapetranslate_string_notice' => null === $error ? 'saved' : 'invalid',
 		);
 
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
@@ -348,20 +348,20 @@ final class StringTranslationModule implements ModuleInterface {
 	 */
 	private function render_notice() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only allowlisted notice.
-		$notice = isset( $_GET['localepress_string_notice'] )
-			? sanitize_key( wp_unslash( $_GET['localepress_string_notice'] ) )
+		$notice = isset( $_GET['shapetranslate_string_notice'] )
+			? sanitize_key( wp_unslash( $_GET['shapetranslate_string_notice'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( 'saved' === $notice ) {
-			echo '<div class="localepress-notice notice notice-success is-dismissible"><p>' . esc_html__( 'String translations saved.', 'localepress' ) . '</p></div>';
+			echo '<div class="shapetranslate-notice notice notice-success is-dismissible"><p>' . esc_html__( 'String translations saved.', 'shapetranslate' ) . '</p></div>';
 		} elseif ( 'invalid' === $notice ) {
-			echo '<div class="localepress-notice notice notice-error"><p>' . esc_html__( 'The string translations could not be saved.', 'localepress' ) . '</p></div>';
+			echo '<div class="shapetranslate-notice notice notice-error"><p>' . esc_html__( 'The string translations could not be saved.', 'shapetranslate' ) . '</p></div>';
 		}
 	}
 
 	/**
-	 * Enforces the shared LocalePress management capability.
+	 * Enforces the shared ShapeTranslate management capability.
 	 *
 	 * @return void
 	 */
@@ -371,7 +371,7 @@ final class StringTranslationModule implements ModuleInterface {
 		}
 
 		wp_die(
-			esc_html__( 'You are not allowed to manage string translations.', 'localepress' ),
+			esc_html__( 'You are not allowed to manage string translations.', 'shapetranslate' ),
 			'',
 			array( 'response' => 403 )
 		);

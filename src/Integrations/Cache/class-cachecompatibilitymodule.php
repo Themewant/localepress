@@ -2,16 +2,16 @@
 /**
  * Page cache compatibility module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Cache;
+namespace ShapeTranslate\Integrations\Cache;
 
-use LocalePress\Assets;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageDetectionModule;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageDetectionModule;
+use ShapeTranslate\Routing\LanguageUrlManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,7 +35,7 @@ final class CacheCompatibilityModule implements ModuleInterface {
 	/**
 	 * Handle of the script that writes the language cookie.
 	 */
-	const SCRIPT_HANDLE = 'localepress-language-cookie';
+	const SCRIPT_HANDLE = 'shapetranslate-language-cookie';
 
 	/**
 	 * Detection module that owns the language cookie.
@@ -137,7 +137,7 @@ final class CacheCompatibilityModule implements ModuleInterface {
 
 		wp_enqueue_script(
 			self::SCRIPT_HANDLE,
-			LOCALEPRESS_URL . 'assets/js/language-cookie.js',
+			SHAPETRANSLATE_URL . 'assets/js/language-cookie.js',
 			array(),
 			Assets::version( 'assets/js/language-cookie.js' ),
 			true
@@ -149,7 +149,7 @@ final class CacheCompatibilityModule implements ModuleInterface {
 		 */
 		wp_add_inline_script(
 			self::SCRIPT_HANDLE,
-			'window.localePressLanguageCookie = ' . $encoded . ';',
+			'window.shapeTranslateLanguageCookie = ' . $encoded . ';',
 			'before'
 		);
 	}

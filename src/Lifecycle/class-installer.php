@@ -2,17 +2,15 @@
 /**
  * Plugin installation and upgrades.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Lifecycle;
+namespace ShapeTranslate\Lifecycle;
 
-use LocalePress\Infrastructure\DatabaseTermTranslationRepository;
-use LocalePress\Infrastructure\DatabaseStringRepository;
-use LocalePress\Infrastructure\DatabaseTranslationRepository;
-use LocalePress\Infrastructure\OptionsLanguageRepository;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Settings\WorkflowSettings;
+use ShapeTranslate\Infrastructure\DatabaseStringRepository;
+use ShapeTranslate\Infrastructure\OptionsLanguageRepository;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Settings\WorkflowSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +31,7 @@ final class Installer {
 	 *
 	 * @var string
 	 */
-	const VERSION_OPTION = 'localepress_version';
+	const VERSION_OPTION = 'shapetranslate_version';
 
 	/**
 	 * Installs the current plugin schema.
@@ -42,12 +40,10 @@ final class Installer {
 	 */
 	public static function install() {
 		OptionsLanguageRepository::install();
-		DatabaseTranslationRepository::install();
-		DatabaseTermTranslationRepository::install();
 		DatabaseStringRepository::install();
 		PluginSettings::install();
 		WorkflowSettings::install();
-		update_option( self::VERSION_OPTION, LOCALEPRESS_VERSION, true );
+		update_option( self::VERSION_OPTION, SHAPETRANSLATE_VERSION, true );
 	}
 
 	/**
@@ -100,26 +96,26 @@ final class Installer {
 	public static function maybe_upgrade() {
 		$installed_version = (string) get_option( self::VERSION_OPTION, '' );
 
-		if ( '' !== $installed_version && version_compare( $installed_version, LOCALEPRESS_VERSION, '>=' ) ) {
+		if ( '' !== $installed_version && version_compare( $installed_version, SHAPETRANSLATE_VERSION, '>=' ) ) {
 			return;
 		}
 
 		/**
-		 * Fires before LocalePress upgrades its core schema.
+		 * Fires before ShapeTranslate upgrades its core schema.
 		 *
 		 * @param string $installed_version Previously installed version.
 		 * @param string $target_version    Version being installed.
 		 */
-		do_action( 'localepress_before_upgrade', $installed_version, LOCALEPRESS_VERSION );
+		do_action( 'shapetranslate_before_upgrade', $installed_version, SHAPETRANSLATE_VERSION );
 
 		self::install();
 
 		/**
-		 * Fires after LocalePress upgrades its core schema.
+		 * Fires after ShapeTranslate upgrades its core schema.
 		 *
 		 * @param string $installed_version Previously installed version.
 		 * @param string $target_version    Installed version.
 		 */
-		do_action( 'localepress_upgraded', $installed_version, LOCALEPRESS_VERSION );
+		do_action( 'shapetranslate_upgraded', $installed_version, SHAPETRANSLATE_VERSION );
 	}
 }

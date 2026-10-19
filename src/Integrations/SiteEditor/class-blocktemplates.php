@@ -2,13 +2,13 @@
 /**
  * Language state shared by every block theme template type.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Block_Template;
 use WP_Error;
 use WP_Post;
@@ -173,7 +173,7 @@ abstract class BlockTemplates {
 		 *
 		 * @param bool $available Whether the active theme is a block theme.
 		 */
-		return (bool) apply_filters( 'localepress_site_editor_available', $available );
+		return (bool) apply_filters( 'shapetranslate_site_editor_available', $available );
 	}
 
 	/**
@@ -259,7 +259,7 @@ abstract class BlockTemplates {
 					'no_found_rows'                    => true,
 					'ignore_sticky_posts'              => true,
 					'lazy_load_term_meta'              => false,
-					'localepress_skip_language_filter' => true,
+					'shapetranslate_skip_language_filter' => true,
 					/*
 					 * This asks about the template with exactly this name. Without
 					 * the marker the resolver would widen it to the language being
@@ -267,7 +267,7 @@ abstract class BlockTemplates {
 					 * `header___bn` — which is how a rename decides the wrong part
 					 * is in its way.
 					 */
-					'localepress_exact_part'           => true,
+					'shapetranslate_exact_part'           => true,
 					'tax_query'                        => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 						array(
 							'taxonomy' => self::THEME_TAXONOMY,
@@ -536,7 +536,7 @@ abstract class BlockTemplates {
 		$template = $this->find( $slug );
 
 		if ( null === $template ) {
-			return new WP_Error( 'localepress_part_not_found', $this->message( 'not_found' ) );
+			return new WP_Error( 'shapetranslate_part_not_found', $this->message( 'not_found' ) );
 		}
 
 		return $this->insert_template(
@@ -579,13 +579,13 @@ abstract class BlockTemplates {
 		$read        = $this->read_slug( $slug );
 
 		if ( $read->has_language() ) {
-			return new WP_Error( 'localepress_part_is_translation', $this->message( 'is_translation' ) );
+			return new WP_Error( 'shapetranslate_part_is_translation', $this->message( 'is_translation' ) );
 		}
 
 		if ( null === $this->language_manager->find( $language_id ) ) {
 			return new WP_Error(
-				'localepress_language_not_found',
-				__( 'The selected language is not registered.', 'localepress' )
+				'shapetranslate_language_not_found',
+				__( 'The selected language is not registered.', 'shapetranslate' )
 			);
 		}
 
@@ -602,19 +602,19 @@ abstract class BlockTemplates {
 		$existing = absint( $this->post_translations->get_translation( $source_id, $language_id ) );
 
 		if ( 0 !== $existing && $existing !== $source_id ) {
-			return new WP_Error( 'localepress_part_exists', $this->message( 'exists' ) );
+			return new WP_Error( 'shapetranslate_part_exists', $this->message( 'exists' ) );
 		}
 
 		$source = get_post( $source_id );
 
 		if ( ! $source instanceof WP_Post ) {
-			return new WP_Error( 'localepress_part_not_found', $this->message( 'unreadable' ) );
+			return new WP_Error( 'shapetranslate_part_not_found', $this->message( 'unreadable' ) );
 		}
 
 		$target_slug = $this->slug_in_language( $slug, $language_id );
 
 		if ( $this->exists( $target_slug ) ) {
-			return new WP_Error( 'localepress_part_slug_taken', $this->message( 'slug_taken' ) );
+			return new WP_Error( 'shapetranslate_part_slug_taken', $this->message( 'slug_taken' ) );
 		}
 
 		/**
@@ -628,7 +628,7 @@ abstract class BlockTemplates {
 		 * @param string  $language_id Target language identifier.
 		 */
 		$content = (string) apply_filters(
-			'localepress_template_part_content',
+			'shapetranslate_template_part_content',
 			(string) $source->post_content,
 			$source,
 			$language_id
@@ -663,7 +663,7 @@ abstract class BlockTemplates {
 		 * @param int    $source_id   Template it was created from.
 		 * @param string $language_id Language it belongs to.
 		 */
-		do_action( 'localepress_template_part_created', $post_id, $source_id, $language_id );
+		do_action( 'shapetranslate_template_part_created', $post_id, $source_id, $language_id );
 
 		return $post_id;
 	}
@@ -689,26 +689,26 @@ abstract class BlockTemplates {
 		$language_id = is_scalar( $language_id ) ? (string) $language_id : '';
 
 		if ( '' === $base || '' === $target_slug ) {
-			return new WP_Error( 'localepress_part_not_found', $this->message( 'not_found' ) );
+			return new WP_Error( 'shapetranslate_part_not_found', $this->message( 'not_found' ) );
 		}
 
 		if ( $base === $target_slug ) {
-			return new WP_Error( 'localepress_link_self', $this->message( 'link_self' ) );
+			return new WP_Error( 'shapetranslate_link_self', $this->message( 'link_self' ) );
 		}
 
 		if ( null === $this->language_manager->find( $language_id ) ) {
 			return new WP_Error(
-				'localepress_language_not_found',
-				__( 'The selected language is not registered.', 'localepress' )
+				'shapetranslate_language_not_found',
+				__( 'The selected language is not registered.', 'shapetranslate' )
 			);
 		}
 
 		if ( ! $this->exists( $target_slug ) ) {
-			return new WP_Error( 'localepress_part_not_found', $this->message( 'not_found' ) );
+			return new WP_Error( 'shapetranslate_part_not_found', $this->message( 'not_found' ) );
 		}
 
 		if ( $this->read_slug( $target_slug )->has_language() ) {
-			return new WP_Error( 'localepress_part_is_translation', $this->message( 'link_translation' ) );
+			return new WP_Error( 'shapetranslate_part_is_translation', $this->message( 'link_translation' ) );
 		}
 
 		$source_id = $this->ensure_source_post( $base );
@@ -720,7 +720,7 @@ abstract class BlockTemplates {
 		$existing = absint( $this->post_translations->get_translation( $source_id, $language_id ) );
 
 		if ( 0 !== $existing && $existing !== $source_id ) {
-			return new WP_Error( 'localepress_part_exists', $this->message( 'exists' ) );
+			return new WP_Error( 'shapetranslate_part_exists', $this->message( 'exists' ) );
 		}
 
 		$target_id = $this->ensure_post( $target_slug );
@@ -744,7 +744,7 @@ abstract class BlockTemplates {
 		$this->forget();
 
 		/** This action is documented in src/Integrations/SiteEditor/class-blocktemplates.php */
-		do_action( 'localepress_template_part_created', $target_id, $source_id, $language_id );
+		do_action( 'shapetranslate_template_part_created', $target_id, $source_id, $language_id );
 
 		return array(
 			'slug'     => '' === $renamed ? $target_slug : $renamed,
@@ -773,13 +773,13 @@ abstract class BlockTemplates {
 
 		if ( null === $this->language_manager->find( $language_id ) ) {
 			return new WP_Error(
-				'localepress_language_not_found',
-				__( 'The selected language is not registered.', 'localepress' )
+				'shapetranslate_language_not_found',
+				__( 'The selected language is not registered.', 'shapetranslate' )
 			);
 		}
 
 		if ( ! $this->exists( $slug ) ) {
-			return new WP_Error( 'localepress_part_not_found', $this->message( 'not_found' ) );
+			return new WP_Error( 'shapetranslate_part_not_found', $this->message( 'not_found' ) );
 		}
 
 		if ( $language_id === $this->get_language_id( $slug ) ) {
@@ -792,7 +792,7 @@ abstract class BlockTemplates {
 		$target_slug = $this->slug_in_language( $slug, $language_id );
 
 		if ( $target_slug !== $slug && $this->exists( $target_slug ) ) {
-			return new WP_Error( 'localepress_part_slug_taken', $this->message( 'slug_taken' ) );
+			return new WP_Error( 'shapetranslate_part_slug_taken', $this->message( 'slug_taken' ) );
 		}
 
 		$post_id = $this->ensure_post( $slug );
@@ -1074,7 +1074,7 @@ abstract class BlockTemplates {
 		}
 
 		if ( $source_language === $language_id ) {
-			return new WP_Error( 'localepress_link_default', $this->message( 'link_default' ) );
+			return new WP_Error( 'shapetranslate_link_default', $this->message( 'link_default' ) );
 		}
 
 		return $this->post_translations->link_translations(
@@ -1104,7 +1104,7 @@ abstract class BlockTemplates {
 			return true;
 		}
 
-		return new WP_Error( 'localepress_part_is_fallback', $this->message( 'is_fallback' ) );
+		return new WP_Error( 'shapetranslate_part_is_fallback', $this->message( 'is_fallback' ) );
 	}
 
 	/**
@@ -1137,7 +1137,7 @@ abstract class BlockTemplates {
 			return false;
 		};
 
-		add_filter( 'localepress_auto_assign_default_post_language', $suppress, 99 );
+		add_filter( 'shapetranslate_auto_assign_default_post_language', $suppress, 99 );
 
 		$post_id = wp_insert_post(
 			array(
@@ -1151,7 +1151,7 @@ abstract class BlockTemplates {
 			true
 		);
 
-		remove_filter( 'localepress_auto_assign_default_post_language', $suppress, 99 );
+		remove_filter( 'shapetranslate_auto_assign_default_post_language', $suppress, 99 );
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
@@ -1195,7 +1195,7 @@ abstract class BlockTemplates {
 
 		return sprintf(
 			/* translators: 1: template title, 2: language name. */
-			__( '%1$s (%2$s)', 'localepress' ),
+			__( '%1$s (%2$s)', 'shapetranslate' ),
 			$title,
 			$label
 		);

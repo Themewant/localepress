@@ -2,10 +2,10 @@
 /**
  * Term translation admin action helper.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
 use WP_Term;
 
@@ -27,7 +27,7 @@ final class TermTranslationActions {
 	public function get_create_url( $source_term_id, $taxonomy, $language_id ) {
 		$url = add_query_arg(
 			array(
-				'action'         => 'localepress_create_term_translation',
+				'action'         => 'shapetranslate_create_term_translation',
 				'source_term_id' => absint( $source_term_id ),
 				'taxonomy'       => sanitize_key( $taxonomy ),
 				'language_id'    => $language_id,
@@ -37,7 +37,7 @@ final class TermTranslationActions {
 
 		return wp_nonce_url(
 			$url,
-			'localepress_create_term_translation_' . absint( $source_term_id ) . '_' . sanitize_key( $taxonomy ) . '_' . $language_id
+			'shapetranslate_create_term_translation_' . absint( $source_term_id ) . '_' . sanitize_key( $taxonomy ) . '_' . $language_id
 		);
 	}
 

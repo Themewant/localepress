@@ -2,10 +2,10 @@
 /**
  * Translation of values stored inside options.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * text value those keys reach becomes a registered string. The value then
  * arrives through `get_option()` already translated, so the code that owns the
  * option renders it without knowing a translation layer exists. Two sources
- * feed this today: LocalePress's own catalog of core and widget options, and
+ * feed this today: ShapeTranslate's own catalog of core and widget options, and
  * the `admin-texts` declarations read from wpml-config.xml files.
  *
  * Three rules keep that safe. Originals are registered wherever the option is
@@ -181,7 +181,7 @@ final class OptionStringTranslator {
 	 */
 	private function attach( $context, $option, $keys ) {
 
-		if ( 0 === strpos( $option, 'localepress' ) ) {
+		if ( 0 === strpos( $option, 'shapetranslate' ) ) {
 			return;
 		}
 
@@ -305,7 +305,7 @@ final class OptionStringTranslator {
 		 * @param bool   $front_end Whether the value may be substituted.
 		 * @param string $option    Option name.
 		 */
-		return (bool) apply_filters( 'localepress_translate_option', $front_end, $option );
+		return (bool) apply_filters( 'shapetranslate_translate_option', $front_end, $option );
 	}
 
 	/**

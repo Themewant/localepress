@@ -18,17 +18,17 @@
 ( function () {
 	'use strict';
 
-	var settings = window.localePressElementorSiteEditor;
+	var settings = window.shapeTranslateElementorSiteEditor;
 
 	if ( ! settings || ! window.MutationObserver || ! document.createElement ) {
 		return;
 	}
 
-	var PAYLOAD_KEY = settings.payloadKey || 'localepress';
+	var PAYLOAD_KEY = settings.payloadKey || 'shapetranslate';
 	var CARD_SELECTOR = '.e-site-template';
 	var HEADER_SELECTOR = '.eps-card__header';
-	var MARKER = 'localepressLanguages';
-	var BAR_CLASS = 'localepress-e-template-languages';
+	var MARKER = 'shapetranslateLanguages';
+	var BAR_CLASS = 'shapetranslate-e-template-languages';
 
 	var labels = settings.labels || {};
 	var templates = settings.templates || {};

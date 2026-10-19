@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "localepress/language-switcher",
+	"name": "shapetranslate/language-switcher",
 	"version": "1.0.0",
 	"title": "Language Switcher",
 	"category": "widgets",
 	"icon": "translation",
-	"description": "Display links to available LocalePress languages.",
-	"textdomain": "localepress",
+	"description": "Display links to available ShapeTranslate languages.",
+	"textdomain": "shapetranslate",
 	"attributes": {
 		"display": {
 			"type": "string",
@@ -47,5 +47,5 @@
 		"className": true
 	},
 	"editorScript": "file:./index.js",
-	"style": "localepress-switcher"
+	"style": "shapetranslate-switcher"
 }

@@ -2,12 +2,12 @@
 /**
  * Database-backed registered string repository.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Infrastructure;
+namespace ShapeTranslate\Infrastructure;
 
-use LocalePress\Contracts\StringRepositoryInterface;
+use ShapeTranslate\Contracts\StringRepositoryInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,21 +23,21 @@ final class DatabaseStringRepository implements StringRepositoryInterface {
 	 *
 	 * @var string
 	 */
-	const STRINGS_TABLE_SUFFIX = 'localepress_strings';
+	const STRINGS_TABLE_SUFFIX = 'shapetranslate_strings';
 
 	/**
 	 * String translation table suffix.
 	 *
 	 * @var string
 	 */
-	const TRANSLATIONS_TABLE_SUFFIX = 'localepress_string_translations';
+	const TRANSLATIONS_TABLE_SUFFIX = 'shapetranslate_string_translations';
 
 	/**
 	 * Object cache group.
 	 *
 	 * @var string
 	 */
-	const CACHE_GROUP = 'localepress_strings';
+	const CACHE_GROUP = 'shapetranslate_strings';
 
 	/**
 	 * Creates or upgrades registered-string tables.

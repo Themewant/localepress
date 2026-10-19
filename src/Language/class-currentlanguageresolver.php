@@ -2,10 +2,10 @@
 /**
  * Current language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,7 +48,7 @@ final class CurrentLanguageResolver {
 		 * @param string                           $default   Default language identifier.
 		 * @param array<int, array<string, mixed>> $languages Enabled languages.
 		 */
-		$filtered_id = apply_filters( 'localepress_current_language_id', $default, $languages );
+		$filtered_id = apply_filters( 'shapetranslate_current_language_id', $default, $languages );
 		$current_id  = is_scalar( $filtered_id ) ? (string) $filtered_id : $default;
 		$current     = null;
 
@@ -74,7 +74,7 @@ final class CurrentLanguageResolver {
 		 * @param array<string, mixed>|null         $current   Current language.
 		 * @param array<int, array<string, mixed>> $languages Enabled languages.
 		 */
-		$filtered_language = apply_filters( 'localepress_current_language', $current, $languages );
+		$filtered_language = apply_filters( 'shapetranslate_current_language', $current, $languages );
 
 		return is_array( $filtered_language ) || null === $filtered_language ? $filtered_language : $current;
 	}

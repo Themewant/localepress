@@ -2,13 +2,13 @@
 /**
  * Language scope for the pages WordPress answers without WP_Query.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Post;
 use WP_Widget_Calendar;
 
@@ -185,7 +185,7 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 		 * @param string  $language_id Language the links are limited to.
 		 * @param WP_Post $post        Post the links are relative to.
 		 */
-		$filtered = apply_filters( 'localepress_adjacent_post_language', $language_id, $post );
+		$filtered = apply_filters( 'shapetranslate_adjacent_post_language', $language_id, $post );
 
 		return is_string( $filtered ) ? $filtered : $language_id;
 	}
@@ -276,7 +276,7 @@ final class DirectQueryLanguageModule implements ModuleInterface {
 		$language_id = $this->current_language_id();
 
 		if ( '' !== $language_id ) {
-			$args['localepress_language'] = $language_id;
+			$args['shapetranslate_language'] = $language_id;
 		}
 
 		return $args;

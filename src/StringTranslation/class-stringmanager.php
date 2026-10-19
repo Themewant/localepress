@@ -2,14 +2,14 @@
 /**
  * Registered string application service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
-use LocalePress\Contracts\StringRepositoryInterface;
-use LocalePress\Language\CurrentLanguageResolver;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Contracts\StringRepositoryInterface;
+use ShapeTranslate\Language\CurrentLanguageResolver;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -96,7 +96,7 @@ final class StringManager {
 		 *
 		 * @param array<string, mixed> $input Raw registration input.
 		 */
-		$filtered = apply_filters( 'localepress_pre_register_string', $input );
+		$filtered = apply_filters( 'shapetranslate_pre_register_string', $input );
 
 		if ( is_array( $filtered ) ) {
 			$input = wp_parse_args( $filtered, $input );
@@ -139,7 +139,7 @@ final class StringManager {
 			 *
 			 * @param array<string, mixed> $definition Definition including created/updated change.
 			 */
-			do_action( 'localepress_registered_string_saved', $definition );
+			do_action( 'shapetranslate_registered_string_saved', $definition );
 		}
 
 		return count( $changed );
@@ -199,7 +199,7 @@ final class StringManager {
 		 * @param bool                 $has_translation Whether a stored translation was used.
 		 */
 		$filtered = apply_filters(
-			'localepress_string_translation',
+			'shapetranslate_string_translation',
 			$value,
 			array(
 				'string_id'       => $string_id,
@@ -227,11 +227,11 @@ final class StringManager {
 		$language = $this->language_manager->find( $language_id );
 
 		if ( ! is_array( $language ) || empty( $language['enabled'] ) ) {
-			return new WP_Error( 'invalid_string_language', __( 'Select an enabled language.', 'localepress' ) );
+			return new WP_Error( 'invalid_string_language', __( 'Select an enabled language.', 'shapetranslate' ) );
 		}
 
 		if ( ! is_array( $translations ) ) {
-			return new WP_Error( 'invalid_string_translations', __( 'No valid string translations were submitted.', 'localepress' ) );
+			return new WP_Error( 'invalid_string_translations', __( 'No valid string translations were submitted.', 'shapetranslate' ) );
 		}
 
 		$this->flush_registered_strings();
@@ -270,7 +270,7 @@ final class StringManager {
 			if ( '' === $translation ) {
 				if ( null !== $current && $this->repository->delete_translation( $string_id, $language_id ) ) {
 					++$changed;
-					do_action( 'localepress_string_translation_deleted', $string_id, $language_id, $current );
+					do_action( 'shapetranslate_string_translation_deleted', $string_id, $language_id, $current );
 				}
 				continue;
 			}
@@ -288,7 +288,7 @@ final class StringManager {
 				 * @param array<string, mixed> $definition  Registered definition.
 				 */
 				do_action(
-					'localepress_string_translation_saved',
+					'shapetranslate_string_translation_saved',
 					$string_id,
 					$language_id,
 					$translation,

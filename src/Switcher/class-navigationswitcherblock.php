@@ -2,12 +2,12 @@
 /**
  * Language switcher for the Navigation block.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
-use LocalePress\Language\LanguageTag;
+use ShapeTranslate\Language\LanguageTag;
 use WP_Block;
 use WP_HTML_Tag_Processor;
 
@@ -29,7 +29,7 @@ final class NavigationSwitcherBlock {
 	 *
 	 * @var string
 	 */
-	const BLOCK_NAME = 'localepress/navigation-language-switcher';
+	const BLOCK_NAME = 'shapetranslate/navigation-language-switcher';
 
 	/**
 	 * Token swapped for a language label after WordPress renders the link.
@@ -40,7 +40,7 @@ final class NavigationSwitcherBlock {
 	 *
 	 * @var string
 	 */
-	const LABEL_TOKEN = 'localepress-switcher-label-token';
+	const LABEL_TOKEN = 'shapetranslate-switcher-label-token';
 
 	/**
 	 * Language switcher service.
@@ -311,7 +311,7 @@ final class NavigationSwitcherBlock {
 	 * @return string
 	 */
 	private function item_class( array $item ) {
-		return 'localepress-switcher__item--' . sanitize_html_class( $item['id'] );
+		return 'shapetranslate-switcher__item--' . sanitize_html_class( $item['id'] );
 	}
 
 	/**
@@ -341,14 +341,14 @@ final class NavigationSwitcherBlock {
 	 * @return array<string, mixed>
 	 */
 	private function build_item_attributes( array $item, array $attributes ) {
-		$classes = array( 'localepress-switcher__item', $this->item_class( $item ) );
+		$classes = array( 'shapetranslate-switcher__item', $this->item_class( $item ) );
 
 		if ( ! empty( $item['current'] ) ) {
 			$classes[] = 'is-current-language';
 		}
 
 		if ( empty( $item['available'] ) ) {
-			$classes[] = 'localepress-switcher__item--unavailable';
+			$classes[] = 'shapetranslate-switcher__item--unavailable';
 		}
 
 		$url = isset( $item['url'] ) && is_string( $item['url'] ) ? $item['url'] : '';
@@ -437,7 +437,7 @@ final class NavigationSwitcherBlock {
 			}
 
 			$flag = sprintf(
-				'<img class="localepress-switcher__flag" src="%1$s" alt="" width="16" height="11" loading="lazy" decoding="async" /> ',
+				'<img class="shapetranslate-switcher__flag" src="%1$s" alt="" width="16" height="11" loading="lazy" decoding="async" /> ',
 				esc_url( $item['flag_url'] )
 			);
 

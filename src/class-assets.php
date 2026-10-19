@@ -2,10 +2,10 @@
 /**
  * Asset cache busting.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress;
+namespace ShapeTranslate;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,14 +30,14 @@ final class Assets {
 	 * @return string
 	 */
 	public static function version( $relative_path ) {
-		$path = LOCALEPRESS_PATH . ltrim( (string) $relative_path, '/\\' );
+		$path = SHAPETRANSLATE_PATH . ltrim( (string) $relative_path, '/\\' );
 
 		if ( ! is_readable( $path ) ) {
-			return LOCALEPRESS_VERSION;
+			return SHAPETRANSLATE_VERSION;
 		}
 
 		$modified = filemtime( $path );
 
-		return false === $modified ? LOCALEPRESS_VERSION : LOCALEPRESS_VERSION . '.' . $modified;
+		return false === $modified ? SHAPETRANSLATE_VERSION : SHAPETRANSLATE_VERSION . '.' . $modified;
 	}
 }

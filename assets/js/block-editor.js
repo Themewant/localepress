@@ -3,14 +3,14 @@
  *
  * The block editor loads parent pages, terms, and link search results over the
  * REST API. Without a language those lists mix every language, so the request is
- * tagged here and LocalePress constrains the collection on the server.
+ * tagged here and ShapeTranslate constrains the collection on the server.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function ( wp ) {
 	'use strict';
 
-	var config = window.localePressEditor;
+	var config = window.shapeTranslateEditor;
 
 	if ( ! wp || ! wp.apiFetch || ! config || ! config.routes || ! config.routes.length ) {
 		return;
@@ -39,7 +39,7 @@
 	}
 
 	/**
-	 * Reports whether a request path is one LocalePress can constrain.
+	 * Reports whether a request path is one ShapeTranslate can constrain.
 	 *
 	 * Single-item routes end with an identifier and are left alone: fetching one
 	 * known post must never depend on the language being edited.

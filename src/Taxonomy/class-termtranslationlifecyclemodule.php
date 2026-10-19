@@ -2,12 +2,12 @@
 /**
  * Term translation lifecycle module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Taxonomy;
+namespace ShapeTranslate\Taxonomy;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 use WP_Error;
 use WP_Term;
 
@@ -41,7 +41,7 @@ final class TermTranslationLifecycleModule implements ModuleInterface {
 		add_action( 'created_term', array( $this, 'assign_default_language' ), 20, 3 );
 		add_action( 'delete_term', array( $this, 'remove_deleted_term' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'synchronize_edited_term' ), 20, 3 );
-		add_filter( 'localepress_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
+		add_filter( 'shapetranslate_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
 	}
 
 	/**
@@ -73,12 +73,12 @@ final class TermTranslationLifecycleModule implements ModuleInterface {
 		/**
 		 * Filters automatic default-language assignment for a newly created term.
 		 *
-		 * @param bool   $assign   Whether LocalePress should persist the default.
+		 * @param bool   $assign   Whether ShapeTranslate should persist the default.
 		 * @param int    $term_id  Term identifier.
 		 * @param string $taxonomy Taxonomy name.
 		 */
 		$assign = apply_filters(
-			'localepress_auto_assign_default_term_language',
+			'shapetranslate_auto_assign_default_term_language',
 			true,
 			absint( $term_id ),
 			sanitize_key( $taxonomy )
@@ -130,7 +130,7 @@ final class TermTranslationLifecycleModule implements ModuleInterface {
 		 * @param string $language_id Resolved language identifier.
 		 * @param string $taxonomy    Taxonomy name.
 		 */
-		$filtered = apply_filters( 'localepress_new_term_language_id', $language_id, (string) $taxonomy );
+		$filtered = apply_filters( 'shapetranslate_new_term_language_id', $language_id, (string) $taxonomy );
 
 		return is_scalar( $filtered ) ? (string) $filtered : '';
 	}
@@ -180,7 +180,7 @@ final class TermTranslationLifecycleModule implements ModuleInterface {
 
 		return new WP_Error(
 			'language_in_use',
-			__( 'This language is assigned to terms and cannot be deleted.', 'localepress' )
+			__( 'This language is assigned to terms and cannot be deleted.', 'shapetranslate' )
 		);
 	}
 }

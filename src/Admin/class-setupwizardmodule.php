@@ -1,19 +1,19 @@
 <?php
 /**
- * LocalePress setup wizard module.
+ * ShapeTranslate setup wizard module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageCatalog;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageHostResolver;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Switcher\NavigationMenuIntegration;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageCatalog;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageHostResolver;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Switcher\NavigationMenuIntegration;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -69,18 +69,18 @@ final class SetupWizardModule implements ModuleInterface {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ), 19 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'admin_post_localepress_setup_step', array( $this, 'save_step' ) );
-		add_action( 'admin_post_localepress_setup_remove_language', array( $this, 'remove_language' ) );
+		add_action( 'admin_post_shapetranslate_setup_step', array( $this, 'save_step' ) );
+		add_action( 'admin_post_shapetranslate_setup_remove_language', array( $this, 'remove_language' ) );
 	}
 
 	/** Registers the rerunnable setup submenu. */
 	public function register_menu() {
 		add_submenu_page(
-			'localepress',
-			esc_html__( 'Set Up LocalePress', 'localepress' ),
-			esc_html__( 'Setup Wizard', 'localepress' ),
+			'shapetranslate',
+			esc_html__( 'Set Up ShapeTranslate', 'shapetranslate' ),
+			esc_html__( 'Setup Wizard', 'shapetranslate' ),
 			AdminModule::capability(),
-			'localepress-setup',
+			'shapetranslate-setup',
 			array( $this->page, 'render' )
 		);
 	}
@@ -91,24 +91,24 @@ final class SetupWizardModule implements ModuleInterface {
 	 * @param string $hook_suffix Current page hook.
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		if ( 'localepress_page_localepress-setup' !== $hook_suffix ) {
+		if ( 'shapetranslate_page_shapetranslate-setup' !== $hook_suffix ) {
 			return;
 		}
 
-		wp_enqueue_style( 'localepress-admin', LOCALEPRESS_URL . 'assets/css/admin.css', array(), Assets::version( 'assets/css/admin.css' ) );
-		wp_enqueue_script( 'localepress-admin', LOCALEPRESS_URL . 'assets/js/admin.js', array(), Assets::version( 'assets/js/admin.js' ), true );
+		wp_enqueue_style( 'shapetranslate-admin', SHAPETRANSLATE_URL . 'assets/css/admin.css', array(), Assets::version( 'assets/css/admin.css' ) );
+		wp_enqueue_script( 'shapetranslate-admin', SHAPETRANSLATE_URL . 'assets/js/admin.js', array(), Assets::version( 'assets/js/admin.js' ), true );
 	}
 
 	/** Handles one nonce-protected wizard step. */
 	public function save_step() {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
-			wp_die( esc_html__( 'You are not allowed to set up LocalePress.', 'localepress' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to set up ShapeTranslate.', 'shapetranslate' ), '', array( 'response' => 403 ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Used to select the nonce verified below.
 		$step = isset( $_POST['step'] ) && is_scalar( $_POST['step'] ) ? absint( wp_unslash( $_POST['step'] ) ) : 1;
 		$step = min( 5, max( 1, $step ) );
-		check_admin_referer( 'localepress_setup_step_' . $step );
+		check_admin_referer( 'shapetranslate_setup_step_' . $step );
 
 		$method = 'save_step_' . $step;
 		$result = $this->{$method}();
@@ -130,12 +130,12 @@ final class SetupWizardModule implements ModuleInterface {
 	/** Removes one language from the wizard language list. */
 	public function remove_language() {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
-			wp_die( esc_html__( 'You are not allowed to set up LocalePress.', 'localepress' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to set up ShapeTranslate.', 'shapetranslate' ), '', array( 'response' => 403 ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Used to select the nonce verified below.
 		$language_id = isset( $_GET['language'] ) ? sanitize_text_field( wp_unslash( $_GET['language'] ) ) : '';
-		check_admin_referer( 'localepress_setup_remove_language_' . $language_id );
+		check_admin_referer( 'shapetranslate_setup_remove_language_' . $language_id );
 
 		$result = $this->language_manager->delete( $language_id );
 
@@ -160,7 +160,7 @@ final class SetupWizardModule implements ModuleInterface {
 			$language = $this->language_manager->find( $language_id );
 
 			if ( null === $language ) {
-				return new WP_Error( 'setup_language_missing', __( 'Choose a registered site language.', 'localepress' ) );
+				return new WP_Error( 'setup_language_missing', __( 'Choose a registered site language.', 'shapetranslate' ) );
 			}
 
 			if ( empty( $language['enabled'] ) ) {
@@ -255,7 +255,7 @@ final class SetupWizardModule implements ModuleInterface {
 			return $this->language_manager->toggle( $existing['id'] );
 		}
 
-		return new WP_Error( 'setup_locale_exists', __( 'That language is already added.', 'localepress' ) );
+		return new WP_Error( 'setup_locale_exists', __( 'That language is already added.', 'shapetranslate' ) );
 	}
 
 	/**
@@ -372,7 +372,7 @@ final class SetupWizardModule implements ModuleInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( 0 < $menu_id && ( ! current_user_can( 'edit_theme_options' ) || ! wp_get_nav_menu_object( $menu_id ) ) ) {
-			return new WP_Error( 'setup_menu_missing', __( 'The selected navigation menu is not available.', 'localepress' ) );
+			return new WP_Error( 'setup_menu_missing', __( 'The selected navigation menu is not available.', 'shapetranslate' ) );
 		}
 
 		$has_switcher = false;
@@ -391,11 +391,11 @@ final class SetupWizardModule implements ModuleInterface {
 				$menu_id,
 				0,
 				array(
-					'menu-item-title'   => __( 'Language switcher', 'localepress' ),
+					'menu-item-title'   => __( 'Language switcher', 'shapetranslate' ),
 					'menu-item-url'     => NavigationMenuIntegration::MENU_ITEM_URL,
 					'menu-item-status'  => 'publish',
 					'menu-item-type'    => 'custom',
-					'menu-item-classes' => 'localepress-menu-switcher',
+					'menu-item-classes' => 'shapetranslate-menu-switcher',
 				)
 			);
 
@@ -435,8 +435,8 @@ final class SetupWizardModule implements ModuleInterface {
 			)
 		);
 
-		/** Fires after the LocalePress setup wizard is completed. */
-		do_action( 'localepress_setup_completed' );
+		/** Fires after the ShapeTranslate setup wizard is completed. */
+		do_action( 'shapetranslate_setup_completed' );
 
 		return true;
 	}
@@ -451,11 +451,11 @@ final class SetupWizardModule implements ModuleInterface {
 		$catalog = $this->catalog->get_languages();
 
 		if ( ! isset( $catalog[ $locale ] ) ) {
-			return new WP_Error( 'setup_invalid_locale', __( 'Choose a language from the LocalePress catalog.', 'localepress' ) );
+			return new WP_Error( 'setup_invalid_locale', __( 'Choose a language from the ShapeTranslate catalog.', 'shapetranslate' ) );
 		}
 
 		if ( null !== $this->find_by_locale( $locale ) ) {
-			return new WP_Error( 'setup_locale_exists', __( 'That language is already registered.', 'localepress' ) );
+			return new WP_Error( 'setup_locale_exists', __( 'That language is already registered.', 'shapetranslate' ) );
 		}
 
 		$language             = $catalog[ $locale ];
@@ -523,7 +523,7 @@ final class SetupWizardModule implements ModuleInterface {
 	 * @param string $message Error message.
 	 */
 	private function store_error( $message ) {
-		set_transient( 'localepress_setup_error_' . get_current_user_id(), sanitize_text_field( $message ), MINUTE_IN_SECONDS );
+		set_transient( 'shapetranslate_setup_error_' . get_current_user_id(), sanitize_text_field( $message ), MINUTE_IN_SECONDS );
 	}
 
 	/**
@@ -534,12 +534,12 @@ final class SetupWizardModule implements ModuleInterface {
 	 */
 	private function redirect( $step, $notice = '' ) {
 		$args = array(
-			'page' => 'localepress-setup',
+			'page' => 'shapetranslate-setup',
 			'step' => min( 5, max( 1, absint( $step ) ) ),
 		);
 
 		if ( in_array( $notice, array( 'setup_error', 'setup_complete' ), true ) ) {
-			$args['localepress_notice'] = $notice;
+			$args['shapetranslate_notice'] = $notice;
 		}
 
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );

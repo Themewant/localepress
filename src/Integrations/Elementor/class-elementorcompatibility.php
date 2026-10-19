@@ -2,10 +2,10 @@
 /**
  * Elementor document compatibility service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
 use WP_Error;
 use WP_Post;
@@ -39,7 +39,7 @@ final class ElementorCompatibility {
 		 *
 		 * @param bool $available Whether Elementor completed loading.
 		 */
-		return (bool) apply_filters( 'localepress_elementor_available', $available );
+		return (bool) apply_filters( 'shapetranslate_elementor_available', $available );
 	}
 
 	/**
@@ -63,7 +63,7 @@ final class ElementorCompatibility {
 		 * @param int          $post_id     Post identifier.
 		 * @param WP_Post|null $post        Post object when it exists.
 		 */
-		return (bool) apply_filters( 'localepress_is_elementor_document', $is_document, $post_id, $post );
+		return (bool) apply_filters( 'shapetranslate_is_elementor_document', $is_document, $post_id, $post );
 	}
 
 	/**
@@ -92,21 +92,21 @@ final class ElementorCompatibility {
 		if ( ! $source instanceof WP_Post || ! $target instanceof WP_Post || $source_post_id === $target_post_id ) {
 			return new WP_Error(
 				'invalid_elementor_translation_target',
-				__( 'The Elementor translation source and target must be different existing posts.', 'localepress' )
+				__( 'The Elementor translation source and target must be different existing posts.', 'shapetranslate' )
 			);
 		}
 
 		if ( $source->post_type !== $target->post_type ) {
 			return new WP_Error(
 				'elementor_translation_post_type_mismatch',
-				__( 'Elementor document data cannot be copied between different post types.', 'localepress' )
+				__( 'Elementor document data cannot be copied between different post types.', 'shapetranslate' )
 			);
 		}
 
 		if ( metadata_exists( 'post', $target_post_id, self::DATA_META_KEY ) ) {
 			return new WP_Error(
 				'elementor_translation_target_not_empty',
-				__( 'The translated post already contains Elementor document data.', 'localepress' )
+				__( 'The translated post already contains Elementor document data.', 'shapetranslate' )
 			);
 		}
 
@@ -115,7 +115,7 @@ final class ElementorCompatibility {
 		if ( $copy_content && ! $this->is_valid_element_data( $element_data ) ) {
 			return new WP_Error(
 				'invalid_elementor_document_data',
-				__( 'The source Elementor document data is invalid and was not copied.', 'localepress' )
+				__( 'The source Elementor document data is invalid and was not copied.', 'shapetranslate' )
 			);
 		}
 
@@ -141,7 +141,7 @@ final class ElementorCompatibility {
 			 * @param int    $target_post_id Target post identifier.
 			 */
 			$meta_value = apply_filters(
-				'localepress_elementor_copy_meta_value',
+				'shapetranslate_elementor_copy_meta_value',
 				$meta_value,
 				$meta_key,
 				$source_post_id,
@@ -153,7 +153,7 @@ final class ElementorCompatibility {
 
 				return new WP_Error(
 					'invalid_filtered_elementor_document_data',
-					__( 'Filtered Elementor document data is invalid and was not copied.', 'localepress' )
+					__( 'Filtered Elementor document data is invalid and was not copied.', 'shapetranslate' )
 				);
 			}
 
@@ -174,7 +174,7 @@ final class ElementorCompatibility {
 
 					return new WP_Error(
 						'elementor_translation_meta_copy_failed',
-						__( 'Elementor document metadata could not be copied to the translated post.', 'localepress' )
+						__( 'Elementor document metadata could not be copied to the translated post.', 'shapetranslate' )
 					);
 				}
 			}
@@ -191,7 +191,7 @@ final class ElementorCompatibility {
 		 * @param bool $copy_content   Whether widget data was copied.
 		 */
 		do_action(
-			'localepress_elementor_document_copied',
+			'shapetranslate_elementor_document_copied',
 			$target_post_id,
 			$source_post_id,
 			(bool) $copy_content
@@ -229,7 +229,7 @@ final class ElementorCompatibility {
 		 * @param int                $target_post_id Target post identifier.
 		 */
 		$filtered_keys = apply_filters(
-			'localepress_elementor_copy_meta_keys',
+			'shapetranslate_elementor_copy_meta_keys',
 			$meta_keys,
 			$source_post_id,
 			$target_post_id
@@ -263,7 +263,7 @@ final class ElementorCompatibility {
 		 * @param int                $source_post_id Source post identifier.
 		 */
 		$filtered_keys = apply_filters(
-			'localepress_elementor_generated_meta_keys',
+			'shapetranslate_elementor_generated_meta_keys',
 			$meta_keys,
 			$target_post_id,
 			$source_post_id

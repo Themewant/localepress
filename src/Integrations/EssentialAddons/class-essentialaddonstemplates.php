@@ -2,12 +2,12 @@
 /**
  * Essential Addons Theme Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\EssentialAddons;
+namespace ShapeTranslate\Integrations\EssentialAddons;
 
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -118,7 +118,7 @@ final class EssentialAddonsTemplates {
 		 *
 		 * @param bool $available Whether the Theme Builder module is loaded.
 		 */
-		return (bool) apply_filters( 'localepress_eael_available', $available );
+		return (bool) apply_filters( 'shapetranslate_eael_available', $available );
 	}
 
 	/**

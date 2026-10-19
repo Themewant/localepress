@@ -1,23 +1,23 @@
 <?php
 /**
- * LocalePress admin notice gate.
+ * ShapeTranslate admin notice gate.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
 use Closure;
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 use WP_Hook;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Keeps unrelated admin notices off LocalePress screens.
+ * Keeps unrelated admin notices off ShapeTranslate screens.
  *
  * Other plugins and themes print promotions, review requests and opt-in
- * banners on every admin page. On LocalePress screens they push the interface
+ * banners on every admin page. On ShapeTranslate screens they push the interface
  * down and compete with the plugin's own feedback, so they are removed.
  *
  * What is never removed is anything a reader has to act on. WordPress's own
@@ -31,13 +31,13 @@ defined( 'ABSPATH' ) || exit;
  * Two layers are used because notices arrive two different ways:
  *
  * 1. PHP - callbacks on the four core notice hooks are detached before those
- *    hooks run. Callbacks owned by LocalePress, and WordPress's own, are kept.
+ *    hooks run. Callbacks owned by ShapeTranslate, and WordPress's own, are kept.
  * 2. CSS - a small scoped rule hides notice markup that scripts inject into
  *    the page after PHP has finished, which the first layer cannot reach. It
  *    passes over update and error markup for the same reason.
  *
- * LocalePress prints its own notices with the `localepress-notice` class so
- * the CSS layer can tell them apart. Any new LocalePress notice markup must
+ * ShapeTranslate prints its own notices with the `shapetranslate-notice` class so
+ * the CSS layer can tell them apart. Any new ShapeTranslate notice markup must
  * carry that class or it will be hidden along with the foreign ones.
  */
 final class AdminNoticeGate implements ModuleInterface {
@@ -59,7 +59,7 @@ final class AdminNoticeGate implements ModuleInterface {
 	 *
 	 * These carry updates, recovery mode, and the account and security messages
 	 * a site is expected to act on. Hiding any of them would mean a reader who
-	 * happens to be on a LocalePress screen is the one reader not told.
+	 * happens to be on a ShapeTranslate screen is the one reader not told.
 	 *
 	 * @var array<int, string>
 	 */
@@ -87,32 +87,29 @@ final class AdminNoticeGate implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const OWN_NAMESPACE = 'LocalePress\\';
+	const OWN_NAMESPACE = 'ShapeTranslate\\';
 
 	/**
 	 * Function prefix identifying callbacks owned by the plugin.
 	 *
 	 * @var string
 	 */
-	const OWN_FUNCTION_PREFIX = 'localepress';
+	const OWN_FUNCTION_PREFIX = 'shapetranslate';
 
 	/**
 	 * Style handle carrying the notice-hiding rule.
 	 *
 	 * @var string
 	 */
-	const STYLE_HANDLE = 'localepress-notice-gate';
+	const STYLE_HANDLE = 'shapetranslate-notice-gate';
 
 	/**
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		// Runs after every plugin has registered its notices and before the
-		// notice hooks fire, which is where almost everything is caught.
+		
 		add_action( 'in_admin_header', array( $this, 'detach_foreign_notices' ), PHP_INT_MAX );
 
-		// Second pass for callbacks registered after `in_admin_header`, for
-		// example from another plugin's own header or screen callbacks.
 		foreach ( self::NOTICE_HOOKS as $hook ) {
 			add_action( $hook, array( $this, 'detach_foreign_notices' ), PHP_INT_MIN );
 		}
@@ -153,15 +150,15 @@ final class AdminNoticeGate implements ModuleInterface {
 		 * is left alone for the same reason.
 		 */
 		$selectors = array(
-			'#wpbody-content .notice:not(.localepress-notice):not(.notice-error):not(.update-nag):not(.update-message)',
-			'#wpbody-content div.updated:not(.localepress-notice)',
+			'#wpbody-content .notice:not(.shapetranslate-notice):not(.notice-error):not(.update-nag):not(.update-message)',
+			'#wpbody-content div.updated:not(.shapetranslate-notice)',
 		);
 
 		/*
 		 * A handle of its own rather than the admin stylesheet, because not
-		 * every LocalePress screen loads that one.
+		 * every ShapeTranslate screen loads that one.
 		 */
-		wp_register_style( self::STYLE_HANDLE, false, array(), LOCALEPRESS_VERSION );
+		wp_register_style( self::STYLE_HANDLE, false, array(), SHAPETRANSLATE_VERSION );
 		wp_enqueue_style( self::STYLE_HANDLE );
 		wp_add_inline_style( self::STYLE_HANDLE, implode( ',', $selectors ) . '{display:none!important;}' );
 	}
@@ -179,16 +176,16 @@ final class AdminNoticeGate implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress hides unrelated notices on its own screens.
+		 * Filters whether ShapeTranslate hides unrelated notices on its own screens.
 		 *
 		 * @param bool   $hide Whether unrelated admin notices should be removed.
-		 * @param string $page Current LocalePress admin page slug.
+		 * @param string $page Current ShapeTranslate admin page slug.
 		 */
-		return (bool) apply_filters( 'localepress_hide_foreign_admin_notices', true, $page );
+		return (bool) apply_filters( 'shapetranslate_hide_foreign_admin_notices', true, $page );
 	}
 
 	/**
-	 * Returns the LocalePress admin page slug for the current request.
+	 * Returns the ShapeTranslate admin page slug for the current request.
 	 *
 	 * Read from the global WordPress fills in from the page query variable
 	 * before any admin screen loads, rather than from the query string itself.
@@ -201,7 +198,7 @@ final class AdminNoticeGate implements ModuleInterface {
 	 *
 	 * @global string $plugin_page
 	 *
-	 * @return string Empty when this is not a LocalePress screen.
+	 * @return string Empty when this is not a ShapeTranslate screen.
 	 */
 	private function current_admin_page() {
 		if ( wp_doing_ajax() || is_network_admin() || is_user_admin() ) {
@@ -212,11 +209,11 @@ final class AdminNoticeGate implements ModuleInterface {
 			? sanitize_key( $GLOBALS['plugin_page'] )
 			: '';
 
-		return 'localepress' === $page || 0 === strpos( $page, 'localepress-' ) ? $page : '';
+		return 'shapetranslate' === $page || 0 === strpos( $page, 'shapetranslate-' ) ? $page : '';
 	}
 
 	/**
-	 * Removes every callback on one hook that LocalePress does not own.
+	 * Removes every callback on one hook that ShapeTranslate does not own.
 	 *
 	 * `remove_all_actions()` is not used because it would also drop the
 	 * plugin's own notices and this gate's second pass.
@@ -273,10 +270,10 @@ final class AdminNoticeGate implements ModuleInterface {
 	}
 
 	/**
-	 * Determines whether a callback belongs to LocalePress.
+	 * Determines whether a callback belongs to ShapeTranslate.
 	 *
 	 * Closures cannot be attributed to an owner, so they are treated as
-	 * foreign. LocalePress registers its notice callbacks as class methods.
+	 * foreign. ShapeTranslate registers its notice callbacks as class methods.
 	 *
 	 * @param mixed $callback Registered callback.
 	 * @return bool

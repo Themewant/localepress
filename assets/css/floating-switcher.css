@@ -4,7 +4,7 @@
  * Loaded only on a page that prints one, so a site that placed its switcher
  * in a menu or a template never pays for the strip it does not use.
  *
- * Everything here is scoped to `.localepress-switcher--floating`, because this
+ * Everything here is scoped to `.shapetranslate-switcher--floating`, because this
  * is the one switcher that is not part of a theme's design. Every other
  * placement sits inside a header, a footer, or a post and inherits the type and
  * color around it; this one is drawn over the page and has nothing to inherit
@@ -31,7 +31,7 @@
  * one, so a site that placed its switcher in a menu or a template never pays
  * for the strip it does not use.
  *
- * Everything here is scoped to `.localepress-switcher--floating`, because this
+ * Everything here is scoped to `.shapetranslate-switcher--floating`, because this
  * is the one switcher that is not part of a theme's design. Every other
  * placement sits inside a header, a footer, or a post and inherits the type and
  * color around it; this one is drawn over the page and has nothing to inherit
@@ -40,12 +40,12 @@
  * strip belongs to it again.
  */
 
-.localepress-switcher--floating {
-	--localepress-floating-bg: #f0f0f2;
-	--localepress-floating-text: #1d1d1f;
-	--localepress-floating-current-bg: #101012;
-	--localepress-floating-current-text: #ffffff;
-	--localepress-floating-radius: 999px;
+.shapetranslate-switcher--floating {
+	--shapetranslate-floating-bg: #f0f0f2;
+	--shapetranslate-floating-text: #1d1d1f;
+	--shapetranslate-floating-current-bg: #101012;
+	--shapetranslate-floating-current-text: #ffffff;
+	--shapetranslate-floating-radius: 999px;
 
 	/*
 	 * How far a pill moves when it is pointed at, and in which direction. Each
@@ -53,7 +53,7 @@
 	 * side of the screen the strip is pinned to. Zero here so a strip with no
 	 * placement class still has somewhere to read the value from.
 	 */
-	--localepress-floating-shift: 0px;
+	--shapetranslate-floating-shift: 0px;
 
 	position: fixed;
 	z-index: 9990;
@@ -84,8 +84,8 @@
  * right, which is the same gesture read from either side of the screen.
  */
 
-.localepress-switcher--floating.localepress-switcher--at-middle-right {
-	--localepress-floating-shift: -6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-right {
+	--shapetranslate-floating-shift: -6px;
 
 	top: 50%;
 	right: 0;
@@ -94,8 +94,8 @@
 	transform: translateY( -50% );
 }
 
-.localepress-switcher--floating.localepress-switcher--at-middle-left {
-	--localepress-floating-shift: 6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-left {
+	--shapetranslate-floating-shift: 6px;
 
 	top: 50%;
 	right: auto;
@@ -109,26 +109,26 @@
  * rendering fault, and there is no edge for it to be flush against there.
  */
 
-.localepress-switcher--floating.localepress-switcher--at-bottom-right {
-	--localepress-floating-shift: -6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-bottom-right {
+	--shapetranslate-floating-shift: -6px;
 
 	inset: auto 1rem 1rem auto;
 }
 
-.localepress-switcher--floating.localepress-switcher--at-bottom-left {
-	--localepress-floating-shift: 6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-bottom-left {
+	--shapetranslate-floating-shift: 6px;
 
 	inset: auto auto 1rem 1rem;
 }
 
-.localepress-switcher--floating.localepress-switcher--at-top-right {
-	--localepress-floating-shift: -6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-top-right {
+	--shapetranslate-floating-shift: -6px;
 
 	inset: 1rem 1rem auto auto;
 }
 
-.localepress-switcher--floating.localepress-switcher--at-top-left {
-	--localepress-floating-shift: 6px;
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-top-left {
+	--shapetranslate-floating-shift: 6px;
 
 	inset: 1rem auto auto 1rem;
 }
@@ -139,8 +139,8 @@
  * heights the admin bar itself uses, at the width where it changes.
  */
 
-.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
-.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
+.admin-bar .shapetranslate-switcher--floating.shapetranslate-switcher--at-top-right,
+.admin-bar .shapetranslate-switcher--floating.shapetranslate-switcher--at-top-left {
 	top: calc( 1rem + 32px );
 }
 
@@ -163,7 +163,7 @@
  * above and below it.
  */
 
-.localepress-switcher--floating .localepress-switcher__list {
+.shapetranslate-switcher--floating .shapetranslate-switcher__list {
 	gap: 0.5rem;
 	align-items: stretch;
 }
@@ -174,14 +174,14 @@
  * no edges of its own to line up against the page.
  */
 
-.localepress-switcher--floating .localepress-switcher__link,
-.localepress-switcher--floating .localepress-switcher__unavailable,
-.localepress-switcher--floating .localepress-switcher__dropdown > summary {
+.shapetranslate-switcher--floating .shapetranslate-switcher__link,
+.shapetranslate-switcher--floating .shapetranslate-switcher__unavailable,
+.shapetranslate-switcher--floating .shapetranslate-switcher__dropdown > summary {
 	gap: 0.5em;
 	padding: 0.5rem 0.85rem;
-	border-radius: var( --localepress-floating-radius );
-	background: var( --localepress-floating-bg );
-	color: var( --localepress-floating-text );
+	border-radius: var( --shapetranslate-floating-radius );
+	background: var( --shapetranslate-floating-bg );
+	color: var( --shapetranslate-floating-text );
 	box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.14 );
 	font-weight: 600;
 	text-decoration: none;
@@ -196,9 +196,9 @@
  * same item every layout and every context calls current.
  */
 
-.localepress-switcher--floating .localepress-switcher__item.is-current .localepress-switcher__link {
-	background: var( --localepress-floating-current-bg );
-	color: var( --localepress-floating-current-text );
+.shapetranslate-switcher--floating .shapetranslate-switcher__item.is-current .shapetranslate-switcher__link {
+	background: var( --shapetranslate-floating-current-bg );
+	color: var( --shapetranslate-floating-current-text );
 }
 
 /*
@@ -208,9 +208,9 @@
  * also what gives the four corners the movement they had no rule for before.
  */
 
-.localepress-switcher--floating .localepress-switcher__link:hover,
-.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
-	transform: translateX( var( --localepress-floating-shift ) ) scale( 1.03 );
+.shapetranslate-switcher--floating .shapetranslate-switcher__link:hover,
+.shapetranslate-switcher--floating .shapetranslate-switcher__dropdown > summary:hover {
+	transform: translateX( var( --shapetranslate-floating-shift ) ) scale( 1.03 );
 }
 
 /* End 3. List and links */
@@ -226,15 +226,15 @@
  * round on all four sides.
  */
 
-.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__link,
-.localepress-switcher--floating.localepress-switcher--at-middle-right .localepress-switcher__unavailable {
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-right .shapetranslate-switcher__link,
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-right .shapetranslate-switcher__unavailable {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 	padding-right: 0.7rem;
 }
 
-.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__link,
-.localepress-switcher--floating.localepress-switcher--at-middle-left .localepress-switcher__unavailable {
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-left .shapetranslate-switcher__link,
+.shapetranslate-switcher--floating.shapetranslate-switcher--at-middle-left .shapetranslate-switcher__unavailable {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	padding-left: 0.7rem;
@@ -253,7 +253,7 @@
  * a way a row of differently shaped rectangles does not.
  */
 
-.localepress-switcher--floating .localepress-switcher__flag {
+.shapetranslate-switcher--floating .shapetranslate-switcher__flag {
 	width: 1.5em;
 	height: 1.5em;
 	border-radius: 50%;
@@ -263,7 +263,7 @@
 
 /* An unreachable language is shown without pretending to be a button. */
 
-.localepress-switcher--floating .localepress-switcher__unavailable {
+.shapetranslate-switcher--floating .shapetranslate-switcher__unavailable {
 	box-shadow: none;
 	font-weight: 500;
 }
@@ -274,11 +274,11 @@
  * shared script, so only the summary needs the pill treatment above.
  */
 
-.localepress-switcher--floating .localepress-switcher__dropdown[open] > .localepress-switcher__list {
+.shapetranslate-switcher--floating .shapetranslate-switcher__dropdown[open] > .shapetranslate-switcher__list {
 	padding: 0.4rem;
 	border: 0;
 	border-radius: 12px;
-	background: var( --localepress-floating-bg );
+	background: var( --shapetranslate-floating-bg );
 	box-shadow: 0 8px 28px rgba( 0, 0, 0, 0.18 );
 }
 
@@ -294,8 +294,8 @@
 /* Narrow viewports. */
 
 @media screen and ( max-width: 782px ) {
-	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-right,
-	.admin-bar .localepress-switcher--floating.localepress-switcher--at-top-left {
+	.admin-bar .shapetranslate-switcher--floating.shapetranslate-switcher--at-top-right,
+	.admin-bar .shapetranslate-switcher--floating.shapetranslate-switcher--at-top-left {
 		top: calc( 1rem + 46px );
 	}
 }
@@ -310,7 +310,7 @@
  */
 
 @media screen and ( max-width: 600px ) {
-	.localepress-switcher--floating {
+	.shapetranslate-switcher--floating {
 		/*
 		 * A box that scrolls on one axis scrolls on both: `overflow-y` below
 		 * makes `overflow-x` compute to `auto` too, and a pill stepping sideways
@@ -319,7 +319,7 @@
 		 * a finger does not hover; a tap that leaves `:hover` stuck behind it
 		 * would leave one pill displaced instead.
 		 */
-		--localepress-floating-shift: 0px;
+		--shapetranslate-floating-shift: 0px;
 
 		font-size: 0.8125rem;
 		max-height: 70vh;
@@ -327,8 +327,8 @@
 		overscroll-behavior: contain;
 	}
 
-	.localepress-switcher--floating .localepress-switcher__link:has( .localepress-switcher__flag ) .localepress-switcher__label,
-	.localepress-switcher--floating .localepress-switcher__unavailable:has( .localepress-switcher__flag ) .localepress-switcher__label {
+	.shapetranslate-switcher--floating .shapetranslate-switcher__link:has( .shapetranslate-switcher__flag ) .shapetranslate-switcher__label,
+	.shapetranslate-switcher--floating .shapetranslate-switcher__unavailable:has( .shapetranslate-switcher__flag ) .shapetranslate-switcher__label {
 		position: absolute;
 		width: 1px;
 		height: 1px;
@@ -341,8 +341,8 @@
 		white-space: nowrap;
 	}
 
-	.localepress-switcher--floating .localepress-switcher__link:has( .localepress-switcher__flag ),
-	.localepress-switcher--floating .localepress-switcher__unavailable:has( .localepress-switcher__flag ) {
+	.shapetranslate-switcher--floating .shapetranslate-switcher__link:has( .shapetranslate-switcher__flag ),
+	.shapetranslate-switcher--floating .shapetranslate-switcher__unavailable:has( .shapetranslate-switcher__flag ) {
 		padding: 0.4rem;
 	}
 }
@@ -353,7 +353,7 @@
  */
 
 @media screen and ( max-width: 600px ) {
-	.localepress-switcher--floating.localepress-switcher--dropdown {
+	.shapetranslate-switcher--floating.shapetranslate-switcher--dropdown {
 		overflow: visible;
 		max-height: none;
 	}
@@ -362,24 +362,24 @@
 /* Colour scheme. */
 
 @media ( prefers-color-scheme: dark ) {
-	.localepress-switcher--floating {
-		--localepress-floating-bg: #2a2a2e;
-		--localepress-floating-text: #f2f2f4;
-		--localepress-floating-current-bg: #f2f2f4;
-		--localepress-floating-current-text: #101012;
+	.shapetranslate-switcher--floating {
+		--shapetranslate-floating-bg: #2a2a2e;
+		--shapetranslate-floating-text: #f2f2f4;
+		--shapetranslate-floating-current-bg: #f2f2f4;
+		--shapetranslate-floating-current-text: #101012;
 	}
 }
 
 /* Reduced motion. */
 
 @media ( prefers-reduced-motion: reduce ) {
-	.localepress-switcher--floating .localepress-switcher__link,
-	.localepress-switcher--floating .localepress-switcher__dropdown > summary {
+	.shapetranslate-switcher--floating .shapetranslate-switcher__link,
+	.shapetranslate-switcher--floating .shapetranslate-switcher__dropdown > summary {
 		transition: none;
 	}
 
-	.localepress-switcher--floating .localepress-switcher__link:hover,
-	.localepress-switcher--floating .localepress-switcher__dropdown > summary:hover {
+	.shapetranslate-switcher--floating .shapetranslate-switcher__link:hover,
+	.shapetranslate-switcher--floating .shapetranslate-switcher__dropdown > summary:hover {
 		transform: none;
 	}
 }
@@ -387,7 +387,7 @@
 /* Print. */
 
 @media print {
-	.localepress-switcher--floating {
+	.shapetranslate-switcher--floating {
 		display: none;
 	}
 }

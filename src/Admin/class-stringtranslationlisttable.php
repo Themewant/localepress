@@ -2,14 +2,14 @@
 /**
  * String translation list table.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageTag;
-use LocalePress\StringTranslation\RegisteredStringValidator;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageTag;
+use ShapeTranslate\StringTranslation\RegisteredStringValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,10 +61,10 @@ final class StringTranslationListTable extends \WP_List_Table {
 	public function __construct( StringTranslationQuery $query ) {
 		parent::__construct(
 			array(
-				'singular' => 'localepress_string',
-				'plural'   => 'localepress_strings',
+				'singular' => 'shapetranslate_string',
+				'plural'   => 'shapetranslate_strings',
 				'ajax'     => false,
-				'screen'   => 'localepress_page_localepress-string-translations',
+				'screen'   => 'shapetranslate_page_shapetranslate-string-translations',
 			)
 		);
 
@@ -84,11 +84,11 @@ final class StringTranslationListTable extends \WP_List_Table {
 	 */
 	public function prepare_items() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only table filters.
-		$language_id = isset( $_GET['localepress_language'] ) && is_scalar( $_GET['localepress_language'] )
-			? sanitize_text_field( wp_unslash( $_GET['localepress_language'] ) )
+		$language_id = isset( $_GET['shapetranslate_language'] ) && is_scalar( $_GET['shapetranslate_language'] )
+			? sanitize_text_field( wp_unslash( $_GET['shapetranslate_language'] ) )
 			: '';
-		$group       = isset( $_GET['localepress_group'] ) && is_scalar( $_GET['localepress_group'] )
-			? sanitize_text_field( wp_unslash( $_GET['localepress_group'] ) )
+		$group       = isset( $_GET['shapetranslate_group'] ) && is_scalar( $_GET['shapetranslate_group'] )
+			? sanitize_text_field( wp_unslash( $_GET['shapetranslate_group'] ) )
 			: '';
 		$search      = isset( $_GET['s'] ) && is_scalar( $_GET['s'] )
 			? sanitize_text_field( wp_unslash( $_GET['s'] ) )
@@ -101,7 +101,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 			: 'ASC';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		$per_page = $this->get_items_per_page( 'localepress_strings_per_page', 20 );
+		$per_page = $this->get_items_per_page( 'shapetranslate_strings_per_page', 20 );
 		$result   = $this->query->query(
 			array(
 				'language_id' => $language_id,
@@ -141,12 +141,12 @@ final class StringTranslationListTable extends \WP_List_Table {
 		$language    = isset( $this->languages[ $language_id ] ) ? $this->languages[ $language_id ] : null;
 		$flag        = null !== $language ? $this->flags->get_flag_html( $language ) : '';
 		$heading     = StringTranslationQuery::ALL_LANGUAGES === $language_id
-			? esc_html__( 'Translations', 'localepress' )
-			: $flag . esc_html__( 'Translation', 'localepress' );
+			? esc_html__( 'Translations', 'shapetranslate' )
+			: $flag . esc_html__( 'Translation', 'shapetranslate' );
 
 		return array(
-			'identity'    => __( 'Registered string', 'localepress' ),
-			'original'    => __( 'Original string', 'localepress' ),
+			'identity'    => __( 'Registered string', 'shapetranslate' ),
+			'original'    => __( 'Original string', 'shapetranslate' ),
 			'translation' => $heading,
 		);
 	}
@@ -163,7 +163,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 		$classes = parent::get_table_classes();
 
 		if ( StringTranslationQuery::ALL_LANGUAGES === $this->selected_filter() ) {
-			$classes[] = 'localepress-strings-all-languages';
+			$classes[] = 'shapetranslate-strings-all-languages';
 		}
 
 		return $classes;
@@ -216,7 +216,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 	 */
 	protected function column_identity( $item ) {
 		return sprintf(
-			'<strong>%1$s</strong><code class="localepress-string-key">%2$s</code>',
+			'<strong>%1$s</strong><code class="shapetranslate-string-key">%2$s</code>',
 			esc_html( $item['string_group'] ),
 			esc_html( $item['string_key'] )
 		);
@@ -229,7 +229,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	protected function column_original( $item ) {
-		return '<div class="localepress-string-original">' . nl2br( esc_html( $item['original_string'] ) ) . '</div>';
+		return '<div class="shapetranslate-string-original">' . nl2br( esc_html( $item['original_string'] ) ) . '</div>';
 	}
 
 	/**
@@ -245,7 +245,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 		$selected = $this->selected_languages();
 
 		if ( empty( $selected ) ) {
-			return '<span class="localepress-dashboard-unavailable">' . esc_html__( 'No enabled language', 'localepress' ) . '</span>';
+			return '<span class="shapetranslate-dashboard-unavailable">' . esc_html__( 'No enabled language', 'shapetranslate' ) . '</span>';
 		}
 
 		// One language needs no label beside its field; the column already names
@@ -253,11 +253,11 @@ final class StringTranslationListTable extends \WP_List_Table {
 		// modifier class is what turns the cell into a label and field grid, so
 		// a single field still fills the column even in the all-languages view.
 		$labelled = count( $selected ) > 1;
-		$classes  = 'localepress-string-translations';
+		$classes  = 'shapetranslate-string-translations';
 		$fields   = '';
 
 		if ( $labelled ) {
-			$classes .= ' localepress-string-translations--labelled';
+			$classes .= ' shapetranslate-string-translations--labelled';
 		}
 
 		foreach ( $selected as $language ) {
@@ -280,11 +280,11 @@ final class StringTranslationListTable extends \WP_List_Table {
 		$value       = isset( $item['translations'][ $language_id ] ) ? $item['translations'][ $language_id ] : '';
 		$label       = sprintf(
 			/* translators: 1: native language name, 2: original string. */
-			__( '%1$s translation for %2$s', 'localepress' ),
+			__( '%1$s translation for %2$s', 'shapetranslate' ),
 			$language['native_name'],
 			$item['original_string']
 		);
-		$field_id = 'localepress-string-' . $item['string_id'] . '-' . $language_id;
+		$field_id = 'shapetranslate-string-' . $item['string_id'] . '-' . $language_id;
 		$heading  = '';
 
 		if ( $labelled ) {
@@ -293,7 +293,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 			// column. The flag carries the recognition, and the full name stays
 			// one hover away.
 			$heading = sprintf(
-				'<label class="localepress-string-language" for="%1$s" title="%2$s">%3$s<span>%4$s</span></label>',
+				'<label class="shapetranslate-string-language" for="%1$s" title="%2$s">%3$s<span>%4$s</span></label>',
 				esc_attr( $field_id ),
 				esc_attr( $language['native_name'] ),
 				$this->flags->get_flag_html( $language ),
@@ -311,7 +311,7 @@ final class StringTranslationListTable extends \WP_List_Table {
 		$direction = LanguageTag::direction( $language );
 
 		return $heading . sprintf(
-			'<textarea id="%1$s" class="large-text localepress-string-translation" name="translations[%2$s][%3$s]" rows="3" maxlength="%4$d" aria-label="%5$s" lang="%7$s" dir="%8$s">%6$s</textarea>',
+			'<textarea id="%1$s" class="large-text shapetranslate-string-translation" name="translations[%2$s][%3$s]" rows="3" maxlength="%4$d" aria-label="%5$s" lang="%7$s" dir="%8$s">%6$s</textarea>',
 			esc_attr( $field_id ),
 			esc_attr( $language_id ),
 			esc_attr( $item['string_id'] ),
@@ -382,6 +382,6 @@ final class StringTranslationListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function no_items() {
-		esc_html_e( 'No registered strings matched the current filters.', 'localepress' );
+		esc_html_e( 'No registered strings matched the current filters.', 'shapetranslate' );
 	}
 }

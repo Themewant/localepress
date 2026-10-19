@@ -2,14 +2,14 @@
 /**
  * Languages admin page.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageCatalog;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageCatalog;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -59,7 +59,7 @@ final class LanguagesPage {
 	public function render() {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
 			wp_die(
-				esc_html__( 'You are not allowed to manage LocalePress languages.', 'localepress' ),
+				esc_html__( 'You are not allowed to manage ShapeTranslate languages.', 'shapetranslate' ),
 				'',
 				array( 'response' => 403 )
 			);
@@ -68,7 +68,7 @@ final class LanguagesPage {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view selection.
 		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
 
-		echo '<div class="wrap localepress-admin">';
+		echo '<div class="wrap shapetranslate-admin">';
 		$this->render_notice();
 
 		if ( in_array( $action, array( 'add', 'edit' ), true ) ) {
@@ -92,37 +92,37 @@ final class LanguagesPage {
 		$default   = $this->language_manager->get_default_id();
 		$add_url   = add_query_arg(
 			array(
-				'page'   => 'localepress',
+				'page'   => 'shapetranslate',
 				'action' => 'add',
 			),
 			admin_url( 'admin.php' )
 		);
 
 		?>
-		<div class="localepress-heading">
-			<h1><?php esc_html_e( 'Languages', 'localepress' ); ?></h1>
+		<div class="shapetranslate-heading">
+			<h1><?php esc_html_e( 'Languages', 'shapetranslate' ); ?></h1>
 			<a class="page-title-action" href="<?php echo esc_url( $add_url ); ?>">
-				<?php esc_html_e( 'Add Language', 'localepress' ); ?>
+				<?php esc_html_e( 'Add Language', 'shapetranslate' ); ?>
 			</a>
 		</div>
 		<hr class="wp-header-end">
 
-		<table class="wp-list-table widefat fixed striped table-view-list localepress-language-table">
+		<table class="wp-list-table widefat fixed striped table-view-list shapetranslate-language-table">
 			<thead>
 				<tr>
-					<th scope="col"><?php esc_html_e( 'Language', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Locale', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Code', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'URL slug', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Direction', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Status', 'localepress' ); ?></th>
-					<th scope="col" class="localepress-order-column"><?php esc_html_e( 'Order', 'localepress' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Language', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Locale', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Code', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'URL slug', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Direction', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Status', 'shapetranslate' ); ?></th>
+					<th scope="col" class="shapetranslate-order-column"><?php esc_html_e( 'Order', 'shapetranslate' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php if ( empty( $languages ) ) : ?>
 					<tr class="no-items">
-						<td colspan="7"><?php esc_html_e( 'No languages have been added yet.', 'localepress' ); ?></td>
+						<td colspan="7"><?php esc_html_e( 'No languages have been added yet.', 'shapetranslate' ); ?></td>
 					</tr>
 				<?php else : ?>
 					<?php foreach ( $languages as $index => $language ) : ?>
@@ -146,13 +146,13 @@ final class LanguagesPage {
 	private function render_language_row( $language, $default_id, $index, $count ) {
 		$is_default     = $default_id === $language['id'];
 		$status_class   = ! empty( $language['enabled'] ) ? 'is-enabled' : 'is-disabled';
-		$status_label   = ! empty( $language['enabled'] ) ? __( 'Enabled', 'localepress' ) : __( 'Disabled', 'localepress' );
-		$direction      = ! empty( $language['is_rtl'] ) ? __( 'RTL', 'localepress' ) : __( 'LTR', 'localepress' );
-		$toggle_label   = ! empty( $language['enabled'] ) ? __( 'Disable', 'localepress' ) : __( 'Enable', 'localepress' );
-		$delete_confirm = __( 'Delete this language? This does not delete site content.', 'localepress' );
+		$status_label   = ! empty( $language['enabled'] ) ? __( 'Enabled', 'shapetranslate' ) : __( 'Disabled', 'shapetranslate' );
+		$direction      = ! empty( $language['is_rtl'] ) ? __( 'RTL', 'shapetranslate' ) : __( 'LTR', 'shapetranslate' );
+		$toggle_label   = ! empty( $language['enabled'] ) ? __( 'Disable', 'shapetranslate' ) : __( 'Enable', 'shapetranslate' );
+		$delete_confirm = __( 'Delete this language? This does not delete site content.', 'shapetranslate' );
 		$edit_url       = add_query_arg(
 			array(
-				'page'        => 'localepress',
+				'page'        => 'shapetranslate',
 				'action'      => 'edit',
 				'language_id' => $language['id'],
 			),
@@ -161,65 +161,65 @@ final class LanguagesPage {
 
 		?>
 		<tr>
-			<td class="column-primary" data-colname="<?php esc_attr_e( 'Language', 'localepress' ); ?>">
+			<td class="column-primary" data-colname="<?php esc_attr_e( 'Language', 'shapetranslate' ); ?>">
 				<strong>
 					<?php echo $this->flags->get_flag_html( $language ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html(). ?>
 					<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $language['name'] ); ?></a>
 				</strong>
-				<span class="localepress-native-name"><?php echo esc_html( $language['native_name'] ); ?></span>
+				<span class="shapetranslate-native-name"><?php echo esc_html( $language['native_name'] ); ?></span>
 				<div class="row-actions">
 					<span class="edit">
-						<a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Edit', 'localepress' ); ?></a><?php echo $is_default ? '' : ' |'; ?>
+						<a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Edit', 'shapetranslate' ); ?></a><?php echo $is_default ? '' : ' |'; ?>
 					</span>
 					<?php if ( ! $is_default ) : ?>
 						<?php
 						$this->render_action_form_start(
-							'localepress_delete_language',
+							'shapetranslate_delete_language',
 							$language['id'],
-							'localepress_delete_language_' . $language['id'],
-							'localepress-inline-form localepress-delete-form'
+							'shapetranslate_delete_language_' . $language['id'],
+							'shapetranslate-inline-form shapetranslate-delete-form'
 						);
 						?>
 						<button
 							type="submit"
 							class="button-link delete"
-							data-localepress-confirm="<?php echo esc_attr( $delete_confirm ); ?>"
+							data-shapetranslate-confirm="<?php echo esc_attr( $delete_confirm ); ?>"
 						>
-							<?php esc_html_e( 'Delete', 'localepress' ); ?>
+							<?php esc_html_e( 'Delete', 'shapetranslate' ); ?>
 						</button>
 						</form>
 					<?php endif; ?>
 				</div>
 				<button type="button" class="toggle-row">
-					<span class="screen-reader-text"><?php esc_html_e( 'Show more details', 'localepress' ); ?></span>
+					<span class="screen-reader-text"><?php esc_html_e( 'Show more details', 'shapetranslate' ); ?></span>
 				</button>
 			</td>
-			<td data-colname="<?php esc_attr_e( 'Locale', 'localepress' ); ?>">
+			<td data-colname="<?php esc_attr_e( 'Locale', 'shapetranslate' ); ?>">
 				<code><?php echo esc_html( $language['locale'] ); ?></code>
 			</td>
-			<td data-colname="<?php esc_attr_e( 'Code', 'localepress' ); ?>">
+			<td data-colname="<?php esc_attr_e( 'Code', 'shapetranslate' ); ?>">
 				<code><?php echo esc_html( $language['language_code'] ); ?></code>
 			</td>
-			<td data-colname="<?php esc_attr_e( 'URL slug', 'localepress' ); ?>">
+			<td data-colname="<?php esc_attr_e( 'URL slug', 'shapetranslate' ); ?>">
 				<code><?php echo esc_html( $language['url_slug'] ); ?></code>
 			</td>
-			<td data-colname="<?php esc_attr_e( 'Direction', 'localepress' ); ?>">
+			<td data-colname="<?php esc_attr_e( 'Direction', 'shapetranslate' ); ?>">
 				<?php echo esc_html( $direction ); ?>
 			</td>
-			<td data-colname="<?php esc_attr_e( 'Status', 'localepress' ); ?>">
-				<span class="localepress-status <?php echo esc_attr( $status_class ); ?>">
+			<td data-colname="<?php esc_attr_e( 'Status', 'shapetranslate' ); ?>">
+				<span class="shapetranslate-status <?php echo esc_attr( $status_class ); ?>">
 					<?php echo esc_html( $status_label ); ?>
 				</span>
 				<?php if ( $is_default ) : ?>
-					<span class="localepress-default-label"><?php esc_html_e( 'Default', 'localepress' ); ?></span>
+					<span class="shapetranslate-default-label"><?php esc_html_e( 'Default', 'shapetranslate' ); ?></span>
 				<?php endif; ?>
-				<div class="localepress-status-actions">
+				<div class="shapetranslate-status-actions">
 					<?php if ( ! $is_default ) : ?>
 						<?php
 						$this->render_simple_action(
-							'localepress_toggle_language',
+							'shapetranslate_toggle_language',
 							$language['id'],
-							'localepress_toggle_language_' . $language['id'],
+							'shapetranslate_toggle_language_' . $language['id'],
 							$toggle_label
 						);
 						?>
@@ -227,16 +227,16 @@ final class LanguagesPage {
 					<?php if ( ! $is_default && ! empty( $language['enabled'] ) ) : ?>
 						<?php
 						$this->render_simple_action(
-							'localepress_set_default_language',
+							'shapetranslate_set_default_language',
 							$language['id'],
-							'localepress_set_default_language_' . $language['id'],
-							__( 'Make default', 'localepress' )
+							'shapetranslate_set_default_language_' . $language['id'],
+							__( 'Make default', 'shapetranslate' )
 						);
 						?>
 					<?php endif; ?>
 				</div>
 			</td>
-			<td class="localepress-order-column" data-colname="<?php esc_attr_e( 'Order', 'localepress' ); ?>">
+			<td class="shapetranslate-order-column" data-colname="<?php esc_attr_e( 'Order', 'shapetranslate' ); ?>">
 				<?php $this->render_move_action( $language['id'], 'up', 0 === $index ); ?>
 				<?php $this->render_move_action( $language['id'], 'down', $index === $count - 1 ); ?>
 			</td>
@@ -268,8 +268,8 @@ final class LanguagesPage {
 			$stored_language = $this->language_manager->find( $language_id );
 
 			if ( null === $stored_language ) {
-				echo '<div class="localepress-notice notice notice-error"><p>';
-				esc_html_e( 'The requested language could not be found.', 'localepress' );
+				echo '<div class="shapetranslate-notice notice notice-error"><p>';
+				esc_html_e( 'The requested language could not be found.', 'shapetranslate' );
 				echo '</p></div>';
 				$this->render_list();
 				return;
@@ -278,7 +278,7 @@ final class LanguagesPage {
 			$language = wp_parse_args( $stored_language, $language );
 		}
 
-		$form_state = get_transient( 'localepress_form_' . get_current_user_id() );
+		$form_state = get_transient( 'shapetranslate_form_' . get_current_user_id() );
 
 		if (
 			is_array( $form_state )
@@ -289,17 +289,17 @@ final class LanguagesPage {
 			$language = wp_parse_args( $form_state['input'], $language );
 		}
 
-		delete_transient( 'localepress_form_' . get_current_user_id() );
+		delete_transient( 'shapetranslate_form_' . get_current_user_id() );
 
-		$list_url   = add_query_arg( 'page', 'localepress', admin_url( 'admin.php' ) );
-		$page_title = 'edit' === $action ? __( 'Edit Language', 'localepress' ) : __( 'Add Language', 'localepress' );
+		$list_url   = add_query_arg( 'page', 'shapetranslate', admin_url( 'admin.php' ) );
+		$page_title = 'edit' === $action ? __( 'Edit Language', 'shapetranslate' ) : __( 'Add Language', 'shapetranslate' );
 		$is_default = '' !== $language_id && $language_id === $this->language_manager->get_default_id();
 
 		if ( 'setup' === $action ) {
-			$page_title = __( 'Set Up LocalePress', 'localepress' );
+			$page_title = __( 'Set Up ShapeTranslate', 'shapetranslate' );
 		}
 		?>
-		<div class="localepress-heading">
+		<div class="shapetranslate-heading">
 			<h1>
 				<?php echo esc_html( $page_title ); ?>
 			</h1>
@@ -307,13 +307,13 @@ final class LanguagesPage {
 		<hr class="wp-header-end">
 
 		<form
-			class="localepress-language-form"
+			class="shapetranslate-language-form"
 			method="post"
 			action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
 		>
-			<input type="hidden" name="action" value="localepress_save_language">
+			<input type="hidden" name="action" value="shapetranslate_save_language">
 			<input type="hidden" name="language_id" value="<?php echo esc_attr( $language_id ); ?>">
-			<?php wp_nonce_field( 'localepress_save_language' ); ?>
+			<?php wp_nonce_field( 'shapetranslate_save_language_' . $language_id ); ?>
 
 			<table class="form-table" role="presentation">
 				<tbody>
@@ -324,83 +324,83 @@ final class LanguagesPage {
 
 					$this->render_text_field(
 						'name',
-						__( 'Name', 'localepress' ),
+						__( 'Name', 'shapetranslate' ),
 						$language['name'],
-						__( 'The administrative display name, for example French.', 'localepress' ),
+						__( 'The administrative display name, for example French.', 'shapetranslate' ),
 						true
 					);
 					$this->render_text_field(
 						'native_name',
-						__( 'Native name', 'localepress' ),
+						__( 'Native name', 'shapetranslate' ),
 						$language['native_name'],
-						__( 'The language name as written by native speakers, for example Français.', 'localepress' ),
+						__( 'The language name as written by native speakers, for example Français.', 'shapetranslate' ),
 						true
 					);
 					$this->render_text_field(
 						'locale',
-						__( 'Locale', 'localepress' ),
+						__( 'Locale', 'shapetranslate' ),
 						$language['locale'],
-						__( 'A WordPress locale such as en_US, fr_FR, or de_DE_formal.', 'localepress' ),
+						__( 'A WordPress locale such as en_US, fr_FR, or de_DE_formal.', 'shapetranslate' ),
 						true
 					);
 					$this->render_text_field(
 						'language_code',
-						__( 'Language code', 'localepress' ),
+						__( 'Language code', 'shapetranslate' ),
 						$language['language_code'],
-						__( 'A two- or three-letter ISO 639 language code, such as en or fra.', 'localepress' ),
+						__( 'A two- or three-letter ISO 639 language code, such as en or fra.', 'shapetranslate' ),
 						true
 					);
 					$this->render_text_field(
 						'url_slug',
-						__( 'URL slug', 'localepress' ),
+						__( 'URL slug', 'shapetranslate' ),
 						$language['url_slug'],
-						__( 'The unique path segment reserved for this language, such as en or french.', 'localepress' ),
+						__( 'The unique path segment reserved for this language, such as en or french.', 'shapetranslate' ),
 						true
 					);
 					$this->render_text_field(
 						'domain',
-						__( 'Domain', 'localepress' ),
+						__( 'Domain', 'shapetranslate' ),
 						isset( $language['domain'] ) ? (string) $language['domain'] : '',
-						__( 'Only used when URL behavior is set to a separate domain per language, such as example.fr. Leave empty to serve this language from the site domain. The domain must already point at this WordPress installation.', 'localepress' )
+						__( 'Only used when URL behavior is set to a separate domain per language, such as example.fr. Leave empty to serve this language from the site domain. The domain must already point at this WordPress installation.', 'shapetranslate' )
 					);
 					?>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Text direction', 'localepress' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Text direction', 'shapetranslate' ); ?></th>
 						<td>
-							<label for="localepress-is-rtl">
+							<label for="shapetranslate-is-rtl">
 								<input type="hidden" name="language[is_rtl]" value="0">
 								<input
-									id="localepress-is-rtl"
+									id="shapetranslate-is-rtl"
 									type="checkbox"
 									name="language[is_rtl]"
 									value="1"
 									<?php checked( ! empty( $language['is_rtl'] ) ); ?>
 								>
-								<?php esc_html_e( 'Right-to-left (RTL)', 'localepress' ); ?>
+								<?php esc_html_e( 'Right-to-left (RTL)', 'shapetranslate' ); ?>
 							</label>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Status', 'localepress' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Status', 'shapetranslate' ); ?></th>
 						<td>
-							<label for="localepress-enabled">
+							<label for="shapetranslate-enabled">
 								<input
 									type="hidden"
 									name="language[enabled]"
 									value="<?php echo esc_attr( $is_default ? '1' : '0' ); ?>"
 								>
 								<input
-									id="localepress-enabled"
+									id="shapetranslate-enabled"
 									type="checkbox"
 									name="language[enabled]"
 									value="1"
 									<?php checked( ! empty( $language['enabled'] ) ); ?>
 									<?php disabled( $is_default ); ?>
 								>
-								<?php esc_html_e( 'Enabled', 'localepress' ); ?>
+								<?php esc_html_e( 'Enabled', 'shapetranslate' ); ?>
 							</label>
 							<?php if ( $is_default ) : ?>
-								<p class="description"><?php esc_html_e( 'The default language must remain enabled.', 'localepress' ); ?></p>
+								<p class="description"><?php esc_html_e( 'The default language must remain enabled.', 'shapetranslate' ); ?></p>
 							<?php endif; ?>
 						</td>
 					</tr>
@@ -409,18 +409,18 @@ final class LanguagesPage {
 
 			<?php
 			if ( 'edit' === $action ) {
-				$submit_label = __( 'Update Language', 'localepress' );
+				$submit_label = __( 'Update Language', 'shapetranslate' );
 			} elseif ( 'setup' === $action ) {
-				$submit_label = __( 'Save and Continue', 'localepress' );
+				$submit_label = __( 'Save and Continue', 'shapetranslate' );
 			} else {
-				$submit_label = __( 'Add Language', 'localepress' );
+				$submit_label = __( 'Add Language', 'shapetranslate' );
 			}
 
 			submit_button( $submit_label );
 			?>
 			<?php if ( 'setup' !== $action ) : ?>
 				<a class="button button-secondary" href="<?php echo esc_url( $list_url ); ?>">
-					<?php esc_html_e( 'Cancel', 'localepress' ); ?>
+					<?php esc_html_e( 'Cancel', 'shapetranslate' ); ?>
 				</a>
 			<?php endif; ?>
 		</form>
@@ -441,12 +441,12 @@ final class LanguagesPage {
 		?>
 		<tr>
 			<th scope="row">
-				<label for="localepress-language-preset"><?php esc_html_e( 'Choose a language', 'localepress' ); ?></label>
+				<label for="shapetranslate-language-preset"><?php esc_html_e( 'Choose a language', 'shapetranslate' ); ?></label>
 			</th>
 			<td>
-				<div class="localepress-flag-select" data-localepress-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'localepress' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'localepress' ); ?>">
-					<select id="localepress-language-preset" class="regular-text">
-						<option value=""><?php esc_html_e( 'Select a language', 'localepress' ); ?></option>
+				<div class="shapetranslate-flag-select" data-shapetranslate-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'shapetranslate' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'shapetranslate' ); ?>">
+					<select id="shapetranslate-language-preset" class="regular-text">
+						<option value=""><?php esc_html_e( 'Select a language', 'shapetranslate' ); ?></option>
 						<?php foreach ( $catalog as $locale => $language ) : ?>
 							<?php
 							if ( in_array( $locale, $registered_locales, true ) ) {
@@ -475,7 +475,7 @@ final class LanguagesPage {
 					</select>
 				</div>
 				<p class="description">
-					<?php esc_html_e( 'Selecting a preset fills the editable language fields below.', 'localepress' ); ?>
+					<?php esc_html_e( 'Selecting a preset fills the editable language fields below.', 'shapetranslate' ); ?>
 				</p>
 			</td>
 		</tr>
@@ -523,11 +523,11 @@ final class LanguagesPage {
 		?>
 		<tr>
 			<th scope="row">
-				<label for="localepress-<?php echo esc_attr( $field ); ?>"><?php echo esc_html( $label ); ?></label>
+				<label for="shapetranslate-<?php echo esc_attr( $field ); ?>"><?php echo esc_html( $label ); ?></label>
 			</th>
 			<td>
 				<input
-					id="localepress-<?php echo esc_attr( $field ); ?>"
+					id="shapetranslate-<?php echo esc_attr( $field ); ?>"
 					class="regular-text"
 					type="text"
 					name="language[<?php echo esc_attr( $field ); ?>]"
@@ -551,7 +551,7 @@ final class LanguagesPage {
 	 * @param string $class_name  Form classes.
 	 * @return void
 	 */
-	private function render_action_form_start( $action, $language_id, $nonce, $class_name = 'localepress-inline-form' ) {
+	private function render_action_form_start( $action, $language_id, $nonce, $class_name = 'shapetranslate-inline-form' ) {
 		?>
 		<form
 			class="<?php echo esc_attr( $class_name ); ?>"
@@ -590,19 +590,19 @@ final class LanguagesPage {
 	 * @return void
 	 */
 	private function render_move_action( $language_id, $direction, $disabled ) {
-		$label = 'up' === $direction ? __( 'Move up', 'localepress' ) : __( 'Move down', 'localepress' );
+		$label = 'up' === $direction ? __( 'Move up', 'shapetranslate' ) : __( 'Move down', 'shapetranslate' );
 		$icon  = 'up' === $direction ? 'arrow-up-alt2' : 'arrow-down-alt2';
 
 		$this->render_action_form_start(
-			'localepress_move_language',
+			'shapetranslate_move_language',
 			$language_id,
-			'localepress_move_language_' . $language_id
+			'shapetranslate_move_language_' . $language_id
 		);
 		?>
 		<input type="hidden" name="direction" value="<?php echo esc_attr( $direction ); ?>">
 		<button
 			type="submit"
-			class="button localepress-icon-button"
+			class="button shapetranslate-icon-button"
 			title="<?php echo esc_attr( $label ); ?>"
 			<?php disabled( $disabled ); ?>
 		>
@@ -628,14 +628,14 @@ final class LanguagesPage {
 
 		if ( isset( $notices[ $notice_code ] ) ) {
 			printf(
-				'<div class="localepress-notice notice notice-success is-dismissible"><p>%s</p></div>',
+				'<div class="shapetranslate-notice notice notice-success is-dismissible"><p>%s</p></div>',
 				esc_html( $notices[ $notice_code ] )
 			);
 		}
 
 		if ( isset( $errors[ $error_code ] ) ) {
 			printf(
-				'<div class="localepress-notice notice notice-error"><p>%s</p></div>',
+				'<div class="shapetranslate-notice notice notice-error"><p>%s</p></div>',
 				esc_html( $errors[ $error_code ] )
 			);
 		}
@@ -648,13 +648,13 @@ final class LanguagesPage {
 	 */
 	private function notice_messages() {
 		return array(
-			'setup_complete'   => __( 'LocalePress setup is complete.', 'localepress' ),
-			'language_added'   => __( 'Language added.', 'localepress' ),
-			'language_updated' => __( 'Language updated.', 'localepress' ),
-			'language_deleted' => __( 'Language deleted.', 'localepress' ),
-			'default_updated'  => __( 'Default language updated.', 'localepress' ),
-			'status_updated'   => __( 'Language status updated.', 'localepress' ),
-			'order_updated'    => __( 'Language order updated.', 'localepress' ),
+			'setup_complete'   => __( 'ShapeTranslate setup is complete.', 'shapetranslate' ),
+			'language_added'   => __( 'Language added.', 'shapetranslate' ),
+			'language_updated' => __( 'Language updated.', 'shapetranslate' ),
+			'language_deleted' => __( 'Language deleted.', 'shapetranslate' ),
+			'default_updated'  => __( 'Default language updated.', 'shapetranslate' ),
+			'status_updated'   => __( 'Language status updated.', 'shapetranslate' ),
+			'order_updated'    => __( 'Language order updated.', 'shapetranslate' ),
 		);
 	}
 
@@ -665,20 +665,20 @@ final class LanguagesPage {
 	 */
 	private function error_messages() {
 		return array(
-			'missing_name'            => __( 'Language name is required.', 'localepress' ),
-			'missing_native_name'     => __( 'Native name is required.', 'localepress' ),
-			'name_too_long'           => __( 'Language names must be 100 characters or fewer.', 'localepress' ),
-			'invalid_locale'          => __( 'Enter a valid WordPress locale, such as en_US or pt_BR.', 'localepress' ),
-			'invalid_language_code'   => __( 'Language code must contain two or three lowercase letters.', 'localepress' ),
-			'invalid_url_slug'        => __( 'URL slug is required and must be 80 characters or fewer.', 'localepress' ),
-			'duplicate_locale'        => __( 'That locale is already registered.', 'localepress' ),
-			'duplicate_url_slug'      => __( 'That URL slug is already in use.', 'localepress' ),
-			'language_not_found'      => __( 'The requested language could not be found.', 'localepress' ),
-			'default_must_be_enabled' => __( 'Enable a language before making it the default.', 'localepress' ),
-			'cannot_disable_default'  => __( 'The default language cannot be disabled.', 'localepress' ),
-			'invalid_direction'       => __( 'Invalid language ordering direction.', 'localepress' ),
-			'invalid_language_data'   => __( 'Language data is invalid.', 'localepress' ),
-			'language_in_use'         => __( 'This language is assigned to content and cannot be deleted.', 'localepress' ),
+			'missing_name'            => __( 'Language name is required.', 'shapetranslate' ),
+			'missing_native_name'     => __( 'Native name is required.', 'shapetranslate' ),
+			'name_too_long'           => __( 'Language names must be 100 characters or fewer.', 'shapetranslate' ),
+			'invalid_locale'          => __( 'Enter a valid WordPress locale, such as en_US or pt_BR.', 'shapetranslate' ),
+			'invalid_language_code'   => __( 'Language code must contain two or three lowercase letters.', 'shapetranslate' ),
+			'invalid_url_slug'        => __( 'URL slug is required and must be 80 characters or fewer.', 'shapetranslate' ),
+			'duplicate_locale'        => __( 'That locale is already registered.', 'shapetranslate' ),
+			'duplicate_url_slug'      => __( 'That URL slug is already in use.', 'shapetranslate' ),
+			'language_not_found'      => __( 'The requested language could not be found.', 'shapetranslate' ),
+			'default_must_be_enabled' => __( 'Enable a language before making it the default.', 'shapetranslate' ),
+			'cannot_disable_default'  => __( 'The default language cannot be disabled.', 'shapetranslate' ),
+			'invalid_direction'       => __( 'Invalid language ordering direction.', 'shapetranslate' ),
+			'invalid_language_data'   => __( 'Language data is invalid.', 'shapetranslate' ),
+			'language_in_use'         => __( 'This language is assigned to content and cannot be deleted.', 'shapetranslate' ),
 		);
 	}
 }

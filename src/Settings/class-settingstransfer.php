@@ -1,16 +1,16 @@
 <?php
 /**
- * LocalePress settings export and import.
+ * ShapeTranslate settings export and import.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Settings;
+namespace ShapeTranslate\Settings;
 
-use LocalePress\Content\PostTypeSupport;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageHostResolver;
-use LocalePress\Taxonomy\TaxonomySupport;
+use ShapeTranslate\Content\PostTypeSupport;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageHostResolver;
+use ShapeTranslate\Taxonomy\TaxonomySupport;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,7 +25,7 @@ final class SettingsTransfer {
 	 *
 	 * @var string
 	 */
-	const FORMAT = 'localepress-settings';
+	const FORMAT = 'shapetranslate-settings';
 
 	/**
 	 * Maximum accepted JSON size in bytes.
@@ -120,7 +120,7 @@ final class SettingsTransfer {
 		$document = array(
 			'format'         => self::FORMAT,
 			'schema_version' => PluginSettings::SCHEMA_VERSION,
-			'plugin_version' => LOCALEPRESS_VERSION,
+			'plugin_version' => SHAPETRANSLATE_VERSION,
 			'exported_at'    => gmdate( 'c' ),
 			'general'        => array(
 				'default_locale'  => $default_locale,
@@ -131,13 +131,13 @@ final class SettingsTransfer {
 		);
 
 		/**
-		 * Filters a LocalePress settings export document.
+		 * Filters a ShapeTranslate settings export document.
 		 *
 		 * Consumers must preserve the format and schema version fields.
 		 *
 		 * @param array<string, mixed> $document Export document.
 		 */
-		$filtered = apply_filters( 'localepress_settings_export', $document );
+		$filtered = apply_filters( 'shapetranslate_settings_export', $document );
 
 		return is_array( $filtered ) ? $filtered : $document;
 	}
@@ -150,17 +150,17 @@ final class SettingsTransfer {
 	 */
 	public function import_json( $json ) {
 		if ( ! is_string( $json ) || '' === trim( $json ) ) {
-			return new WP_Error( 'empty_import', __( 'Choose a settings file or paste JSON to import.', 'localepress' ) );
+			return new WP_Error( 'empty_import', __( 'Choose a settings file or paste JSON to import.', 'shapetranslate' ) );
 		}
 
 		if ( self::MAX_JSON_BYTES < strlen( $json ) ) {
-			return new WP_Error( 'import_too_large', __( 'The settings file is larger than 1 MB.', 'localepress' ) );
+			return new WP_Error( 'import_too_large', __( 'The settings file is larger than 1 MB.', 'shapetranslate' ) );
 		}
 
 		$document = json_decode( $json, true );
 
 		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $document ) ) {
-			return new WP_Error( 'invalid_json', __( 'The settings file does not contain valid JSON.', 'localepress' ) );
+			return new WP_Error( 'invalid_json', __( 'The settings file does not contain valid JSON.', 'shapetranslate' ) );
 		}
 
 		$validated = $this->validate_document( $document );
@@ -177,14 +177,14 @@ final class SettingsTransfer {
 		 * @param array<string, mixed>|WP_Error $validated Validated document.
 		 * @param array<string, mixed>          $document  Decoded source document.
 		 */
-		$filtered = apply_filters( 'localepress_validated_settings_import', $validated, $document );
+		$filtered = apply_filters( 'shapetranslate_validated_settings_import', $validated, $document );
 
 		if ( is_wp_error( $filtered ) ) {
 			return $filtered;
 		}
 
 		if ( ! is_array( $filtered ) ) {
-			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter returned invalid data.', 'localepress' ) );
+			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter returned invalid data.', 'shapetranslate' ) );
 		}
 
 		if (
@@ -193,7 +193,7 @@ final class SettingsTransfer {
 			|| ! is_array( $filtered['settings'] )
 			|| ! is_array( $filtered['workflow'] )
 		) {
-			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter removed required data.', 'localepress' ) );
+			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter removed required data.', 'shapetranslate' ) );
 		}
 
 		$general  = $this->validate_general( $filtered['general'] );
@@ -201,7 +201,7 @@ final class SettingsTransfer {
 		$workflow = $this->validate_workflow( $filtered['workflow'] );
 
 		if ( is_wp_error( $general ) || is_wp_error( $settings ) || is_wp_error( $workflow ) ) {
-			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter returned data that failed validation.', 'localepress' ) );
+			return new WP_Error( 'invalid_filtered_import', __( 'A settings import filter returned data that failed validation.', 'shapetranslate' ) );
 		}
 
 		$validated             = $filtered;
@@ -227,7 +227,7 @@ final class SettingsTransfer {
 		 * @param array<string, bool>  $result    Import result.
 		 * @param array<string, mixed> $validated Validated document.
 		 */
-		do_action( 'localepress_settings_imported', $result, $validated );
+		do_action( 'shapetranslate_settings_imported', $result, $validated );
 
 		return $result;
 	}
@@ -240,11 +240,11 @@ final class SettingsTransfer {
 	 */
 	private function validate_document( array $document ) {
 		if ( ! isset( $document['format'] ) || self::FORMAT !== $document['format'] ) {
-			return new WP_Error( 'invalid_import_format', __( 'This is not a LocalePress settings export.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_format', __( 'This is not a ShapeTranslate settings export.', 'shapetranslate' ) );
 		}
 
 		if ( ! isset( $document['schema_version'] ) || PluginSettings::SCHEMA_VERSION !== absint( $document['schema_version'] ) ) {
-			return new WP_Error( 'unsupported_import_schema', __( 'This settings schema version is not supported.', 'localepress' ) );
+			return new WP_Error( 'unsupported_import_schema', __( 'This settings schema version is not supported.', 'shapetranslate' ) );
 		}
 
 		if (
@@ -253,7 +253,7 @@ final class SettingsTransfer {
 			|| ! is_array( $document['settings'] )
 			|| ! is_array( $document['workflow'] )
 		) {
-			return new WP_Error( 'incomplete_import', __( 'The settings export is missing required sections.', 'localepress' ) );
+			return new WP_Error( 'incomplete_import', __( 'The settings export is missing required sections.', 'shapetranslate' ) );
 		}
 
 		$general = $this->validate_general( $document['general'] );
@@ -293,7 +293,7 @@ final class SettingsTransfer {
 			|| ! is_string( $general['default_locale'] )
 			|| ! is_array( $general['enabled_locales'] )
 		) {
-			return new WP_Error( 'invalid_import_languages', __( 'The imported language configuration is invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_languages', __( 'The imported language configuration is invalid.', 'shapetranslate' ) );
 		}
 
 		$by_locale = array();
@@ -308,7 +308,7 @@ final class SettingsTransfer {
 			if ( ! is_string( $locale ) || ! isset( $by_locale[ $locale ] ) ) {
 				return new WP_Error(
 					'missing_import_language',
-					__( 'Register every language from the export before importing its settings.', 'localepress' )
+					__( 'Register every language from the export before importing its settings.', 'shapetranslate' )
 				);
 			}
 
@@ -322,7 +322,7 @@ final class SettingsTransfer {
 			|| ! isset( $by_locale[ $general['default_locale'] ] )
 			|| ! in_array( $general['default_locale'], $enabled_locales, true )
 		) {
-			return new WP_Error( 'invalid_import_default', __( 'The imported default language must be registered and enabled.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_default', __( 'The imported default language must be registered and enabled.', 'shapetranslate' ) );
 		}
 
 		return array(
@@ -343,7 +343,7 @@ final class SettingsTransfer {
 
 		foreach ( $required as $section ) {
 			if ( ! isset( $settings[ $section ] ) || ! is_array( $settings[ $section ] ) ) {
-				return new WP_Error( 'invalid_import_settings', __( 'The imported plugin settings are incomplete.', 'localepress' ) );
+				return new WP_Error( 'invalid_import_settings', __( 'The imported plugin settings are incomplete.', 'shapetranslate' ) );
 			}
 		}
 
@@ -358,7 +358,7 @@ final class SettingsTransfer {
 			|| ! in_array( $url['mode'], LanguageHostResolver::modes(), true )
 			|| ! is_bool( $url['prefix_default'] )
 		) {
-			return new WP_Error( 'invalid_import_url', __( 'The imported URL settings are invalid or unsupported.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_url', __( 'The imported URL settings are invalid or unsupported.', 'shapetranslate' ) );
 		}
 
 		$content_result = $this->validate_content_settings( $content );
@@ -373,7 +373,7 @@ final class SettingsTransfer {
 			|| ! $this->valid_enum( $switcher, 'unavailable_behavior', array( 'disabled', 'hide', 'home', 'current' ) )
 			|| ! $this->boolean_keys( $switcher, array( 'hide_current', 'hide_missing', 'show_flags', 'show_disabled' ) )
 		) {
-			return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'shapetranslate' ) );
 		}
 
 		/*
@@ -384,7 +384,7 @@ final class SettingsTransfer {
 		 */
 		if ( isset( $switcher['floater'] ) ) {
 			if ( ! is_array( $switcher['floater'] ) ) {
-				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
+				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'shapetranslate' ) );
 			}
 
 			$floater = $switcher['floater'];
@@ -394,16 +394,16 @@ final class SettingsTransfer {
 				|| ! $this->valid_enum( $floater, 'position', PluginSettings::floater_positions() )
 				|| ! $this->valid_enum( $floater, 'layout', array( 'dropdown', 'horizontal', 'vertical' ) )
 			) {
-				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'localepress' ) );
+				return new WP_Error( 'invalid_import_switcher', __( 'The imported switcher settings are invalid.', 'shapetranslate' ) );
 			}
 		}
 
 		if ( ! $this->boolean_keys( $seo, array( 'hreflang_enabled', 'x_default_enabled' ) ) ) {
-			return new WP_Error( 'invalid_import_seo', __( 'The imported SEO settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_seo', __( 'The imported SEO settings are invalid.', 'shapetranslate' ) );
 		}
 
 		if ( ! $this->boolean_keys( $advanced, array( 'delete_data_on_uninstall' ) ) ) {
-			return new WP_Error( 'invalid_import_advanced', __( 'The imported advanced settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_advanced', __( 'The imported advanced settings are invalid.', 'shapetranslate' ) );
 		}
 
 		return array(
@@ -429,26 +429,26 @@ final class SettingsTransfer {
 			|| ! is_array( $content['post_types'] )
 			|| ! is_array( $content['taxonomies'] )
 		) {
-			return new WP_Error( 'invalid_import_content', __( 'The imported content settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_content', __( 'The imported content settings are invalid.', 'shapetranslate' ) );
 		}
 
 		// Exports written before media translation existed simply keep it off.
 		if ( isset( $content['media_support'] ) && ! is_bool( $content['media_support'] ) ) {
-			return new WP_Error( 'invalid_import_content', __( 'The imported content settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_content', __( 'The imported content settings are invalid.', 'shapetranslate' ) );
 		}
 
 		$post_types = $this->strict_key_list( $content['post_types'] );
 		$taxonomies = $this->strict_key_list( $content['taxonomies'] );
 
 		if ( false === $post_types || false === $taxonomies ) {
-			return new WP_Error( 'invalid_import_content', __( 'The imported content settings contain invalid object names.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_content', __( 'The imported content settings contain invalid object names.', 'shapetranslate' ) );
 		}
 
 		if (
 			! empty( array_diff( $post_types, $this->post_type_support->get_available_post_types() ) )
 			|| ! empty( array_diff( $taxonomies, $this->taxonomy_support->get_available_taxonomies() ) )
 		) {
-			return new WP_Error( 'missing_import_content_type', __( 'A selected post type or taxonomy is not available on this site.', 'localepress' ) );
+			return new WP_Error( 'missing_import_content_type', __( 'A selected post type or taxonomy is not available on this site.', 'shapetranslate' ) );
 		}
 
 		return array(
@@ -468,7 +468,7 @@ final class SettingsTransfer {
 	 */
 	private function validate_workflow( array $workflow ) {
 		if ( ! $this->boolean_keys( $workflow, array_keys( WorkflowSettings::DEFAULTS ) ) ) {
-			return new WP_Error( 'invalid_import_workflow', __( 'The imported translation workflow settings are invalid.', 'localepress' ) );
+			return new WP_Error( 'invalid_import_workflow', __( 'The imported translation workflow settings are invalid.', 'shapetranslate' ) );
 		}
 
 		$validated = array();
@@ -476,7 +476,7 @@ final class SettingsTransfer {
 		// Exports written before an item existed simply fall back to its default.
 		foreach ( WorkflowSettings::defaults() as $key => $default ) {
 			if ( array_key_exists( $key, $workflow ) && ! is_bool( $workflow[ $key ] ) ) {
-				return new WP_Error( 'invalid_import_workflow', __( 'The imported translation workflow settings are invalid.', 'localepress' ) );
+				return new WP_Error( 'invalid_import_workflow', __( 'The imported translation workflow settings are invalid.', 'shapetranslate' ) );
 			}
 
 			$validated[ $key ] = array_key_exists( $key, $workflow ) ? $workflow[ $key ] : $default;

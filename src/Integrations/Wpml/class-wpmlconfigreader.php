@@ -2,10 +2,10 @@
 /**
  * Reader for wpml-config.xml.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Wpml;
+namespace ShapeTranslate\Integrations\Wpml;
 
 use SimpleXMLElement;
 
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * code on either side.
  *
  * Parsing is deliberately separated from applying: this class only turns XML
- * into arrays. WpmlConfigModule decides which of those arrays LocalePress acts
+ * into arrays. WpmlConfigModule decides which of those arrays ShapeTranslate acts
  * on, so a rule the engine cannot honor yet is still parsed and exposed rather
  * than silently dropped.
  */
@@ -31,7 +31,7 @@ final class WpmlConfigReader {
 	 *
 	 * @var string
 	 */
-	const CACHE_GROUP = 'localepress';
+	const CACHE_GROUP = 'shapetranslate';
 
 	/**
 	 * Object cache key holding the parsed rules and their fingerprint.
@@ -94,7 +94,7 @@ final class WpmlConfigReader {
 		 *
 		 * @param array<string, array> $rules Normalized rules.
 		 */
-		$filtered = apply_filters( 'localepress_wpml_config_rules', $this->rules );
+		$filtered = apply_filters( 'shapetranslate_wpml_config_rules', $this->rules );
 
 		if ( is_array( $filtered ) ) {
 			$this->rules = array_merge( $this->empty_rules(), $filtered );
@@ -296,7 +296,7 @@ final class WpmlConfigReader {
 	/**
 	 * Reads block translation rules.
 	 *
-	 * LocalePress has no block string extractor of its own yet, so these rules
+	 * ShapeTranslate has no block string extractor of its own yet, so these rules
 	 * are parsed and exposed rather than applied. Reading them now keeps a file
 	 * that declares both blocks and options useful for its options today.
 	 *

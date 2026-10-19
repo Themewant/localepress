@@ -2,12 +2,12 @@
 /**
  * Plugin activation.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Lifecycle;
+namespace ShapeTranslate\Lifecycle;
 
-use LocalePress\Routing\RoutingModule;
+use ShapeTranslate\Routing\RoutingModule;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,10 +21,10 @@ final class Activator {
 	 *
 	 * @var string
 	 */
-	const SETUP_REDIRECT_TRANSIENT = 'localepress_setup_redirect';
+	const SETUP_REDIRECT_TRANSIENT = 'shapetranslate_setup_redirect';
 
 	/**
-	 * Activates LocalePress.
+	 * Activates ShapeTranslate.
 	 *
 	 * @param bool $network_wide Whether the plugin is being network activated.
 	 * @return void
@@ -32,18 +32,18 @@ final class Activator {
 	public static function activate( $network_wide = false ) {
 		global $wp_version;
 
-		if ( version_compare( PHP_VERSION, LOCALEPRESS_MINIMUM_PHP_VERSION, '<' ) ) {
+		if ( version_compare( PHP_VERSION, SHAPETRANSLATE_MINIMUM_PHP_VERSION, '<' ) ) {
 			wp_die(
-				esc_html__( 'LocalePress could not be activated because the PHP requirement is not met.', 'localepress' ),
-				esc_html__( 'Plugin activation failed', 'localepress' ),
+				esc_html__( 'ShapeTranslate could not be activated because the PHP requirement is not met.', 'shapetranslate' ),
+				esc_html__( 'Plugin activation failed', 'shapetranslate' ),
 				array( 'back_link' => true )
 			);
 		}
 
-		if ( version_compare( $wp_version, LOCALEPRESS_MINIMUM_WP_VERSION, '<' ) ) {
+		if ( version_compare( $wp_version, SHAPETRANSLATE_MINIMUM_WP_VERSION, '<' ) ) {
 			wp_die(
-				esc_html__( 'LocalePress could not be activated because the WordPress requirement is not met.', 'localepress' ),
-				esc_html__( 'Plugin activation failed', 'localepress' ),
+				esc_html__( 'ShapeTranslate could not be activated because the WordPress requirement is not met.', 'shapetranslate' ),
+				esc_html__( 'Plugin activation failed', 'shapetranslate' ),
 				array( 'back_link' => true )
 			);
 		}
@@ -68,6 +68,6 @@ final class Activator {
 			set_transient( self::SETUP_REDIRECT_TRANSIENT, 1, 10 * MINUTE_IN_SECONDS );
 		}
 
-		do_action( 'localepress_activated' );
+		do_action( 'shapetranslate_activated' );
 	}
 }

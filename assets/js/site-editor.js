@@ -11,15 +11,15 @@
  * never reloads, and all three of these operations rename a template, so the
  * address it was opened on stops being true the moment the request succeeds.
  *
- * Plain ES5, like the rest of LocalePress: no build step, and `createElement`
+ * Plain ES5, like the rest of ShapeTranslate: no build step, and `createElement`
  * rather than JSX for the same reason.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function ( wp ) {
 	'use strict';
 
-	var config = window.localePressSiteEditor;
+	var config = window.shapeTranslateSiteEditor;
 
 	if ( ! wp || ! wp.plugins || ! wp.element || ! wp.components || ! config ) {
 		return;
@@ -118,7 +118,7 @@
 	function renderFlag( language ) {
 		if ( language.flagUrl ) {
 			return createElement( 'img', {
-				className: 'localepress-site-editor__flag',
+				className: 'shapetranslate-site-editor__flag',
 				src: language.flagUrl,
 				alt: '',
 				width: 18,
@@ -130,7 +130,7 @@
 
 		return createElement(
 			'abbr',
-			{ className: 'localepress-site-editor__code', title: language.name },
+			{ className: 'shapetranslate-site-editor__code', title: language.name },
 			language.code
 		);
 	}
@@ -232,7 +232,7 @@
 	 * @return {void}
 	 */
 	function rememberEditorLanguage( view ) {
-		var editor = window.localePressEditor;
+		var editor = window.shapeTranslateEditor;
 
 		if ( ! editor ) {
 			return;
@@ -416,7 +416,7 @@
 				/* translators: %s: language name. */
 				__(
 					'Move this to %s? It is renamed to match, so anything that names it by its old name will fall back to the original.',
-					'localepress'
+					'shapetranslate'
 				),
 				language.nativeName
 			);
@@ -434,7 +434,7 @@
 				method: 'POST',
 				data: { slug: view.slug, language: languageId },
 			} ).then( follow, function ( response ) {
-				fail( response, __( 'LocalePress could not change that language.', 'localepress' ) );
+				fail( response, __( 'ShapeTranslate could not change that language.', 'shapetranslate' ) );
 			} );
 		}
 
@@ -453,7 +453,7 @@
 				method: 'POST',
 				data: { slug: view.slug, language: language.id },
 			} ).then( follow, function ( response ) {
-				fail( response, __( 'LocalePress could not create that template.', 'localepress' ) );
+				fail( response, __( 'ShapeTranslate could not create that template.', 'shapetranslate' ) );
 			} );
 		}
 
@@ -476,7 +476,7 @@
 				method: 'POST',
 				data: { slug: view.slug, language: language.id, target: chosen },
 			} ).then( follow, function ( response ) {
-				fail( response, __( 'LocalePress could not link that template.', 'localepress' ) );
+				fail( response, __( 'ShapeTranslate could not link that template.', 'shapetranslate' ) );
 			} );
 		}
 
@@ -489,14 +489,14 @@
 		function deleteTranslation( language ) {
 			var question = sprintf(
 				/* translators: %s: language name. */
-				__( 'Delete the %s version of this? This cannot be undone.', 'localepress' ),
+				__( 'Delete the %s version of this? This cannot be undone.', 'shapetranslate' ),
 				language.nativeName
 			);
 
 			if ( language.isDefault ) {
 				question += '\n\n' + __(
 					'This is the version every other language falls back to, so its translations are deleted with it.',
-					'localepress'
+					'shapetranslate'
 				);
 			}
 
@@ -523,7 +523,7 @@
 					window.location.reload();
 				},
 				function ( response ) {
-					fail( response, __( 'LocalePress could not delete that template.', 'localepress' ) );
+					fail( response, __( 'ShapeTranslate could not delete that template.', 'shapetranslate' ) );
 				}
 			);
 		}
@@ -597,15 +597,15 @@
 
 			return createElement(
 				'div',
-				{ className: 'localepress-site-editor__section' },
-				createElement( 'h2', { className: 'localepress-site-editor__heading' }, __( 'Language', 'localepress' ) ),
+				{ className: 'shapetranslate-site-editor__section' },
+				createElement( 'h2', { className: 'shapetranslate-site-editor__heading' }, __( 'Language', 'shapetranslate' ) ),
 				createElement(
 					'div',
-					{ className: 'localepress-site-editor__current' },
+					{ className: 'shapetranslate-site-editor__current' },
 					renderFlag( current ),
 					createElement( SelectControl, {
-						className: 'localepress-site-editor__select',
-						label: __( 'Language', 'localepress' ),
+						className: 'shapetranslate-site-editor__select',
+						label: __( 'Language', 'shapetranslate' ),
 						hideLabelFromVision: true,
 						value: current.id,
 						options: options,
@@ -616,7 +616,7 @@
 				),
 				view.canMove
 					? null
-					: createElement( 'p', { className: 'localepress-site-editor__empty' }, view.moveNotice )
+					: createElement( 'p', { className: 'shapetranslate-site-editor__empty' }, view.moveNotice )
 			);
 		}
 
@@ -634,8 +634,8 @@
 			if ( ! candidates.length ) {
 				return createElement(
 					'p',
-					{ className: 'localepress-site-editor__empty' },
-					__( 'Nothing here is free to be adopted as a translation.', 'localepress' )
+					{ className: 'shapetranslate-site-editor__empty' },
+					__( 'Nothing here is free to be adopted as a translation.', 'shapetranslate' )
 				);
 			}
 
@@ -647,9 +647,9 @@
 
 			if ( ComboboxControl ) {
 				field = createElement( ComboboxControl, {
-					label: __( 'Search for an existing one', 'localepress' ),
+					label: __( 'Search for an existing one', 'shapetranslate' ),
 					hideLabelFromVision: true,
-					placeholder: __( 'Search for an existing one', 'localepress' ),
+					placeholder: __( 'Search for an existing one', 'shapetranslate' ),
 					value: chosen,
 					options: options,
 					allowReset: false,
@@ -660,10 +660,10 @@
 				} );
 			} else {
 				field = createElement( SelectControl, {
-					label: __( 'Search for an existing one', 'localepress' ),
+					label: __( 'Search for an existing one', 'shapetranslate' ),
 					hideLabelFromVision: true,
 					value: chosen,
-					options: [ { label: __( 'Select one…', 'localepress' ), value: '' } ].concat( options ),
+					options: [ { label: __( 'Select one…', 'shapetranslate' ), value: '' } ].concat( options ),
 					__nextHasNoMarginBottom: true,
 					onChange: function ( value ) {
 						setChosen( value || '' );
@@ -673,7 +673,7 @@
 
 			return createElement(
 				'div',
-				{ className: 'localepress-site-editor__linking' },
+				{ className: 'shapetranslate-site-editor__linking' },
 				field,
 				createElement(
 					Button,
@@ -687,7 +687,7 @@
 					},
 					sprintf(
 						/* translators: %s: language name. */
-						__( 'Use as %s', 'localepress' ),
+						__( 'Use as %s', 'shapetranslate' ),
 						language.nativeName
 					)
 				)
@@ -705,12 +705,12 @@
 			var cells = [
 				createElement(
 					'th',
-					{ key: 'flag', className: 'localepress-site-editor__flag-cell', scope: 'row' },
+					{ key: 'flag', className: 'shapetranslate-site-editor__flag-cell', scope: 'row' },
 					renderFlag( language )
 				),
 				createElement(
 					'td',
-					{ key: 'name', className: 'localepress-site-editor__name-cell' },
+					{ key: 'name', className: 'shapetranslate-site-editor__name-cell' },
 					language.nativeName
 				),
 			];
@@ -724,10 +724,10 @@
 					icon: icon( 'edit' ),
 					href: language.editUrl,
 					disabled: ! language.editUrl,
-					className: 'localepress-site-editor__button is-edit',
+					className: 'shapetranslate-site-editor__button is-edit',
 					label: sprintf(
 						/* translators: %s: language name. */
-						__( 'Edit the %s version', 'localepress' ),
+						__( 'Edit the %s version', 'shapetranslate' ),
 						language.nativeName
 					),
 					showTooltip: true,
@@ -736,10 +736,10 @@
 				action = createElement( Button, {
 					icon: icon( 'plus-alt2' ),
 					disabled: ! view.canManage,
-					className: 'localepress-site-editor__button is-add',
+					className: 'shapetranslate-site-editor__button is-add',
 					label: sprintf(
 						/* translators: %s: language name. */
-						__( 'Add a translation in %s', 'localepress' ),
+						__( 'Add a translation in %s', 'shapetranslate' ),
 						language.nativeName
 					),
 					showTooltip: true,
@@ -750,7 +750,7 @@
 			}
 
 			cells.push(
-				createElement( 'td', { key: 'action', className: 'localepress-site-editor__icon-cell' }, action )
+				createElement( 'td', { key: 'action', className: 'shapetranslate-site-editor__icon-cell' }, action )
 			);
 
 			/*
@@ -761,17 +761,17 @@
 			cells.push(
 				createElement(
 					'td',
-					{ key: 'link', className: 'localepress-site-editor__icon-cell' },
+					{ key: 'link', className: 'shapetranslate-site-editor__icon-cell' },
 					language.slug
 						? null
 						: createElement( Button, {
 								icon: icon( 'admin-links' ),
 								disabled: working || ! view.canManage,
 								isPressed: linking === language.id,
-								className: 'localepress-site-editor__button is-link',
+								className: 'shapetranslate-site-editor__button is-link',
 								label: sprintf(
 									/* translators: %s: language name. */
-									__( 'Use an existing one as the %s version', 'localepress' ),
+									__( 'Use an existing one as the %s version', 'shapetranslate' ),
 									language.nativeName
 								),
 								showTooltip: true,
@@ -785,14 +785,14 @@
 			cells.push(
 				createElement(
 					'td',
-					{ key: 'delete', className: 'localepress-site-editor__icon-cell' },
+					{ key: 'delete', className: 'shapetranslate-site-editor__icon-cell' },
 					createElement( Button, {
 						icon: icon( 'trash' ),
 						disabled: working || ! language.isDeletable || ! view.canManage,
-						className: 'localepress-site-editor__button is-delete',
+						className: 'shapetranslate-site-editor__button is-delete',
 						label: sprintf(
 							/* translators: %s: language name. */
-							__( 'Delete the %s version', 'localepress' ),
+							__( 'Delete the %s version', 'shapetranslate' ),
 							language.nativeName
 						),
 						showTooltip: true,
@@ -806,18 +806,18 @@
 			cells.push(
 				createElement(
 					'td',
-					{ key: 'default', className: 'localepress-site-editor__icon-cell' },
+					{ key: 'default', className: 'shapetranslate-site-editor__icon-cell' },
 					language.isDefault
 						? createElement(
 								'span',
 								{
-									className: 'localepress-site-editor__default',
-									title: __( 'Default language', 'localepress' ),
+									className: 'shapetranslate-site-editor__default',
+									title: __( 'Default language', 'shapetranslate' ),
 								},
 								createElement(
 									'span',
 									{ className: 'screen-reader-text' },
-									__( 'Default language', 'localepress' )
+									__( 'Default language', 'shapetranslate' )
 								)
 						  )
 						: null
@@ -840,7 +840,7 @@
 				row,
 				createElement(
 					'tr',
-					{ className: 'localepress-site-editor__linking-row' },
+					{ className: 'shapetranslate-site-editor__linking-row' },
 					createElement( 'td', { colSpan: 6 }, renderLinking( language ) )
 				)
 			);
@@ -855,14 +855,14 @@
 		if ( loading ) {
 			body = createElement(
 				'p',
-				{ className: 'localepress-site-editor__empty' },
+				{ className: 'shapetranslate-site-editor__empty' },
 				createElement( Spinner, null )
 			);
 		} else if ( ! view.isOpen ) {
 			body = createElement(
 				'p',
-				{ className: 'localepress-site-editor__empty' },
-				__( 'Open a template, a template part, or a menu to see which language it belongs to.', 'localepress' )
+				{ className: 'shapetranslate-site-editor__empty' },
+				__( 'Open a template, a template part, or a menu to see which language it belongs to.', 'shapetranslate' )
 			);
 		} else {
 			body = createElement(
@@ -871,22 +871,22 @@
 				renderCurrent(),
 				createElement(
 					'div',
-					{ className: 'localepress-site-editor__section' },
+					{ className: 'shapetranslate-site-editor__section' },
 					createElement(
 						'h2',
-						{ className: 'localepress-site-editor__heading' },
-						__( 'Translations', 'localepress' )
+						{ className: 'shapetranslate-site-editor__heading' },
+						__( 'Translations', 'shapetranslate' )
 					),
 					others.length
 						? createElement(
 								'table',
-								{ className: 'localepress-site-editor__table' },
+								{ className: 'shapetranslate-site-editor__table' },
 								createElement( 'tbody', null, others.map( renderRow ) )
 						  )
 						: createElement(
 								'p',
-								{ className: 'localepress-site-editor__empty' },
-								__( 'This site publishes one language.', 'localepress' )
+								{ className: 'shapetranslate-site-editor__empty' },
+								__( 'This site publishes one language.', 'shapetranslate' )
 						  )
 				)
 			);
@@ -898,18 +898,18 @@
 			PluginSidebarMoreMenuItem
 				? createElement(
 						PluginSidebarMoreMenuItem,
-						{ target: 'localepress-languages', icon: icon( 'translation' ) },
-						__( 'Languages', 'localepress' )
+						{ target: 'shapetranslate-languages', icon: icon( 'translation' ) },
+						__( 'Languages', 'shapetranslate' )
 				  )
 				: null,
 			createElement(
 				PluginSidebar,
 				{
-					name: 'localepress-languages',
-					title: __( 'Languages', 'localepress' ),
+					name: 'shapetranslate-languages',
+					title: __( 'Languages', 'shapetranslate' ),
 					// Without an icon the sidebar gets no toolbar button of its own.
 					icon: icon( 'translation' ),
-					className: 'localepress-site-editor',
+					className: 'shapetranslate-site-editor',
 				},
 				error
 					? createElement(
@@ -929,7 +929,7 @@
 		);
 	}
 
-	wp.plugins.registerPlugin( 'localepress-site-editor', {
+	wp.plugins.registerPlugin( 'shapetranslate-site-editor', {
 		render: Panel,
 		icon: icon( 'translation' ),
 	} );

@@ -1,31 +1,31 @@
 <?php
 /**
- * LocalePress settings administration module.
+ * ShapeTranslate settings administration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Assets;
-use LocalePress\Content\PostTypeSupport;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Navigation\MenuLanguageManager;
-use LocalePress\Routing\LanguageHostResolver;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Settings\SettingsTransfer;
-use LocalePress\Settings\SyncCatalog;
-use LocalePress\Settings\WorkflowSettings;
-use LocalePress\Taxonomy\TaxonomySupport;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTypeSupport;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Navigation\MenuLanguageManager;
+use ShapeTranslate\Routing\LanguageHostResolver;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Settings\SettingsTransfer;
+use ShapeTranslate\Settings\SyncCatalog;
+use ShapeTranslate\Settings\WorkflowSettings;
+use ShapeTranslate\Taxonomy\TaxonomySupport;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Error;
 use WP_Term;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers and secures the LocalePress settings screen and actions.
+ * Registers and secures the ShapeTranslate settings screen and actions.
  */
 final class SettingsModule implements ModuleInterface {
 
@@ -141,19 +141,19 @@ final class SettingsModule implements ModuleInterface {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'admin_post_localepress_save_settings', array( $this, 'save_settings' ) );
-		add_action( 'admin_post_localepress_export_settings', array( $this, 'export_settings' ) );
-		add_action( 'admin_post_localepress_import_settings', array( $this, 'import_settings' ) );
+		add_action( 'admin_post_shapetranslate_save_settings', array( $this, 'save_settings' ) );
+		add_action( 'admin_post_shapetranslate_export_settings', array( $this, 'export_settings' ) );
+		add_action( 'admin_post_shapetranslate_import_settings', array( $this, 'import_settings' ) );
 	}
 
 	/** Registers the settings submenu. */
 	public function register_menu() {
 		add_submenu_page(
-			'localepress',
-			esc_html__( 'LocalePress Settings', 'localepress' ),
-			esc_html__( 'Settings', 'localepress' ),
+			'shapetranslate',
+			esc_html__( 'ShapeTranslate Settings', 'shapetranslate' ),
+			esc_html__( 'Settings', 'shapetranslate' ),
 			AdminModule::capability(),
-			'localepress-settings',
+			'shapetranslate-settings',
 			array( $this->page, 'render' )
 		);
 	}
@@ -164,17 +164,17 @@ final class SettingsModule implements ModuleInterface {
 	 * @param string $hook_suffix Current page hook.
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		if ( 'localepress_page_localepress-settings' !== $hook_suffix ) {
+		if ( 'shapetranslate_page_shapetranslate-settings' !== $hook_suffix ) {
 			return;
 		}
 
-		wp_enqueue_style( 'localepress-admin', LOCALEPRESS_URL . 'assets/css/admin.css', array(), Assets::version( 'assets/css/admin.css' ) );
-		wp_enqueue_script( 'localepress-admin', LOCALEPRESS_URL . 'assets/js/admin.js', array(), Assets::version( 'assets/js/admin.js' ), true );
+		wp_enqueue_style( 'shapetranslate-admin', SHAPETRANSLATE_URL . 'assets/css/admin.css', array(), Assets::version( 'assets/css/admin.css' ) );
+		wp_enqueue_script( 'shapetranslate-admin', SHAPETRANSLATE_URL . 'assets/js/admin.js', array(), Assets::version( 'assets/js/admin.js' ), true );
 	}
 
 	/** Saves only the active settings tab. */
 	public function save_settings() {
-		$this->authorize( 'localepress_save_settings' );
+		$this->authorize( 'shapetranslate_save_settings' );
 		$tab = $this->posted_tab();
 
 		switch ( $tab ) {
@@ -200,7 +200,7 @@ final class SettingsModule implements ModuleInterface {
 				$result = $this->save_advanced();
 				break;
 			default:
-				$result = new WP_Error( 'invalid_settings_tab', __( 'The requested settings section is invalid.', 'localepress' ) );
+				$result = new WP_Error( 'invalid_settings_tab', __( 'The requested settings section is invalid.', 'shapetranslate' ) );
 		}
 
 		if ( is_wp_error( $result ) ) {
@@ -214,24 +214,24 @@ final class SettingsModule implements ModuleInterface {
 
 	/** Streams a nonce-protected JSON export. */
 	public function export_settings() {
-		$this->authorize( 'localepress_export_settings' );
+		$this->authorize( 'shapetranslate_export_settings' );
 		$json = wp_json_encode( $this->transfer->export(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 
 		if ( false === $json ) {
-			$this->store_error( __( 'LocalePress could not encode the settings export.', 'localepress' ) );
+			$this->store_error( __( 'ShapeTranslate could not encode the settings export.', 'shapetranslate' ) );
 			$this->redirect( 'advanced', 'settings_error' );
 		}
 
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=UTF-8' );
-		header( 'Content-Disposition: attachment; filename="localepress-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
+		header( 'Content-Disposition: attachment; filename="shapetranslate-settings-' . gmdate( 'Y-m-d' ) . '.json"' );
 		echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON download with an explicit content type.
 		exit;
 	}
 
 	/** Imports a validated JSON document. */
 	public function import_settings() {
-		$this->authorize( 'localepress_import_settings' );
+		$this->authorize( 'shapetranslate_import_settings' );
 		$json = $this->get_import_json();
 
 		if ( is_wp_error( $json ) ) {
@@ -277,7 +277,7 @@ final class SettingsModule implements ModuleInterface {
 			|| ! in_array( $default_id, $enabled_ids, true )
 			|| ! empty( array_diff( $enabled_ids, array_keys( $registered ) ) )
 		) {
-			return new WP_Error( 'invalid_language_configuration', __( 'Choose at least one enabled language and make an enabled language the default.', 'localepress' ) );
+			return new WP_Error( 'invalid_language_configuration', __( 'Choose at least one enabled language and make an enabled language the default.', 'shapetranslate' ) );
 		}
 
 		foreach ( $enabled_ids as $language_id ) {
@@ -364,7 +364,7 @@ final class SettingsModule implements ModuleInterface {
 			! empty( array_diff( $post_types, $this->post_type_support->get_available_post_types() ) )
 			|| ! empty( array_diff( $taxonomies, $this->taxonomy_support->get_available_taxonomies() ) )
 		) {
-			return new WP_Error( 'invalid_content_type', __( 'A selected post type or taxonomy is not available.', 'localepress' ) );
+			return new WP_Error( 'invalid_content_type', __( 'A selected post type or taxonomy is not available.', 'shapetranslate' ) );
 		}
 
 		$default_terms = $this->posted_default_terms( $taxonomies_mode, $taxonomies );
@@ -428,11 +428,11 @@ final class SettingsModule implements ModuleInterface {
 				$term = get_term( $term_id, $taxonomy );
 
 				if ( ! is_array( $this->language_manager->find( $language_id ) ) || ! $term instanceof WP_Term ) {
-					return new WP_Error( 'invalid_default_term', __( 'A chosen default term is not available.', 'localepress' ) );
+					return new WP_Error( 'invalid_default_term', __( 'A chosen default term is not available.', 'shapetranslate' ) );
 				}
 
 				if ( $this->term_translations->get_term_language_id( $term_id, $taxonomy ) !== $language_id ) {
-					return new WP_Error( 'invalid_default_term_language', __( 'A default term must belong to the language it is chosen for.', 'localepress' ) );
+					return new WP_Error( 'invalid_default_term_language', __( 'A default term must belong to the language it is chosen for.', 'shapetranslate' ) );
 				}
 
 				$map[ $taxonomy ][ $language_id ] = $term_id;
@@ -539,12 +539,19 @@ final class SettingsModule implements ModuleInterface {
 			)
 		);
 
-		// Reported after the switcher settings are safely stored, so the notice
-		// names the menu problem without the rest of the tab being lost to it.
-		$result = $this->menu_manager->update_configuration( $menu_languages, $menu_locations );
+		/*
+		 * Menu assignments change the theme's menu locations, which WordPress
+		 * keeps behind `edit_theme_options` however the plugin's own capability
+		 * is filtered. A user without it keeps the switcher half of the save.
+		 */
+		if ( current_user_can( 'edit_theme_options' ) ) {
+			// Reported after the switcher settings are safely stored, so the notice
+			// names the menu problem without the rest of the tab being lost to it.
+			$result = $this->menu_manager->update_configuration( $menu_languages, $menu_locations );
 
-		if ( is_wp_error( $result ) ) {
-			return $result;
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
 
 		return array( 'url_changed' => false );
@@ -599,7 +606,7 @@ final class SettingsModule implements ModuleInterface {
 
 			if ( isset( $file['error'] ) && UPLOAD_ERR_NO_FILE !== (int) $file['error'] ) {
 				if ( UPLOAD_ERR_OK !== (int) $file['error'] ) {
-					return new WP_Error( 'settings_upload_failed', __( 'The settings file upload failed.', 'localepress' ) );
+					return new WP_Error( 'settings_upload_failed', __( 'The settings file upload failed.', 'shapetranslate' ) );
 				}
 
 				$name = isset( $file['name'] ) && is_scalar( $file['name'] ) ? sanitize_file_name( wp_unslash( $file['name'] ) ) : '';
@@ -607,18 +614,18 @@ final class SettingsModule implements ModuleInterface {
 				$tmp  = isset( $file['tmp_name'] ) && is_scalar( $file['tmp_name'] ) ? (string) $file['tmp_name'] : '';
 
 				if ( 'json' !== strtolower( pathinfo( $name, PATHINFO_EXTENSION ) ) || 1 > $size || SettingsTransfer::MAX_JSON_BYTES < $size ) {
-					return new WP_Error( 'invalid_settings_file', __( 'Choose a JSON settings file no larger than 1 MB.', 'localepress' ) );
+					return new WP_Error( 'invalid_settings_file', __( 'Choose a JSON settings file no larger than 1 MB.', 'shapetranslate' ) );
 				}
 
 				if ( '' === $tmp || ! is_uploaded_file( $tmp ) ) {
-					return new WP_Error( 'invalid_settings_upload', __( 'WordPress could not verify the uploaded settings file.', 'localepress' ) );
+					return new WP_Error( 'invalid_settings_upload', __( 'WordPress could not verify the uploaded settings file.', 'shapetranslate' ) );
 				}
 
 				// The path is PHP's verified upload temporary file and is never user-controlled.
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 				$json = file_get_contents( $tmp );
 
-				return is_string( $json ) ? $json : new WP_Error( 'settings_file_read_failed', __( 'WordPress could not read the uploaded settings file.', 'localepress' ) );
+				return is_string( $json ) ? $json : new WP_Error( 'settings_file_read_failed', __( 'WordPress could not read the uploaded settings file.', 'shapetranslate' ) );
 			}
 		}
 
@@ -636,7 +643,7 @@ final class SettingsModule implements ModuleInterface {
 	 */
 	private function authorize( $nonce_action ) {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
-			wp_die( esc_html__( 'You are not allowed to manage LocalePress settings.', 'localepress' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to manage ShapeTranslate settings.', 'shapetranslate' ), '', array( 'response' => 403 ) );
 		}
 
 		check_admin_referer( $nonce_action );
@@ -660,7 +667,7 @@ final class SettingsModule implements ModuleInterface {
 	 * @param string $message Error message.
 	 */
 	private function store_error( $message ) {
-		set_transient( 'localepress_settings_error_' . get_current_user_id(), sanitize_text_field( $message ), MINUTE_IN_SECONDS );
+		set_transient( 'shapetranslate_settings_error_' . get_current_user_id(), sanitize_text_field( $message ), MINUTE_IN_SECONDS );
 	}
 
 	/**
@@ -675,9 +682,9 @@ final class SettingsModule implements ModuleInterface {
 		$notice  = in_array( $notice, $allowed, true ) ? $notice : 'settings_error';
 		$url     = add_query_arg(
 			array(
-				'page'               => 'localepress-settings',
+				'page'               => 'shapetranslate-settings',
 				'tab'                => $tab,
-				'localepress_notice' => $notice,
+				'shapetranslate_notice' => $notice,
 			),
 			admin_url( 'admin.php' )
 		);

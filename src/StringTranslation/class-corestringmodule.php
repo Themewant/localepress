@@ -1,14 +1,14 @@
 <?php
 /**
- * Registration of the options LocalePress translates on its own.
+ * Registration of the options ShapeTranslate translates on its own.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -72,7 +72,7 @@ final class CoreStringModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress registers its own catalog of options.
+		 * Filters whether ShapeTranslate registers its own catalog of options.
 		 *
 		 * Turning this off leaves the site title, tagline, date and time
 		 * patterns, and widget values untranslated, and removes them from the
@@ -80,6 +80,6 @@ final class CoreStringModule implements ModuleInterface {
 		 *
 		 * @param bool $enabled Whether the catalog is registered.
 		 */
-		return (bool) apply_filters( 'localepress_register_core_strings', true );
+		return (bool) apply_filters( 'shapetranslate_register_core_strings', true );
 	}
 }

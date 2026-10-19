@@ -2,14 +2,14 @@
 /**
  * Elementor Header & Footer Builder integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\HeaderFooter;
+namespace ShapeTranslate\Integrations\HeaderFooter;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,11 +82,11 @@ final class HeaderFooterModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
 
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_locations' ), 10, 4 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_locations' ), 10, 4 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		add_filter( 'astra_get_display_posts_by_conditions', array( $this, 'filter_matched_templates' ), 10, 2 );
 
@@ -109,7 +109,7 @@ final class HeaderFooterModule implements ModuleInterface {
 	 * headers and footers for every language says so through the filter below,
 	 * which leaves the rest of the module inert on its own.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -126,7 +126,7 @@ final class HeaderFooterModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether builder templates are translatable.
 		 */
-		if ( ! apply_filters( 'localepress_hfe_translate_templates', true ) ) {
+		if ( ! apply_filters( 'shapetranslate_hfe_translate_templates', true ) ) {
 			return $settings;
 		}
 
@@ -263,7 +263,7 @@ final class HeaderFooterModule implements ModuleInterface {
 		 * @param string                   $language_id Language being rendered.
 		 */
 		$selected = apply_filters(
-			'localepress_hfe_matched_templates',
+			'shapetranslate_hfe_matched_templates',
 			$this->templates->select_for_language( $templates, $language_id ),
 			$templates,
 			$language_id
@@ -313,7 +313,7 @@ final class HeaderFooterModule implements ModuleInterface {
 		 */
 		$resolved_id = absint(
 			apply_filters(
-				'localepress_hfe_template_id',
+				'shapetranslate_hfe_template_id',
 				$this->resolved[ $cache_key ],
 				$source_id,
 				$language_id
@@ -353,7 +353,7 @@ final class HeaderFooterModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		return (bool) apply_filters(
-			'localepress_hfe_translate_locations',
+			'shapetranslate_hfe_translate_locations',
 			true,
 			absint( $target_post_id ),
 			(string) $language_id

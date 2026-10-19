@@ -2,12 +2,12 @@
 /**
  * Translatable post type policy.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,7 +25,7 @@ final class PostTypeSupport {
 	 * referenced by ID, so a shared pattern carries one language's text into
 	 * every translation unless the pattern itself is translated. A site that
 	 * wants that adds the post type back through
-	 * `localepress_supported_post_types`.
+	 * `shapetranslate_supported_post_types`.
 	 *
 	 * @var array<int, string>
 	 */
@@ -38,38 +38,38 @@ final class PostTypeSupport {
 	 * types registered as non-public, because nothing should reach them by URL.
 	 * They are still authored content that needs translating, so an integration
 	 * declares them here and then adds them through
-	 * `localepress_supported_post_types` as usual.
+	 * `shapetranslate_supported_post_types` as usual.
 	 *
 	 * @return array<int, string>
 	 */
 	public static function non_public_post_types() {
 		/**
-		 * Filters the non-public post types LocalePress may translate.
+		 * Filters the non-public post types ShapeTranslate may translate.
 		 *
 		 * Adding a post type here only makes it eligible. It still has to be
-		 * returned from `localepress_supported_post_types` to be translated.
+		 * returned from `shapetranslate_supported_post_types` to be translated.
 		 *
 		 * A post type declared here is exempt from the administrative UI
 		 * requirement the public types are held to. That requirement exists so a
-		 * site owner can reach what LocalePress offers to translate, and a type
+		 * site owner can reach what ShapeTranslate offers to translate, and a type
 		 * named here is vouched for by whoever named it: a block theme's template
 		 * parts are edited in the Site Editor rather than through a list table,
 		 * and `show_ui` is false for exactly that reason.
 		 *
 		 * Example, for a header and footer builder:
 		 *
-		 *     add_filter( 'localepress_non_public_post_types', function ( $types ) {
+		 *     add_filter( 'shapetranslate_non_public_post_types', function ( $types ) {
 		 *         $types[] = 'elementor-hf';
 		 *         return $types;
 		 *     } );
-		 *     add_filter( 'localepress_supported_post_types', function ( $types ) {
+		 *     add_filter( 'shapetranslate_supported_post_types', function ( $types ) {
 		 *         $types[] = 'elementor-hf';
 		 *         return $types;
 		 *     } );
 		 *
 		 * @param array<int, string> $post_types Non-public post type names.
 		 */
-		$filtered = apply_filters( 'localepress_non_public_post_types', self::INTERNAL_POST_TYPES );
+		$filtered = apply_filters( 'shapetranslate_non_public_post_types', self::INTERNAL_POST_TYPES );
 
 		if ( ! is_array( $filtered ) ) {
 			return self::INTERNAL_POST_TYPES;
@@ -156,14 +156,14 @@ final class PostTypeSupport {
 		 *
 		 * Returned post types must expose an administrative UI and cannot be
 		 * attachments. Public post types are already present; this is where a site
-		 * adds one of the editorial types LocalePress does not offer on its own,
+		 * adds one of the editorial types ShapeTranslate does not offer on its own,
 		 * such as `wp_block` for synced patterns. Product uses only generic post
 		 * fields in Free.
 		 *
 		 * @param array<int, string>            $post_types Supported post type names.
 		 * @param array<string, \WP_Post_Type> $objects    Public post type objects.
 		 */
-		$filtered   = apply_filters( 'localepress_supported_post_types', $post_types, $objects );
+		$filtered   = apply_filters( 'shapetranslate_supported_post_types', $post_types, $objects );
 		$filtered   = is_array( $filtered ) ? $filtered : $post_types;
 		$non_public = self::non_public_post_types();
 		$supported  = array();

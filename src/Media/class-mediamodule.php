@@ -2,14 +2,14 @@
 /**
  * Media translation module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Media;
+namespace ShapeTranslate\Media;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\CurrentLanguageResolver;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\CurrentLanguageResolver;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -86,10 +86,10 @@ final class MediaModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		add_filter( 'localepress_insert_translation', array( $this, 'insert_media_translation' ), 10, 3 );
-		add_filter( 'localepress_translation_featured_image_id', array( $this, 'translate_featured_image_id' ), 10, 2 );
-		add_filter( 'localepress_translate_post_meta_value', array( $this, 'translate_thumbnail_meta_value' ), 10, 3 );
-		add_filter( 'localepress_copy_post_meta_keys', array( $this, 'add_shared_file_meta_keys' ), 10, 4 );
+		add_filter( 'shapetranslate_insert_translation', array( $this, 'insert_media_translation' ), 10, 3 );
+		add_filter( 'shapetranslate_translation_featured_image_id', array( $this, 'translate_featured_image_id' ), 10, 2 );
+		add_filter( 'shapetranslate_translate_post_meta_value', array( $this, 'translate_thumbnail_meta_value' ), 10, 3 );
+		add_filter( 'shapetranslate_copy_post_meta_keys', array( $this, 'add_shared_file_meta_keys' ), 10, 4 );
 		add_action( 'delete_attachment', array( $this, 'protect_shared_files' ), 5 );
 		add_filter( 'wp_delete_file', array( $this, 'skip_protected_file' ), 5 );
 		add_action( 'added_post_meta', array( $this, 'share_structural_meta' ), 10, 4 );
@@ -320,7 +320,7 @@ final class MediaModule implements ModuleInterface {
 		 * @param int             $object_id Attachment that was edited.
 		 * @param string          $meta_key  Meta key being written.
 		 */
-		$filtered = apply_filters( 'localepress_shared_file_siblings', $siblings, $object_id, $meta_key );
+		$filtered = apply_filters( 'shapetranslate_shared_file_siblings', $siblings, $object_id, $meta_key );
 
 		return is_array( $filtered ) ? array_map( 'absint', $filtered ) : $siblings;
 	}

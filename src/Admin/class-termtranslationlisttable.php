@@ -2,14 +2,14 @@
 /**
  * Term translation list-table integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Term;
 use WP_Term_Query;
 
@@ -94,21 +94,21 @@ final class TermTranslationListTable {
 	 */
 	public function add_columns( $columns ) {
 		$updated            = array();
-		$language_label     = __( 'Language', 'localepress' );
+		$language_label     = __( 'Language', 'shapetranslate' );
 		$translations_label = $this->get_translations_column_label();
 
 		foreach ( $columns as $key => $label ) {
 			$updated[ $key ] = $label;
 
 			if ( 'name' === $key ) {
-				$updated['localepress_language']     = $language_label;
-				$updated['localepress_translations'] = $translations_label;
+				$updated['shapetranslate_language']     = $language_label;
+				$updated['shapetranslate_translations'] = $translations_label;
 			}
 		}
 
-		if ( ! isset( $updated['localepress_language'] ) ) {
-			$updated['localepress_language']     = $language_label;
-			$updated['localepress_translations'] = $translations_label;
+		if ( ! isset( $updated['shapetranslate_language'] ) ) {
+			$updated['shapetranslate_language']     = $language_label;
+			$updated['shapetranslate_translations'] = $translations_label;
 		}
 
 		return $updated;
@@ -125,7 +125,7 @@ final class TermTranslationListTable {
 	 * @return string
 	 */
 	private function get_translations_column_label() {
-		$label = __( 'Translations', 'localepress' );
+		$label = __( 'Translations', 'shapetranslate' );
 		$flags = '';
 
 		foreach ( $this->language_manager->get_languages() as $language ) {
@@ -136,11 +136,11 @@ final class TermTranslationListTable {
 			$flag = $this->flags->get_flag_html( $language );
 
 			$flags .= sprintf(
-				'<span class="localepress-translations-heading-flag" title="%1$s">%2$s</span>',
+				'<span class="shapetranslate-translations-heading-flag" title="%1$s">%2$s</span>',
 				esc_attr( $language['native_name'] ),
 				'' !== $flag
 					? $flag
-					: '<span class="localepress-translation-code">' . esc_html( strtoupper( $language['language_code'] ) ) . '</span>'
+					: '<span class="shapetranslate-translation-code">' . esc_html( strtoupper( $language['language_code'] ) ) . '</span>'
 			);
 		}
 
@@ -149,7 +149,7 @@ final class TermTranslationListTable {
 		}
 
 		return sprintf(
-			'<span class="screen-reader-text">%1$s</span><span class="localepress-translations-heading" aria-hidden="true">%2$s</span>',
+			'<span class="screen-reader-text">%1$s</span><span class="shapetranslate-translations-heading" aria-hidden="true">%2$s</span>',
 			esc_html( $label ),
 			$flags
 		);
@@ -171,11 +171,11 @@ final class TermTranslationListTable {
 			return $content;
 		}
 
-		if ( 'localepress_language' === $column ) {
+		if ( 'shapetranslate_language' === $column ) {
 			return $content . $this->get_language_column( $term_id, $taxonomy );
 		}
 
-		if ( 'localepress_translations' === $column ) {
+		if ( 'shapetranslate_translations' === $column ) {
 			return $content . $this->get_translations_column( $term_id, $taxonomy );
 		}
 
@@ -247,8 +247,8 @@ final class TermTranslationListTable {
 
 		if ( null === $language ) {
 			return sprintf(
-				'<span class="localepress-unassigned">%s</span>',
-				esc_html__( 'Not assigned', 'localepress' )
+				'<span class="shapetranslate-unassigned">%s</span>',
+				esc_html__( 'Not assigned', 'shapetranslate' )
 			);
 		}
 
@@ -259,7 +259,7 @@ final class TermTranslationListTable {
 		 * since "EN" on its own says very little.
 		 */
 		return sprintf(
-			'<span class="localepress-list-language" title="%3$s">%1$s<strong aria-hidden="true">%2$s</strong><span class="screen-reader-text">%4$s</span></span>',
+			'<span class="shapetranslate-list-language" title="%3$s">%1$s<strong aria-hidden="true">%2$s</strong><span class="screen-reader-text">%4$s</span></span>',
 			$this->flags->get_flag_html( $language ),
 			esc_html( strtoupper( $language['language_code'] ) ),
 			esc_attr( $language['native_name'] ),
@@ -281,8 +281,8 @@ final class TermTranslationListTable {
 
 		if ( '' === $current_id || ! $term instanceof WP_Term ) {
 			return sprintf(
-				'<span class="localepress-unassigned">%s</span>',
-				esc_html__( 'Assign language first', 'localepress' )
+				'<span class="shapetranslate-unassigned">%s</span>',
+				esc_html__( 'Assign language first', 'shapetranslate' )
 			);
 		}
 
@@ -303,7 +303,7 @@ final class TermTranslationListTable {
 			}
 		}
 
-		return '<div class="localepress-list-translations">' . implode( '', $states ) . '</div>';
+		return '<div class="shapetranslate-list-translations">' . implode( '', $states ) . '</div>';
 	}
 
 	/**
@@ -320,10 +320,10 @@ final class TermTranslationListTable {
 		$flag   = $this->flags->get_flag_html( $language );
 		$marker = '' !== $flag
 			? $flag
-			: '<span class="localepress-translation-code">' . esc_html( $code ) . '</span>';
+			: '<span class="shapetranslate-translation-code">' . esc_html( $code ) . '</span>';
 		$label  = sprintf(
 			/* translators: %s: native language name. */
-			__( '%s translation', 'localepress' ),
+			__( '%s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
@@ -333,13 +333,13 @@ final class TermTranslationListTable {
 				: '';
 			$edit_label = sprintf(
 				/* translators: %s: language name. */
-				__( 'Edit %s translation', 'localepress' ),
+				__( 'Edit %s translation', 'shapetranslate' ),
 				$language['native_name']
 			);
 
 			if ( '' !== $edit_url && $language['id'] !== $current_id ) {
 				return sprintf(
-					'<a class="localepress-translation-state has-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="localepress-translation-badge dashicons dashicons-edit" aria-hidden="true"></span></a>',
+					'<a class="shapetranslate-translation-state has-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="shapetranslate-translation-badge dashicons dashicons-edit" aria-hidden="true"></span></a>',
 					esc_url( $edit_url ),
 					esc_attr( $edit_label ),
 					$marker
@@ -347,7 +347,7 @@ final class TermTranslationListTable {
 			}
 
 			return sprintf(
-				'<span class="localepress-translation-state has-translation" title="%1$s">%2$s<span class="localepress-translation-badge dashicons dashicons-yes" aria-hidden="true"></span><span class="screen-reader-text">%1$s</span></span>',
+				'<span class="shapetranslate-translation-state has-translation" title="%1$s">%2$s<span class="shapetranslate-translation-badge dashicons dashicons-yes" aria-hidden="true"></span><span class="screen-reader-text">%1$s</span></span>',
 				esc_attr( $label ),
 				$marker
 			);
@@ -359,12 +359,12 @@ final class TermTranslationListTable {
 
 		$add_label = sprintf(
 			/* translators: %s: native language name. */
-			__( 'Add %s translation', 'localepress' ),
+			__( 'Add %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
 		return sprintf(
-			'<a class="localepress-translation-state missing-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="localepress-translation-badge dashicons dashicons-plus-alt2" aria-hidden="true"></span></a>',
+			'<a class="shapetranslate-translation-state missing-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="shapetranslate-translation-badge dashicons dashicons-plus-alt2" aria-hidden="true"></span></a>',
 			esc_url( $this->actions->get_create_url( $term->term_id, $term->taxonomy, $language['id'] ) ),
 			esc_attr( $add_label ),
 			$marker

@@ -2,10 +2,10 @@
 /**
  * Translation workflow settings.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Settings;
+namespace ShapeTranslate\Settings;
 
 use WP_Post;
 
@@ -21,7 +21,7 @@ final class WorkflowSettings {
 	 *
 	 * @var string
 	 */
-	const OPTION_NAME = 'localepress_workflow_settings';
+	const OPTION_NAME = 'shapetranslate_workflow_settings';
 
 	/**
 	 * Copy overrides that have no settings screen.
@@ -83,7 +83,7 @@ final class WorkflowSettings {
 		 *
 		 * @param array<string, bool> $settings Normalized settings.
 		 */
-		$filtered = apply_filters( 'localepress_workflow_settings', $settings );
+		$filtered = apply_filters( 'shapetranslate_workflow_settings', $settings );
 
 		return is_array( $filtered ) ? $this->normalize( $filtered ) : $settings;
 	}
@@ -173,7 +173,7 @@ final class WorkflowSettings {
 		 * @param WP_Post             $source   Source post.
 		 * @param array<string, mixed> $language Target language record.
 		 */
-		$filtered = apply_filters( 'localepress_translation_copy_options', $resolved, $source, $language );
+		$filtered = apply_filters( 'shapetranslate_translation_copy_options', $resolved, $source, $language );
 
 		return is_array( $filtered ) ? $this->normalize( $filtered ) : $resolved;
 	}

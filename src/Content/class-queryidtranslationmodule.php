@@ -2,14 +2,14 @@
 /**
  * Frontend query identifier translation module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Query;
 use WP_Term;
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * `post__in` naming English posts returns an empty German loop.
  *
  * This module rewrites those identifiers to the language being viewed, so code
- * that knows nothing about LocalePress produces the right language anyway.
+ * that knows nothing about ShapeTranslate produces the right language anyway.
  *
  * Only identifiers are translated. Slugs and names stay exactly as they were
  * asked for: the router already maps the routes a visitor can request, and a
@@ -47,7 +47,7 @@ final class QueryIdTranslationModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const SKIP_QUERY_VAR = 'localepress_skip_id_translation';
+	const SKIP_QUERY_VAR = 'shapetranslate_skip_id_translation';
 
 	/**
 	 * Language URL service.
@@ -151,22 +151,22 @@ final class QueryIdTranslationModule implements ModuleInterface {
 		 * it holding the same term three times.
 		 */
 		if (
-			! empty( $args['localepress_skip_language_filter'] )
+			! empty( $args['shapetranslate_skip_language_filter'] )
 			|| ! empty( $args[ self::SKIP_QUERY_VAR ] )
 		) {
 			return $args;
 		}
 
 		/**
-		 * Filters whether LocalePress may translate the identifiers in one term query.
+		 * Filters whether ShapeTranslate may translate the identifiers in one term query.
 		 *
-		 * The counterpart of `localepress_translate_query_ids`, which answers the
+		 * The counterpart of `shapetranslate_translate_query_ids`, which answers the
 		 * same question for a post query.
 		 *
 		 * @param bool                 $translate Whether identifiers should be translated.
 		 * @param array<string, mixed> $args      Term query arguments.
 		 */
-		if ( ! apply_filters( 'localepress_translate_term_query_ids', true, $args ) ) {
+		if ( ! apply_filters( 'shapetranslate_translate_term_query_ids', true, $args ) ) {
 			return $args;
 		}
 
@@ -255,7 +255,7 @@ final class QueryIdTranslationModule implements ModuleInterface {
 			 */
 			|| $query->is_main_query()
 			|| $query->get( 'suppress_filters' )
-			|| $query->get( 'localepress_skip_language_filter' )
+			|| $query->get( 'shapetranslate_skip_language_filter' )
 			|| $query->get( self::SKIP_QUERY_VAR )
 
 			/*
@@ -269,12 +269,12 @@ final class QueryIdTranslationModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress may translate the identifiers in one query.
+		 * Filters whether ShapeTranslate may translate the identifiers in one query.
 		 *
 		 * @param bool     $translate Whether identifiers should be translated.
 		 * @param WP_Query $query     Query being parsed.
 		 */
-		return (bool) apply_filters( 'localepress_translate_query_ids', true, $query );
+		return (bool) apply_filters( 'shapetranslate_translate_query_ids', true, $query );
 	}
 
 	/**

@@ -2,16 +2,16 @@
 /**
  * Language-aware frontend URL service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Content\LanguageQueryConstraint;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\LanguageQueryConstraint;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Term;
 
@@ -27,7 +27,7 @@ final class LanguageUrlManager {
 	 *
 	 * @var string
 	 */
-	const QUERY_VAR = 'localepress_lang';
+	const QUERY_VAR = 'shapetranslate_lang';
 
 	/**
 	 * Query argument that carries the language in query routing mode.
@@ -240,7 +240,7 @@ final class LanguageUrlManager {
 	/**
 	 * Returns the public query argument that names a language in a URL.
 	 *
-	 * The plugin's own `localepress_lang` variable stays available everywhere as
+	 * The plugin's own `shapetranslate_lang` variable stays available everywhere as
 	 * the unambiguous form. This is the short one that goes into visitor-facing
 	 * URLs, so a site whose theme or another plugin already owns `lang` can move
 	 * it without losing the internal one.
@@ -253,7 +253,7 @@ final class LanguageUrlManager {
 		 *
 		 * @param string $variable Public query argument name.
 		 */
-		$variable = apply_filters( 'localepress_public_query_var', self::PUBLIC_QUERY_VAR );
+		$variable = apply_filters( 'shapetranslate_public_query_var', self::PUBLIC_QUERY_VAR );
 		$variable = is_scalar( $variable ) ? sanitize_key( (string) $variable ) : '';
 
 		return '' === $variable ? self::PUBLIC_QUERY_VAR : $variable;
@@ -352,7 +352,7 @@ final class LanguageUrlManager {
 		}
 
 		/*
-		 * A WordPress locale is what a caller outside LocalePress is most likely
+		 * A WordPress locale is what a caller outside ShapeTranslate is most likely
 		 * to have in hand — it is the identifier core itself uses — so a request
 		 * naming `bn_BD` means the same language as one naming `bn`.
 		 */
@@ -459,7 +459,7 @@ final class LanguageUrlManager {
 	}
 
 	/**
-	 * Reports whether LocalePress may own frontend language routes.
+	 * Reports whether ShapeTranslate may own frontend language routes.
 	 *
 	 * Competing multilingual routers are disabled by default because two global
 	 * permalink systems cannot safely own the same request paths.
@@ -468,12 +468,12 @@ final class LanguageUrlManager {
 	 */
 	public function is_frontend_routing_enabled() {
 		/**
-		 * Filters whether LocalePress should register and expose frontend routing.
+		 * Filters whether ShapeTranslate should register and expose frontend routing.
 		 *
 		 * @param bool $enabled Whether frontend routing should be available.
 		 */
 		return (bool) apply_filters(
-			'localepress_enable_frontend_routing',
+			'shapetranslate_enable_frontend_routing',
 			! defined( 'POLYLANG_VERSION' ) && ! defined( 'ICL_SITEPRESS_VERSION' )
 		);
 	}
@@ -506,7 +506,7 @@ final class LanguageUrlManager {
 	 * Points a same-site public URL at one enabled language.
 	 *
 	 * Where the language goes depends on the configured mode: a path prefix, the
-	 * hostname, or a query argument. Existing LocalePress prefixes and arguments
+	 * hostname, or a query argument. Existing ShapeTranslate prefixes and arguments
 	 * are replaced whichever mode wrote them, so a site that changes its mode
 	 * keeps producing one language per URL. Query strings and fragments are
 	 * preserved. Administrative, REST, and WordPress asset paths are ignored.
@@ -850,7 +850,7 @@ final class LanguageUrlManager {
 		 * @param string               $taxonomy  Taxonomy name, or empty for posts.
 		 */
 		$fallback = apply_filters(
-			'localepress_missing_translation_url',
+			'shapetranslate_missing_translation_url',
 			'',
 			absint( $object_id ),
 			$language,
@@ -1023,7 +1023,7 @@ final class LanguageUrlManager {
 		 * @param array<string, mixed> $language   Target language record.
 		 * @param array<int, string>   $post_types Post types the archive lists.
 		 */
-		$hide = (bool) apply_filters( 'localepress_hide_archive_translation_url', $hide, $language, $post_types );
+		$hide = (bool) apply_filters( 'shapetranslate_hide_archive_translation_url', $hide, $language, $post_types );
 
 		return $hide ? '' : $this->prefix_url( $this->get_current_request_url(), $language );
 	}
@@ -1122,7 +1122,7 @@ final class LanguageUrlManager {
 		 * @param bool                 $has      Whether any published post carries this language.
 		 * @param array<string, mixed> $language Language record.
 		 */
-		$has = (bool) apply_filters( 'localepress_language_has_content', $has, $language );
+		$has = (bool) apply_filters( 'shapetranslate_language_has_content', $has, $language );
 
 		$this->language_content[ $language_id ] = $has;
 
@@ -1132,7 +1132,7 @@ final class LanguageUrlManager {
 	/**
 	 * Builds a canonical language URL for a post.
 	 *
-	 * Translation members share the source post's core route. LocalePress does
+	 * Translation members share the source post's core route. ShapeTranslate does
 	 * not translate the stored slug in Phase 4.
 	 *
 	 * @param int|WP_Post $post     Post identifier or object.
@@ -1567,12 +1567,12 @@ final class LanguageUrlManager {
 		 * Filters the query arguments that mark a page builder preview frame.
 		 *
 		 * A builder not listed here announces its preview under its own name and
-		 * can add it, rather than having to disable LocalePress routing.
+		 * can add it, rather than having to disable ShapeTranslate routing.
 		 *
 		 * @param array<int, string> $arguments Query argument names.
 		 */
 		$arguments = apply_filters(
-			'localepress_builder_preview_query_args',
+			'shapetranslate_builder_preview_query_args',
 			array( 'elementor-preview' )
 		);
 
@@ -1650,7 +1650,7 @@ final class LanguageUrlManager {
 		if ( $this->is_builder_preview_request() ) {
 			/** This filter is documented in src/Routing/class-languageurlmanager.php */
 			$arguments = apply_filters(
-				'localepress_builder_preview_query_args',
+				'shapetranslate_builder_preview_query_args',
 				array( 'elementor-preview' )
 			);
 

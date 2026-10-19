@@ -2,13 +2,13 @@
 /**
  * Translation dashboard list table.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\FlagRegistry;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\FlagRegistry;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -81,10 +81,10 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 	) {
 		parent::__construct(
 			array(
-				'singular' => 'localepress_translation',
-				'plural'   => 'localepress_translations',
+				'singular' => 'shapetranslate_translation',
+				'plural'   => 'shapetranslate_translations',
 				'ajax'     => false,
-				'screen'   => 'localepress_page_localepress-translations',
+				'screen'   => 'shapetranslate_page_shapetranslate-translations',
 			)
 		);
 
@@ -106,14 +106,14 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 	 */
 	public function prepare_items() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only table filters.
-		$post_type = isset( $_GET['localepress_post_type'] ) && is_scalar( $_GET['localepress_post_type'] )
-			? sanitize_key( wp_unslash( $_GET['localepress_post_type'] ) )
+		$post_type = isset( $_GET['shapetranslate_post_type'] ) && is_scalar( $_GET['shapetranslate_post_type'] )
+			? sanitize_key( wp_unslash( $_GET['shapetranslate_post_type'] ) )
 			: '';
-		$language  = isset( $_GET['localepress_language'] ) && is_scalar( $_GET['localepress_language'] )
-			? sanitize_text_field( wp_unslash( $_GET['localepress_language'] ) )
+		$language  = isset( $_GET['shapetranslate_language'] ) && is_scalar( $_GET['shapetranslate_language'] )
+			? sanitize_text_field( wp_unslash( $_GET['shapetranslate_language'] ) )
 			: '';
-		$status    = isset( $_GET['localepress_status'] ) && is_scalar( $_GET['localepress_status'] )
-			? sanitize_key( wp_unslash( $_GET['localepress_status'] ) )
+		$status    = isset( $_GET['shapetranslate_status'] ) && is_scalar( $_GET['shapetranslate_status'] )
+			? sanitize_key( wp_unslash( $_GET['shapetranslate_status'] ) )
 			: 'all';
 		$search    = isset( $_GET['s'] ) && is_scalar( $_GET['s'] )
 			? sanitize_text_field( wp_unslash( $_GET['s'] ) )
@@ -126,7 +126,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 			: 'ASC';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		$per_page = $this->get_items_per_page( 'localepress_translations_per_page', 20 );
+		$per_page = $this->get_items_per_page( 'shapetranslate_translations_per_page', 20 );
 		$result   = $this->dashboard_query->query(
 			array(
 				'post_type'   => $post_type,
@@ -170,13 +170,13 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 			$columns['cb'] = '<input type="checkbox" />';
 		}
 
-		$columns['content'] = __( 'Content', 'localepress' );
+		$columns['content'] = __( 'Content', 'shapetranslate' );
 
 		foreach ( $this->languages as $language_id => $language ) {
 			$columns[ 'language_' . $language_id ] = $this->flags->get_flag_html( $language ) . esc_html(
 				sprintf(
 					/* translators: 1: native language name, 2: language code. */
-					_x( '%1$s (%2$s)', 'translation dashboard language heading', 'localepress' ),
+					_x( '%1$s (%2$s)', 'translation dashboard language heading', 'shapetranslate' ),
 					$language['native_name'],
 					strtoupper( $language['language_code'] )
 				)
@@ -200,7 +200,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 	/**
 	 * Returns addon-provided bulk actions.
 	 *
-	 * LocalePress Free intentionally provides no mutating bulk operation.
+	 * ShapeTranslate Free intentionally provides no mutating bulk operation.
 	 *
 	 * @return array<string, string>
 	 */
@@ -208,13 +208,13 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		/**
 		 * Filters translation dashboard bulk actions.
 		 *
-		 * Action callbacks can use the localepress_translation_dashboard_bulk_action
+		 * Action callbacks can use the shapetranslate_translation_dashboard_bulk_action
 		 * hook. The dashboard validates the nonce and edit capability for every row.
 		 *
 		 * @param array<string, string> $actions    Bulk actions keyed by action name.
 		 * @param array<string, mixed>  $query_args Current normalized query arguments.
 		 */
-		$filtered = apply_filters( 'localepress_translation_dashboard_bulk_actions', array(), $this->query_args );
+		$filtered = apply_filters( 'shapetranslate_translation_dashboard_bulk_actions', array(), $this->query_args );
 		$actions  = array();
 
 		if ( ! is_array( $filtered ) ) {
@@ -285,7 +285,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		 * @param array<int, int>      $post_ids   Editable source post IDs.
 		 * @param array<string, mixed> $query_args Current normalized filters.
 		 */
-		do_action( 'localepress_translation_dashboard_bulk_action', $action, $post_ids, $this->query_args );
+		do_action( 'shapetranslate_translation_dashboard_bulk_action', $action, $post_ids, $this->query_args );
 	}
 
 	/**
@@ -299,8 +299,8 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		$title   = get_the_title( $post_id );
 		$label   = sprintf(
 			/* translators: %s: source content title. */
-			__( 'Select %s', 'localepress' ),
-			'' !== $title ? $title : __( '(no title)', 'localepress' )
+			__( 'Select %s', 'shapetranslate' ),
+			'' !== $title ? $title : __( '(no title)', 'shapetranslate' )
 		);
 
 		return sprintf(
@@ -320,10 +320,10 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		$post = get_post( absint( $item['source_post_id'] ) );
 
 		if ( ! $post instanceof WP_Post ) {
-			return esc_html__( 'Content unavailable', 'localepress' );
+			return esc_html__( 'Content unavailable', 'shapetranslate' );
 		}
 
-		$title            = '' !== trim( $post->post_title ) ? $post->post_title : __( '(no title)', 'localepress' );
+		$title            = '' !== trim( $post->post_title ) ? $post->post_title : __( '(no title)', 'shapetranslate' );
 		$edit_url         = get_edit_post_link( $post->ID, '' );
 		$can_edit         = current_user_can( 'edit_post', $post->ID ) && is_string( $edit_url );
 		$post_type_object = get_post_type_object( $post->post_type );
@@ -339,7 +339,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 			$row_actions['edit'] = sprintf(
 				'<a href="%1$s">%2$s</a>',
 				esc_url( $edit_url ),
-				esc_html__( 'Edit', 'localepress' )
+				esc_html__( 'Edit', 'shapetranslate' )
 			);
 		}
 
@@ -347,13 +347,13 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 			$row_actions['view'] = sprintf(
 				'<a href="%1$s">%2$s</a>',
 				esc_url( get_permalink( $post ) ),
-				esc_html__( 'View', 'localepress' )
+				esc_html__( 'View', 'shapetranslate' )
 			);
 		}
 
 		$html  = $title_html;
 		$html .= sprintf(
-			'<div class="localepress-dashboard-content-meta">%1$s &middot; %2$s</div>',
+			'<div class="shapetranslate-dashboard-content-meta">%1$s &middot; %2$s</div>',
 			esc_html( $type_label ),
 			esc_html( $status_label )
 		);
@@ -366,7 +366,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		 * @param array<string, mixed> $item Dashboard row.
 		 * @param WP_Post              $post Source post.
 		 */
-		return apply_filters( 'localepress_translation_dashboard_content_html', $html, $item, $post );
+		return apply_filters( 'shapetranslate_translation_dashboard_content_html', $html, $item, $post );
 	}
 
 	/**
@@ -399,8 +399,8 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 			$html = $this->render_missing_translation( $source, $language );
 		} else {
 			$html = sprintf(
-				'<span class="localepress-dashboard-unavailable" aria-hidden="true">&mdash;</span><span class="screen-reader-text">%s</span>',
-				esc_html__( 'Translation unavailable', 'localepress' )
+				'<span class="shapetranslate-dashboard-unavailable" aria-hidden="true">&mdash;</span><span class="screen-reader-text">%s</span>',
+				esc_html__( 'Translation unavailable', 'shapetranslate' )
 			);
 		}
 
@@ -414,7 +414,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		 * @param string               $column_name Current column name.
 		 */
 		return apply_filters(
-			'localepress_translation_dashboard_cell_html',
+			'shapetranslate_translation_dashboard_cell_html',
 			$html,
 			$item,
 			$language,
@@ -440,12 +440,12 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		$label         = $is_complete
 			? sprintf(
 				/* translators: %s: native language name. */
-				__( '%s translation is complete', 'localepress' ),
+				__( '%s translation is complete', 'shapetranslate' ),
 				$language['native_name']
 			)
 			: sprintf(
 				/* translators: 1: native language name, 2: post status. */
-				__( '%1$s translation: %2$s', 'localepress' ),
+				__( '%1$s translation: %2$s', 'shapetranslate' ),
 				$language['native_name'],
 				$status_label
 			);
@@ -458,7 +458,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 
 		if ( ! $is_trash && current_user_can( 'edit_post', $post->ID ) && is_string( $edit_url ) ) {
 			return sprintf(
-				'<a class="localepress-dashboard-state %1$s" href="%2$s" aria-label="%3$s">%4$s</a>',
+				'<a class="shapetranslate-dashboard-state %1$s" href="%2$s" aria-label="%3$s">%4$s</a>',
 				esc_attr( $class ),
 				esc_url( $edit_url ),
 				esc_attr( $label ),
@@ -467,7 +467,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		}
 
 		return sprintf(
-			'<span class="localepress-dashboard-state %1$s">%2$s</span>',
+			'<span class="shapetranslate-dashboard-state %1$s">%2$s</span>',
 			esc_attr( $class ),
 			$contents
 		);
@@ -483,12 +483,12 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 	private function render_missing_translation( WP_Post $source, $language ) {
 		$label = sprintf(
 			/* translators: %s: native language name. */
-			__( 'Add %s translation', 'localepress' ),
+			__( 'Add %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
 		return sprintf(
-			'<a class="localepress-dashboard-state is-missing" href="%1$s" aria-label="%2$s"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><span class="screen-reader-text">%3$s</span></a>',
+			'<a class="shapetranslate-dashboard-state is-missing" href="%1$s" aria-label="%2$s"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><span class="screen-reader-text">%3$s</span></a>',
 			esc_url( $this->actions->get_create_url( $source->ID, $language['id'] ) ),
 			esc_attr( $label ),
 			esc_html( $label )
@@ -510,16 +510,16 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		$language   = isset( $this->query_args['language_id'] ) ? $this->query_args['language_id'] : '';
 		$status     = isset( $this->query_args['status'] ) ? $this->query_args['status'] : 'all';
 		$status_map = array(
-			'all'       => __( 'All translation statuses', 'localepress' ),
-			'missing'   => __( 'Missing translations', 'localepress' ),
-			'completed' => __( 'Completed translations', 'localepress' ),
-			'draft'     => __( 'Draft translations', 'localepress' ),
+			'all'       => __( 'All translation statuses', 'shapetranslate' ),
+			'missing'   => __( 'Missing translations', 'shapetranslate' ),
+			'completed' => __( 'Completed translations', 'shapetranslate' ),
+			'draft'     => __( 'Draft translations', 'shapetranslate' ),
 		);
 
 		echo '<div class="alignleft actions">';
-		echo '<label class="screen-reader-text" for="localepress-post-type">' . esc_html__( 'Filter by content type', 'localepress' ) . '</label>';
-		echo '<select id="localepress-post-type" name="localepress_post_type">';
-		echo '<option value="">' . esc_html__( 'All content types', 'localepress' ) . '</option>';
+		echo '<label class="screen-reader-text" for="shapetranslate-post-type">' . esc_html__( 'Filter by content type', 'shapetranslate' ) . '</label>';
+		echo '<select id="shapetranslate-post-type" name="shapetranslate_post_type">';
+		echo '<option value="">' . esc_html__( 'All content types', 'shapetranslate' ) . '</option>';
 
 		foreach ( $this->post_types as $post_type_id => $object ) {
 			printf(
@@ -531,9 +531,9 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		}
 
 		echo '</select>';
-		echo '<label class="screen-reader-text" for="localepress-language-filter">' . esc_html__( 'Filter by translation language', 'localepress' ) . '</label>';
-		echo '<select id="localepress-language-filter" name="localepress_language">';
-		echo '<option value="">' . esc_html__( 'All languages', 'localepress' ) . '</option>';
+		echo '<label class="screen-reader-text" for="shapetranslate-language-filter">' . esc_html__( 'Filter by translation language', 'shapetranslate' ) . '</label>';
+		echo '<select id="shapetranslate-language-filter" name="shapetranslate_language">';
+		echo '<option value="">' . esc_html__( 'All languages', 'shapetranslate' ) . '</option>';
 
 		foreach ( $this->languages as $language_id => $language_record ) {
 			printf(
@@ -545,8 +545,8 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		}
 
 		echo '</select>';
-		echo '<label class="screen-reader-text" for="localepress-status-filter">' . esc_html__( 'Filter by translation status', 'localepress' ) . '</label>';
-		echo '<select id="localepress-status-filter" name="localepress_status">';
+		echo '<label class="screen-reader-text" for="shapetranslate-status-filter">' . esc_html__( 'Filter by translation status', 'shapetranslate' ) . '</label>';
+		echo '<select id="shapetranslate-status-filter" name="shapetranslate_status">';
 
 		foreach ( $status_map as $status_id => $status_label ) {
 			printf(
@@ -558,7 +558,7 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 		}
 
 		echo '</select>';
-		submit_button( __( 'Filter', 'localepress' ), '', 'filter_action', false );
+		submit_button( __( 'Filter', 'shapetranslate' ), '', 'filter_action', false );
 		echo '</div>';
 	}
 
@@ -568,6 +568,6 @@ final class TranslationDashboardListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function no_items() {
-		esc_html_e( 'No content matched the current translation filters.', 'localepress' );
+		esc_html_e( 'No content matched the current translation filters.', 'shapetranslate' );
 	}
 }

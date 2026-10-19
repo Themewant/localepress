@@ -2,12 +2,12 @@
 /**
  * Elementor compatibility module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +36,7 @@ final class ElementorModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		add_action( 'localepress_translation_created', array( $this, 'copy_translated_document' ), 10, 5 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_translated_document' ), 10, 5 );
 	}
 
 	/**
@@ -73,7 +73,7 @@ final class ElementorModule implements ModuleInterface {
 		 * @param string               $group_id     Translation group identifier.
 		 */
 		do_action(
-			'localepress_elementor_document_copy_failed',
+			'shapetranslate_elementor_document_copy_failed',
 			$result,
 			absint( $new_post_id ),
 			absint( $source_id ),

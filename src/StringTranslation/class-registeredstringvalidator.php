@@ -2,10 +2,10 @@
 /**
  * Registered string validation.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
 use WP_Error;
 
@@ -53,17 +53,17 @@ final class RegisteredStringValidator {
 		}
 
 		if ( ! is_scalar( $original_string ) ) {
-			return new WP_Error( 'invalid_registered_string', __( 'The original string must be plain text.', 'localepress' ) );
+			return new WP_Error( 'invalid_registered_string', __( 'The original string must be plain text.', 'shapetranslate' ) );
 		}
 
 		$original_string = $this->sanitize_value( (string) $original_string );
 
 		if ( '' === $original_string ) {
-			return new WP_Error( 'empty_registered_string', __( 'The original string cannot be empty.', 'localepress' ) );
+			return new WP_Error( 'empty_registered_string', __( 'The original string cannot be empty.', 'shapetranslate' ) );
 		}
 
 		if ( self::MAX_STRING_LENGTH < strlen( $original_string ) ) {
-			return new WP_Error( 'registered_string_too_long', __( 'The original string is too long.', 'localepress' ) );
+			return new WP_Error( 'registered_string_too_long', __( 'The original string is too long.', 'shapetranslate' ) );
 		}
 
 		$identity['original_string'] = $original_string;
@@ -80,26 +80,26 @@ final class RegisteredStringValidator {
 	 */
 	public function validate_identity( $group, $key ) {
 		if ( ! is_scalar( $group ) || ! is_scalar( $key ) ) {
-			return new WP_Error( 'invalid_string_identity', __( 'String groups and keys must be plain text.', 'localepress' ) );
+			return new WP_Error( 'invalid_string_identity', __( 'String groups and keys must be plain text.', 'shapetranslate' ) );
 		}
 
 		$group = sanitize_text_field( (string) $group );
 		$key   = sanitize_text_field( (string) $key );
 
 		if ( '' === $group ) {
-			return new WP_Error( 'empty_string_group', __( 'A string group is required.', 'localepress' ) );
+			return new WP_Error( 'empty_string_group', __( 'A string group is required.', 'shapetranslate' ) );
 		}
 
 		if ( '' === $key ) {
-			return new WP_Error( 'empty_string_key', __( 'A string key is required.', 'localepress' ) );
+			return new WP_Error( 'empty_string_key', __( 'A string key is required.', 'shapetranslate' ) );
 		}
 
 		if ( self::MAX_GROUP_LENGTH < strlen( $group ) ) {
-			return new WP_Error( 'string_group_too_long', __( 'The string group is too long.', 'localepress' ) );
+			return new WP_Error( 'string_group_too_long', __( 'The string group is too long.', 'shapetranslate' ) );
 		}
 
 		if ( self::MAX_KEY_LENGTH < strlen( $key ) ) {
-			return new WP_Error( 'string_key_too_long', __( 'The string key is too long.', 'localepress' ) );
+			return new WP_Error( 'string_key_too_long', __( 'The string key is too long.', 'shapetranslate' ) );
 		}
 
 		return array(
@@ -116,13 +116,13 @@ final class RegisteredStringValidator {
 	 */
 	public function validate_translation( $translation ) {
 		if ( ! is_scalar( $translation ) ) {
-			return new WP_Error( 'invalid_string_translation', __( 'A translation must be plain text.', 'localepress' ) );
+			return new WP_Error( 'invalid_string_translation', __( 'A translation must be plain text.', 'shapetranslate' ) );
 		}
 
 		$translation = $this->sanitize_value( (string) $translation );
 
 		if ( self::MAX_STRING_LENGTH < strlen( $translation ) ) {
-			return new WP_Error( 'string_translation_too_long', __( 'The translation is too long.', 'localepress' ) );
+			return new WP_Error( 'string_translation_too_long', __( 'The translation is too long.', 'shapetranslate' ) );
 		}
 
 		return $translation;

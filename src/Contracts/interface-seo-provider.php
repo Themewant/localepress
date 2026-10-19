@@ -2,10 +2,10 @@
 /**
  * SEO plugin integration contract.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Contracts;
+namespace ShapeTranslate\Contracts;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -1,9 +1,9 @@
 /**
- * LocalePress language switcher, every placement but the floating one.
+ * ShapeTranslate language switcher, every placement but the floating one.
  *
  * The switcher sits inside a theme's own markup, so this file sets only what
  * it has to and inherits the rest. Everything is scoped to the
- * `localepress-switcher` block, which no other plugin renders.
+ * `shapetranslate-switcher` block, which no other plugin renders.
  *
  * Table of contents
  *
@@ -20,8 +20,8 @@
  * 1. Switcher shell and list
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher {
-	--localepress-switcher-gap: 0.75rem;
+.shapetranslate-switcher {
+	--shapetranslate-switcher-gap: 0.75rem;
 	display: block;
 }
 
@@ -32,28 +32,28 @@
  * normal line-height for the markup it owns.
  */
 
-.localepress-switcher,
-.localepress-switcher__list,
-.localepress-switcher__item,
-.localepress-switcher__link,
-.localepress-switcher__unavailable,
-.localepress-switcher__label,
-.localepress-switcher__dropdown,
-.localepress-switcher__dropdown > summary {
+.shapetranslate-switcher,
+.shapetranslate-switcher__list,
+.shapetranslate-switcher__item,
+.shapetranslate-switcher__link,
+.shapetranslate-switcher__unavailable,
+.shapetranslate-switcher__label,
+.shapetranslate-switcher__dropdown,
+.shapetranslate-switcher__dropdown > summary {
 	line-height: normal;
 }
 
-.localepress-switcher__list {
+.shapetranslate-switcher__list {
 	display: flex;
-	gap: var(--localepress-switcher-gap);
+	gap: var(--shapetranslate-switcher-gap);
 	align-items: center;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.localepress-switcher--vertical .localepress-switcher__list,
-.localepress-switcher--dropdown .localepress-switcher__list {
+.shapetranslate-switcher--vertical .shapetranslate-switcher__list,
+.shapetranslate-switcher--dropdown .shapetranslate-switcher__list {
 	align-items: stretch;
 	flex-direction: column;
 }
@@ -64,9 +64,9 @@
  * 2. Links, labels and focus
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher__link,
-.localepress-switcher__unavailable,
-.localepress-switcher__dropdown > summary {
+.shapetranslate-switcher__link,
+.shapetranslate-switcher__unavailable,
+.shapetranslate-switcher__dropdown > summary {
 	display: inline-flex;
 	gap: 0.4em;
 	align-items: center;
@@ -93,16 +93,16 @@
  * below is untouched, so a keyboard still shows exactly where it is.
  */
 
-.localepress-switcher .localepress-switcher__list a.localepress-switcher__link,
-.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:hover,
-.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:focus,
-.localepress-switcher .localepress-switcher__list a.localepress-switcher__link:visited,
-.localepress-switcher .localepress-switcher__dropdown > summary {
+.shapetranslate-switcher .shapetranslate-switcher__list a.shapetranslate-switcher__link,
+.shapetranslate-switcher .shapetranslate-switcher__list a.shapetranslate-switcher__link:hover,
+.shapetranslate-switcher .shapetranslate-switcher__list a.shapetranslate-switcher__link:focus,
+.shapetranslate-switcher .shapetranslate-switcher__list a.shapetranslate-switcher__link:visited,
+.shapetranslate-switcher .shapetranslate-switcher__dropdown > summary {
 	text-decoration: none;
 }
 
-.localepress-switcher__link:focus-visible,
-.localepress-switcher__dropdown > summary:focus-visible {
+.shapetranslate-switcher__link:focus-visible,
+.shapetranslate-switcher__dropdown > summary:focus-visible {
 	outline: 2px solid currentColor;
 	outline-offset: 3px;
 }
@@ -113,19 +113,19 @@
  * 3. Item states
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher__item.is-unavailable {
+.shapetranslate-switcher__item.is-unavailable {
 	opacity: 0.62;
 }
 
 /* A language that falls back to its home page is a real choice, not a dead one. */
 
-.localepress-switcher__item.has-fallback {
+.shapetranslate-switcher__item.has-fallback {
 	opacity: 1;
 }
 
 /* Announced to assistive technology, never printed beside a language label. */
 
-.localepress-switcher__status {
+.shapetranslate-switcher__status {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -144,7 +144,7 @@
  * 4. Flags
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher__flag {
+.shapetranslate-switcher__flag {
 	width: 1.25em;
 	height: auto;
 	flex: 0 0 auto;
@@ -156,12 +156,12 @@
  * 5. Dropdown
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher__dropdown {
+.shapetranslate-switcher__dropdown {
 	position: relative;
 	display: inline-block;
 }
 
-.localepress-switcher__dropdown > summary {
+.shapetranslate-switcher__dropdown > summary {
 	cursor: pointer;
 	list-style: none;
 }
@@ -172,11 +172,11 @@
  * A rotated border avoids a glyph that a screen reader could announce.
  */
 
-.localepress-switcher__dropdown > summary::-webkit-details-marker {
+.shapetranslate-switcher__dropdown > summary::-webkit-details-marker {
 	display: none;
 }
 
-.localepress-switcher__dropdown > summary::after {
+.shapetranslate-switcher__dropdown > summary::after {
 	content: "";
 	flex: 0 0 auto;
 	width: 0.4em;
@@ -187,7 +187,7 @@
 	transition: transform 0.15s ease;
 }
 
-.localepress-switcher__dropdown[open] > summary::after {
+.shapetranslate-switcher__dropdown[open] > summary::after {
 	transform: translateY(0.1em) rotate(-135deg);
 }
 
@@ -198,7 +198,7 @@
  * is the element carrying `position: relative`.
  */
 
-.localepress-switcher__dropdown[open] > .localepress-switcher__list {
+.shapetranslate-switcher__dropdown[open] > .shapetranslate-switcher__list {
 	position: absolute;
 	z-index: 20;
 	top: calc(100% + 0.35rem);
@@ -214,13 +214,13 @@
 	 * transition, because there is no state to transition from — `details` hides
 	 * the panel outright until it opens.
 	 */
-	animation: localepress-switcher-open 0.14s ease-out;
+	animation: shapetranslate-switcher-open 0.14s ease-out;
 }
 
-@keyframes localepress-switcher-open {
+@keyframes shapetranslate-switcher-open {
 	from {
 		opacity: 0;
-		transform: translateY(var(--localepress-switcher-slide, -0.25rem));
+		transform: translateY(var(--shapetranslate-switcher-slide, -0.25rem));
 	}
 
 	to {
@@ -236,14 +236,14 @@
  * opens downward from the inline start as it always has.
  */
 
-.localepress-switcher__dropdown[data-localepress-drop="up"][open] > .localepress-switcher__list {
+.shapetranslate-switcher__dropdown[data-shapetranslate-drop="up"][open] > .shapetranslate-switcher__list {
 	top: auto;
 	bottom: calc(100% + 0.35rem);
 	/* Slides down out of the summary instead of up out of it. */
-	--localepress-switcher-slide: 0.25rem;
+	--shapetranslate-switcher-slide: 0.25rem;
 }
 
-.localepress-switcher__dropdown[data-localepress-align="end"][open] > .localepress-switcher__list {
+.shapetranslate-switcher__dropdown[data-shapetranslate-align="end"][open] > .shapetranslate-switcher__list {
 	inset-inline-start: auto;
 	inset-inline-end: 0;
 }
@@ -254,7 +254,7 @@
  * 6. Screen reader text and menu integration
  * ------------------------------------------------------------------------ */
 
-.localepress-switcher .screen-reader-text {
+.shapetranslate-switcher .screen-reader-text {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -274,7 +274,7 @@
  * them to the anchor as the single word the rest of the menu is made of.
  */
 
-.localepress-switcher__content {
+.shapetranslate-switcher__content {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4em;
@@ -293,13 +293,13 @@
 /* Reduced motion. */
 
 @media (prefers-reduced-motion: reduce) {
-	.localepress-switcher__dropdown > summary::after {
+	.shapetranslate-switcher__dropdown > summary::after {
 		transition: none;
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.localepress-switcher__dropdown[open] > .localepress-switcher__list {
+	.shapetranslate-switcher__dropdown[open] > .shapetranslate-switcher__list {
 		animation: none;
 	}
 }

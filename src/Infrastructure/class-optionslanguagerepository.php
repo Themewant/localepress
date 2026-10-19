@@ -2,12 +2,12 @@
 /**
  * Options API language repository.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Infrastructure;
+namespace ShapeTranslate\Infrastructure;
 
-use LocalePress\Contracts\LanguageRepositoryInterface;
+use ShapeTranslate\Contracts\LanguageRepositoryInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,7 +35,7 @@ final class OptionsLanguageRepository implements LanguageRepositoryInterface {
 	 *
 	 * @var string
 	 */
-	const OPTION_NAME = 'localepress_language_registry';
+	const OPTION_NAME = 'shapetranslate_language_registry';
 
 	/**
 	 * Current registry schema version.

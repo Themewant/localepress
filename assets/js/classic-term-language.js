@@ -15,7 +15,7 @@
 ( function () {
 	'use strict';
 
-	var FIELD_NAME = 'localepress_term_language_id';
+	var FIELD_NAME = 'shapetranslate_term_language_id';
 
 	/**
 	 * Returns the language select rendered by the Language meta box.
@@ -23,7 +23,7 @@
 	 * @return {HTMLSelectElement|null} Language select, or null when absent.
 	 */
 	function getLanguageSelect() {
-		return document.getElementById( 'localepress-post-language' );
+		return document.getElementById( 'shapetranslate-post-language' );
 	}
 
 	/**

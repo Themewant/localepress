@@ -2,10 +2,10 @@
 /**
  * Language-aware wrapper around a core sitemap provider.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\SEO;
+namespace ShapeTranslate\SEO;
 
 use WP_Sitemaps_Provider;
 
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * knowing that languages exist.
  *
  * Only the post and taxonomy providers are wrapped. They are the two whose
- * queries LocalePress can scope; wrapping one it cannot would advertise several
+ * queries ShapeTranslate can scope; wrapping one it cannot would advertise several
  * sitemaps that all answer with the same URLs.
  */
 final class SitemapLanguageProvider extends WP_Sitemaps_Provider {
@@ -35,7 +35,7 @@ final class SitemapLanguageProvider extends WP_Sitemaps_Provider {
 	 * unmistakable rather than short: a post type may contain a dash and so may
 	 * a language slug, and splitting on either would take the wrong half.
 	 */
-	const SEPARATOR = '--localepress-language--';
+	const SEPARATOR = '--shapetranslate-language--';
 
 	/**
 	 * Wrapped core provider.

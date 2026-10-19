@@ -18,14 +18,14 @@
 ( function () {
 	'use strict';
 
-	var settings = window.localePressJegKit;
+	var settings = window.shapeTranslateJegKit;
 
 	if ( ! settings || ! settings.templates || ! window.wp || ! window.wp.apiFetch ) {
 		return;
 	}
 
 	var LIST_ROUTE = 'jkit/v1/getTemplateLists';
-	var CHIP_CLASS = 'localepress-jkit-language';
+	var CHIP_CLASS = 'shapetranslate-jkit-language';
 	var ROOT_ID = 'jkit-admin-dashboard';
 
 	/**
@@ -40,7 +40,7 @@
 		'jkit/v1/updateTemplateStatus'
 	];
 
-	var payloadKey = settings.payloadKey || 'localepress';
+	var payloadKey = settings.payloadKey || 'shapetranslate';
 	var postTypes = settings.postTypes || [];
 	var listRoute = settings.listRoute || '/' + LIST_ROUTE;
 	var labelFormat = settings.labelFormat || '%s';

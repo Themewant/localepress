@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: LocalePress 1.0.0\n"
+"Project-Id-Version: ShapeTranslate 1.0.0\n"
 "Report-Msgid-Bugs-To: https://shapekode.com/\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,33 +12,33 @@ msgstr ""
 "POT-Creation-Date: 2026-09-16T12:07:04+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: localepress\n"
+"X-Domain: shapetranslate\n"
 
 #. Plugin Name of the plugin
-#: localepress.php
+#: shapetranslate.php
 #: src/Admin/class-adminmodule.php:130
 #: src/Integrations/Elementor/class-elementorwidgetmodule.php:56
 #: src/Switcher/class-navigationmenuintegration.php:83
-msgid "LocalePress"
+msgid "ShapeTranslate"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: localepress.php
+#: shapetranslate.php
 msgid "https://shapekode.com/"
 msgstr ""
 
 #. Description of the plugin
-#: localepress.php
+#: shapetranslate.php
 msgid "A lightweight multilingual foundation for WordPress."
 msgstr ""
 
 #. Author of the plugin
-#: localepress.php
+#: shapetranslate.php
 msgid "ShapeKode"
 msgstr ""
 
 #. Author URI of the plugin
-#: localepress.php
+#: shapetranslate.php
 msgid "https://profiles.wordpress.org/shapekode22/"
 msgstr ""
 
@@ -51,27 +51,27 @@ msgid "Provide at least one object keyed by language."
 msgstr ""
 
 #: includes/api.php:857
-msgid "LocalePress is not available yet. Call this on init or later."
+msgid "ShapeTranslate is not available yet. Call this on init or later."
 msgstr ""
 
 #: includes/api.php:871
-msgid "That language is not registered in LocalePress."
+msgid "That language is not registered in ShapeTranslate."
 msgstr ""
 
 #: includes/functions.php:27
-msgid "Register LocalePress strings on init or later."
+msgid "Register ShapeTranslate strings on init or later."
 msgstr ""
 
 #. translators: 1: required PHP version, 2: current PHP version.
-#: localepress.php:37
+#: shapetranslate.php:37
 #, php-format
-msgid "LocalePress requires PHP %1$s or newer. This site is running PHP %2$s."
+msgid "ShapeTranslate requires PHP %1$s or newer. This site is running PHP %2$s."
 msgstr ""
 
 #. translators: 1: required WordPress version, 2: current WordPress version.
-#: localepress.php:93
+#: shapetranslate.php:93
 #, php-format
-msgid "LocalePress requires WordPress %1$s or newer. This site is running WordPress %2$s."
+msgid "ShapeTranslate requires WordPress %1$s or newer. This site is running WordPress %2$s."
 msgstr ""
 
 #: src/Admin/class-adminlanguagefiltermodule.php:171
@@ -83,12 +83,12 @@ msgid "Filters content by language"
 msgstr ""
 
 #: src/Admin/class-adminmodule.php:129
-msgid "LocalePress Languages"
+msgid "ShapeTranslate Languages"
 msgstr ""
 
 #: src/Admin/class-adminmodule.php:256
 #: src/Admin/class-languagespage.php:62
-msgid "You are not allowed to manage LocalePress languages."
+msgid "You are not allowed to manage ShapeTranslate languages."
 msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:130
@@ -114,7 +114,7 @@ msgid "Translated draft created and linked."
 msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:262
-msgid "LocalePress could not complete the translation action."
+msgid "ShapeTranslate could not complete the translation action."
 msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:314
@@ -124,7 +124,7 @@ msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:315
 #: src/Content/class-posttranslationmanager.php:887
-msgid "That post type is not supported by LocalePress."
+msgid "That post type is not supported by ShapeTranslate."
 msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:316
@@ -175,7 +175,7 @@ msgstr ""
 
 #: src/Admin/class-contenttranslationmodule.php:325
 #: src/Content/class-posttranslationmanager.php:1048
-msgid "LocalePress could not save the translation relationship."
+msgid "ShapeTranslate could not save the translation relationship."
 msgstr ""
 
 #: src/Admin/class-languagespage.php:103
@@ -300,7 +300,7 @@ msgstr ""
 #: src/Admin/class-languagespage.php:299
 #: src/Admin/class-setupwizardmodule.php:80
 #: src/Admin/class-setupwizardpage.php:75
-msgid "Set Up LocalePress"
+msgid "Set Up ShapeTranslate"
 msgstr ""
 
 #: src/Admin/class-languagespage.php:327
@@ -420,7 +420,7 @@ msgstr ""
 
 #: src/Admin/class-languagespage.php:651
 #: src/Admin/class-setupwizardpage.php:436
-msgid "LocalePress setup is complete."
+msgid "ShapeTranslate setup is complete."
 msgstr ""
 
 #: src/Admin/class-languagespage.php:652
@@ -519,7 +519,7 @@ msgstr ""
 
 #: src/Admin/class-settingsmodule.php:153
 #: src/Admin/class-settingspage.php:131
-msgid "LocalePress Settings"
+msgid "ShapeTranslate Settings"
 msgstr ""
 
 #: src/Admin/class-settingsmodule.php:154
@@ -532,7 +532,7 @@ msgid "The requested settings section is invalid."
 msgstr ""
 
 #: src/Admin/class-settingsmodule.php:221
-msgid "LocalePress could not encode the settings export."
+msgid "ShapeTranslate could not encode the settings export."
 msgstr ""
 
 #: src/Admin/class-settingsmodule.php:280
@@ -569,7 +569,7 @@ msgstr ""
 
 #: src/Admin/class-settingsmodule.php:638
 #: src/Admin/class-settingspage.php:125
-msgid "You are not allowed to manage LocalePress settings."
+msgid "You are not allowed to manage ShapeTranslate settings."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:140
@@ -582,7 +582,7 @@ msgid "General"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:171
-msgid "Add a language before configuring LocalePress."
+msgid "Add a language before configuring ShapeTranslate."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:172
@@ -704,7 +704,7 @@ msgid "Applies only to the site home page when no language is in the URL. A shar
 msgstr ""
 
 #: src/Admin/class-settingspage.php:302
-msgid "The home page is the one address detection makes reader-dependent, so LocalePress marks it uncacheable and declares what it varies on. Page cache plugins read that; no other page is affected."
+msgid "The home page is the one address detection makes reader-dependent, so ShapeTranslate marks it uncacheable and declares what it varies on. Page cache plugins read that; no other page is affected."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:302
@@ -1037,11 +1037,11 @@ msgid "Uninstall behavior"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:589
-msgid "Enabling this option will permanently delete LocalePress data when the plugin is uninstalled. Continue?"
+msgid "Enabling this option will permanently delete ShapeTranslate data when the plugin is uninstalled. Continue?"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:589
-msgid "Delete all LocalePress data when the plugin is uninstalled"
+msgid "Delete all ShapeTranslate data when the plugin is uninstalled"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:590
@@ -1149,11 +1149,11 @@ msgid "Use WordPress default"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:835
-msgid "LocalePress settings sections"
+msgid "ShapeTranslate settings sections"
 msgstr ""
 
 #: src/Admin/class-settingspage.php:860
-msgid "LocalePress settings saved."
+msgid "ShapeTranslate settings saved."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:861
@@ -1161,7 +1161,7 @@ msgid "URL behavior changed. Review public links and clear page or CDN caches."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:862
-msgid "LocalePress settings imported."
+msgid "ShapeTranslate settings imported."
 msgstr ""
 
 #: src/Admin/class-settingspage.php:863
@@ -1169,7 +1169,7 @@ msgid "Settings imported and URL behavior changed. Review public links and clear
 msgstr ""
 
 #: src/Admin/class-settingspage.php:870
-msgid "LocalePress could not save these settings."
+msgid "ShapeTranslate could not save these settings."
 msgstr ""
 
 #: src/Admin/class-setupwizardmodule.php:81
@@ -1179,7 +1179,7 @@ msgstr ""
 #: src/Admin/class-setupwizardmodule.php:105
 #: src/Admin/class-setupwizardmodule.php:133
 #: src/Admin/class-setupwizardpage.php:69
-msgid "You are not allowed to set up LocalePress."
+msgid "You are not allowed to set up ShapeTranslate."
 msgstr ""
 
 #: src/Admin/class-setupwizardmodule.php:163
@@ -1201,7 +1201,7 @@ msgid "Language switcher"
 msgstr ""
 
 #: src/Admin/class-setupwizardmodule.php:454
-msgid "Choose a language from the LocalePress catalog."
+msgid "Choose a language from the ShapeTranslate catalog."
 msgstr ""
 
 #: src/Admin/class-setupwizardmodule.php:458
@@ -1366,7 +1366,7 @@ msgid "Finish"
 msgstr ""
 
 #: src/Admin/class-setupwizardpage.php:434
-msgid "LocalePress could not save this setup step."
+msgid "ShapeTranslate could not save this setup step."
 msgstr ""
 
 #: src/Admin/class-stringtranslationlisttable.php:145
@@ -1396,7 +1396,7 @@ msgid "No registered strings matched the current filters."
 msgstr ""
 
 #: src/Admin/class-stringtranslationmodule.php:72
-msgid "LocalePress String Translation"
+msgid "ShapeTranslate String Translation"
 msgstr ""
 
 #: src/Admin/class-stringtranslationmodule.php:73
@@ -1526,7 +1526,7 @@ msgid "Translated term created and linked."
 msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:304
-msgid "LocalePress could not complete the term translation action."
+msgid "ShapeTranslate could not complete the term translation action."
 msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:475
@@ -1536,7 +1536,7 @@ msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:476
 #: src/Taxonomy/class-termtranslationmanager.php:968
-msgid "That taxonomy is not supported by LocalePress."
+msgid "That taxonomy is not supported by ShapeTranslate."
 msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:479
@@ -1562,7 +1562,7 @@ msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:484
 #: src/Taxonomy/class-termtranslationmanager.php:1212
-msgid "LocalePress could not save the term translation relationship."
+msgid "ShapeTranslate could not save the term translation relationship."
 msgstr ""
 
 #: src/Admin/class-termtranslationmodule.php:485
@@ -1649,7 +1649,7 @@ msgid "No content matched the current translation filters."
 msgstr ""
 
 #: src/Admin/class-translationdashboardmodule.php:73
-msgid "LocalePress Translations"
+msgid "ShapeTranslate Translations"
 msgstr ""
 
 #: src/Admin/class-translationdashboardmodule.php:94
@@ -1866,7 +1866,7 @@ msgid "That domain is already in use."
 msgstr ""
 
 #: src/Lifecycle/class-activator.php:37
-msgid "LocalePress could not be activated because the PHP requirement is not met."
+msgid "ShapeTranslate could not be activated because the PHP requirement is not met."
 msgstr ""
 
 #: src/Lifecycle/class-activator.php:38
@@ -1875,7 +1875,7 @@ msgid "Plugin activation failed"
 msgstr ""
 
 #: src/Lifecycle/class-activator.php:45
-msgid "LocalePress could not be activated because the WordPress requirement is not met."
+msgid "ShapeTranslate could not be activated because the WordPress requirement is not met."
 msgstr ""
 
 #: src/Media/class-mediatranslationmanager.php:67
@@ -1939,7 +1939,7 @@ msgid "A settings import filter returned data that failed validation."
 msgstr ""
 
 #: src/Settings/class-settingstransfer.php:243
-msgid "This is not a LocalePress settings export."
+msgid "This is not a ShapeTranslate settings export."
 msgstr ""
 
 #: src/Settings/class-settingstransfer.php:247
@@ -2212,7 +2212,7 @@ msgid "What a language does on a page it has no translation of."
 msgstr ""
 
 #: blocks/navigation-language-switcher/index.js:53
-msgid "Add languages in LocalePress to preview the switcher."
+msgid "Add languages in ShapeTranslate to preview the switcher."
 msgstr ""
 
 #: blocks/navigation-language-switcher/index.js:90
@@ -2255,7 +2255,7 @@ msgstr ""
 
 #: blocks/language-switcher/block.json
 msgctxt "block description"
-msgid "Display links to available LocalePress languages."
+msgid "Display links to available ShapeTranslate languages."
 msgstr ""
 
 #: blocks/navigation-language-switcher/block.json

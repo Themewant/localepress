@@ -2,14 +2,14 @@
 /**
  * Jeg Kit for Elementor header and footer language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\JegKit;
+namespace ShapeTranslate\Integrations\JegKit;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Term;
 
 defined( 'ABSPATH' ) || exit;
@@ -157,7 +157,7 @@ final class JegKitTemplates {
 		/*
 		 * The constant, not the builder's own class. Jeg Kit registers its
 		 * autoloader and builds the header and footer service on `plugins_loaded`
-		 * at priority 99, long after LocalePress composes its modules, so asking
+		 * at priority 99, long after ShapeTranslate composes its modules, so asking
 		 * for a class of the builder's here answers no on every site that has it.
 		 * The constant is defined as the plugin file is read, which is before any
 		 * of this; what it cannot promise is that the builder loaded, and
@@ -170,7 +170,7 @@ final class JegKitTemplates {
 		 *
 		 * @param bool $available Whether the Jeg Kit plugin is present.
 		 */
-		return (bool) apply_filters( 'localepress_jegkit_available', $available );
+		return (bool) apply_filters( 'shapetranslate_jegkit_available', $available );
 	}
 
 	/**

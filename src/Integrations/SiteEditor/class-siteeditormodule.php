@@ -2,13 +2,13 @@
 /**
  * WordPress Site Editor integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Block_Type;
 use WP_Query;
 
@@ -67,20 +67,20 @@ final class SiteEditorModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_non_public_post_types', array( $this, 'declare_post_type' ) );
-		add_filter( 'localepress_supported_post_types', array( $this, 'support_post_type' ) );
-		add_filter( 'localepress_settings', array( $this, 'enable_part_translation' ) );
+		add_filter( 'shapetranslate_non_public_post_types', array( $this, 'declare_post_type' ) );
+		add_filter( 'shapetranslate_supported_post_types', array( $this, 'support_post_type' ) );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_part_translation' ) );
 
 		add_action( 'pre_get_posts', array( $this, 'resolve_template_part_query' ), 10000 );
-		add_filter( 'localepress_language_rest_routes', array( $this, 'keep_parts_unfiltered' ) );
-		add_filter( 'localepress_editor_language_id', array( $this, 'answer_editor_language' ), 10, 2 );
+		add_filter( 'shapetranslate_language_rest_routes', array( $this, 'keep_parts_unfiltered' ) );
+		add_filter( 'shapetranslate_editor_language_id', array( $this, 'answer_editor_language' ), 10, 2 );
 		add_filter( 'get_block_type_variations', array( $this, 'hide_translated_variations' ), 10, 2 );
 	}
 
 	/**
 	 * Declares the template part post type eligible for translation.
 	 *
-	 * @param mixed $post_types Post types LocalePress may translate.
+	 * @param mixed $post_types Post types ShapeTranslate may translate.
 	 * @return mixed
 	 */
 	public function declare_post_type( $post_types ) {
@@ -117,7 +117,7 @@ final class SiteEditorModule implements ModuleInterface {
 	 * selected because until it is, nothing else in this module has anything to
 	 * work with: parts carry no language, so there is nothing to resolve.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_part_translation( $settings ) {
@@ -148,7 +148,7 @@ final class SiteEditorModule implements ModuleInterface {
 	 * and the query takes one row, so a part that has no translation returns the
 	 * one the template named without a second query ever running.
 	 *
-	 * The language constraint LocalePress applies to ordinary content is turned
+	 * The language constraint ShapeTranslate applies to ordinary content is turned
 	 * off for this query. It would answer with nothing at all for a part in
 	 * another language, and nothing is a missing header rather than a fallback.
 	 *
@@ -162,9 +162,9 @@ final class SiteEditorModule implements ModuleInterface {
 
 		// Whatever this query answers, it answers about one named part, so the
 		// language must never be allowed to remove it.
-		$query->set( 'localepress_skip_language_filter', true );
+		$query->set( 'shapetranslate_skip_language_filter', true );
 
-		if ( $query->get( 'localepress_exact_part' ) ) {
+		if ( $query->get( 'shapetranslate_exact_part' ) ) {
 			return;
 		}
 
@@ -207,7 +207,7 @@ final class SiteEditorModule implements ModuleInterface {
 		 * @param array<int, string> $requested   Names the template asked for.
 		 * @param string             $language_id Language being rendered.
 		 */
-		$slugs = apply_filters( 'localepress_template_part_slugs', $slugs, $requested, $language_id );
+		$slugs = apply_filters( 'shapetranslate_template_part_slugs', $slugs, $requested, $language_id );
 
 		if ( ! is_array( $slugs ) || empty( $slugs ) ) {
 			return;
@@ -270,11 +270,11 @@ final class SiteEditorModule implements ModuleInterface {
 	/**
 	 * Offers the Site Editor's listings what has not been translated yet.
 	 *
-	 * Not hooked up. It is what `localepress_editor_language_fallback` does when
+	 * Not hooked up. It is what `shapetranslate_editor_language_fallback` does when
 	 * a site turns it on, and it is kept here because the reasoning is worth
 	 * keeping with the code that would act on it:
 	 *
-	 *     add_filter( 'localepress_editor_language_fallback', array(
+	 *     add_filter( 'shapetranslate_editor_language_fallback', array(
 	 *         $site_editor_module, 'offer_untranslated_originals'
 	 *     ) );
 	 *
@@ -382,7 +382,7 @@ final class SiteEditorModule implements ModuleInterface {
 		 * @param string $language_id Language identifier, or an empty string.
 		 */
 		$filtered = apply_filters(
-			'localepress_template_part_language',
+			'shapetranslate_template_part_language',
 			null === $language ? '' : (string) $language['id']
 		);
 
@@ -403,6 +403,6 @@ final class SiteEditorModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether template parts are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_translate_template_parts', true );
+		return (bool) apply_filters( 'shapetranslate_translate_template_parts', true );
 	}
 }

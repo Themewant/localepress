@@ -2,17 +2,17 @@
 /**
  * Frontend language routing module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Content\LanguageQueryConstraint;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\SEO\SitemapModule;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\LanguageQueryConstraint;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\SEO\SitemapModule;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Query;
 use WP_Tax_Query;
@@ -30,7 +30,7 @@ final class RoutingModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const REWRITE_SIGNATURE_OPTION = 'localepress_rewrite_signature';
+	const REWRITE_SIGNATURE_OPTION = 'shapetranslate_rewrite_signature';
 
 	/**
 	 * Routing schema version.
@@ -150,7 +150,7 @@ final class RoutingModule implements ModuleInterface {
 
 		add_filter( 'query_vars', array( $this, 'register_query_var' ) );
 		add_filter( 'rewrite_rules_array', array( $this, 'add_language_rewrite_rules' ), 20 );
-		add_filter( 'localepress_current_language_id', array( $this->url_manager, 'filter_current_language_id' ) );
+		add_filter( 'shapetranslate_current_language_id', array( $this->url_manager, 'filter_current_language_id' ) );
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 99 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'allow_language_hosts' ) );
 		add_filter( 'home_url', array( $this, 'filter_home_url' ), 20, 2 );
@@ -186,9 +186,9 @@ final class RoutingModule implements ModuleInterface {
 	}
 
 	/**
-	 * Removes stale LocalePress rewrites after another router takes ownership.
+	 * Removes stale ShapeTranslate rewrites after another router takes ownership.
 	 *
-	 * This runs once when the stored routing signature shows that LocalePress had
+	 * This runs once when the stored routing signature shows that ShapeTranslate had
 	 * previously generated rules.
 	 *
 	 * @return void
@@ -530,7 +530,7 @@ final class RoutingModule implements ModuleInterface {
 		 * @param array{allow: array<int, array<string, string>>, deny: array<int, array<string, string>>} $callers Caller rules.
 		 */
 		$callers = apply_filters(
-			'localepress_front_door_callers',
+			'shapetranslate_front_door_callers',
 			array(
 				'allow' => $allow,
 				'deny'  => $deny,
@@ -796,7 +796,7 @@ final class RoutingModule implements ModuleInterface {
 	 *
 	 * WordPress's own multilingual convention stores the language as a taxonomy,
 	 * which is applied while the query is assembled rather than through a filter,
-	 * and so is unaffected by suppression. LocalePress keeps its assignments in
+	 * and so is unaffected by suppression. ShapeTranslate keeps its assignments in
 	 * an indexed table instead, and reaches the same place by lifting the
 	 * suppression on exactly the queries it would have scoped anyway.
 	 *
@@ -818,7 +818,7 @@ final class RoutingModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress may lift one query's filter suppression.
+		 * Filters whether ShapeTranslate may lift one query's filter suppression.
 		 *
 		 * Returning false leaves the query exactly as its caller built it, which
 		 * also leaves it unscoped: a listing no filter can reach is a listing no
@@ -827,7 +827,7 @@ final class RoutingModule implements ModuleInterface {
 		 * @param bool     $scope Whether the suppression may be lifted.
 		 * @param WP_Query $query Query about to run.
 		 */
-		if ( ! apply_filters( 'localepress_scope_suppressed_queries', true, $query ) ) {
+		if ( ! apply_filters( 'shapetranslate_scope_suppressed_queries', true, $query ) ) {
 			return;
 		}
 
@@ -849,7 +849,7 @@ final class RoutingModule implements ModuleInterface {
 			return $query_vars;
 		}
 
-		$query_vars['localepress_block_query'] = true;
+		$query_vars['shapetranslate_block_query'] = true;
 
 		return $query_vars;
 	}
@@ -920,7 +920,7 @@ final class RoutingModule implements ModuleInterface {
 		 * @param WP_Query $query       Query being constrained.
 		 * @param string   $language_id Language being read.
 		 */
-		if ( apply_filters( 'localepress_language_query_fallback', false, $query, $language_id ) ) {
+		if ( apply_filters( 'shapetranslate_language_query_fallback', false, $query, $language_id ) ) {
 			return $this->constraint->apply_to_posts_with_fallback( $clauses, $language_id, $default['id'] );
 		}
 
@@ -963,7 +963,7 @@ final class RoutingModule implements ModuleInterface {
 
 		if ( is_array( $args )
 			&& ( ! empty( $args['object_ids'] )
-				|| ! empty( $args['localepress_skip_language_filter'] )
+				|| ! empty( $args['shapetranslate_skip_language_filter'] )
 				|| ! empty( $args[ SitemapModule::QUERY_MARKER ] ) )
 		) {
 			return $clauses;
@@ -991,7 +991,7 @@ final class RoutingModule implements ModuleInterface {
 		 * @param array<string, mixed> $args        Term query arguments.
 		 */
 		$filter = apply_filters(
-			'localepress_filter_terms_by_language',
+			'shapetranslate_filter_terms_by_language',
 			true,
 			$taxonomy,
 			$language_id,
@@ -1012,7 +1012,7 @@ final class RoutingModule implements ModuleInterface {
 	 * @return string Empty when the query must not be constrained.
 	 */
 	private function get_query_language_id( WP_Query $query ) {
-		if ( $query->get( 'suppress_filters' ) || $query->get( 'localepress_skip_language_filter' ) ) {
+		if ( $query->get( 'suppress_filters' ) || $query->get( 'shapetranslate_skip_language_filter' ) ) {
 			return '';
 		}
 		if ( $this->should_filter_query( $query ) ) {
@@ -1060,12 +1060,12 @@ final class RoutingModule implements ModuleInterface {
 			}
 
 			/**
-			 * Filters whether LocalePress should constrain the main frontend query.
+			 * Filters whether ShapeTranslate should constrain the main frontend query.
 			 *
 			 * @param bool     $filter Whether language filtering should run.
 			 * @param WP_Query $query  Main frontend query.
 			 */
-			return apply_filters( 'localepress_filter_main_query_by_language', true, $query )
+			return apply_filters( 'shapetranslate_filter_main_query_by_language', true, $query )
 				? $this->get_current_language_id()
 				: '';
 		}
@@ -1075,24 +1075,24 @@ final class RoutingModule implements ModuleInterface {
 
 			if ( $this->is_block_query( $query ) ) {
 				/**
-				 * Filters whether LocalePress should constrain a block's own post query.
+				 * Filters whether ShapeTranslate should constrain a block's own post query.
 				 *
 				 * The narrower name, kept for integrations written while blocks were
-				 * the only secondary queries LocalePress constrained.
+				 * the only secondary queries ShapeTranslate constrained.
 				 *
 				 * @param bool     $filter Whether language filtering should run.
 				 * @param WP_Query $query  Secondary query built while rendering a block.
 				 */
-				$filter = (bool) apply_filters( 'localepress_filter_block_query_by_language', $filter, $query );
+				$filter = (bool) apply_filters( 'shapetranslate_filter_block_query_by_language', $filter, $query );
 			}
 
 			/**
-			 * Filters whether LocalePress should constrain one secondary post query.
+			 * Filters whether ShapeTranslate should constrain one secondary post query.
 			 *
 			 * @param bool     $filter Whether language filtering should run.
 			 * @param WP_Query $query  Secondary frontend query.
 			 */
-			return apply_filters( 'localepress_filter_secondary_query_by_language', $filter, $query )
+			return apply_filters( 'shapetranslate_filter_secondary_query_by_language', $filter, $query )
 				? $this->get_current_language_id()
 				: '';
 		}
@@ -1104,13 +1104,13 @@ final class RoutingModule implements ModuleInterface {
 	 * Returns the language a query asked for by argument.
 	 *
 	 * Themes and page builders run their own queries to decide which template,
-	 * header, or footer to render, and LocalePress cannot recognize those on its
+	 * header, or footer to render, and ShapeTranslate cannot recognize those on its
 	 * own. Passing the language as a query argument opts one in:
 	 *
 	 *     new WP_Query(
 	 *         array(
 	 *             'post_type'      => 'elementor-hf',
-	 *             'localepress_lang' => 'current', // or a slug, code, or ID
+	 *             'shapetranslate_lang' => 'current', // or a slug, code, or ID
 	 *         )
 	 *     );
 	 *
@@ -1122,7 +1122,7 @@ final class RoutingModule implements ModuleInterface {
 	 */
 	private function get_requested_query_language_id( WP_Query $query ) {
 		$requested = $query->get( LanguageUrlManager::QUERY_VAR );
-		$opt_in    = $query->get( 'localepress_filter_by_language' );
+		$opt_in    = $query->get( 'shapetranslate_filter_by_language' );
 		$has_value = is_scalar( $requested ) && '' !== (string) $requested && false !== $requested;
 
 		if ( ! $has_value && empty( $opt_in ) ) {
@@ -1261,7 +1261,7 @@ final class RoutingModule implements ModuleInterface {
 			return;
 		}
 
-		wp_safe_redirect( $url, $status, 'LocalePress' );
+		wp_safe_redirect( $url, $status, 'ShapeTranslate' );
 		exit;
 	}
 
@@ -1339,13 +1339,13 @@ final class RoutingModule implements ModuleInterface {
 		 * @param array<string, mixed> $default Default language record.
 		 * @param string               $current Current request URL.
 		 */
-		$url = apply_filters( 'localepress_unrouted_host_redirect_url', $url, $default, $current );
+		$url = apply_filters( 'shapetranslate_unrouted_host_redirect_url', $url, $default, $current );
 
 		return is_string( $url ) && '' !== $url && ! $this->same_url( $url, $current ) ? $url : '';
 	}
 
 	/**
-	 * Redirects prefixed object aliases to the LocalePress canonical route.
+	 * Redirects prefixed object aliases to the ShapeTranslate canonical route.
 	 *
 	 * Post translations use the source member's route, while term translations
 	 * use the translated term's core route. Endpoint-shaped requests are left to
@@ -1455,7 +1455,7 @@ final class RoutingModule implements ModuleInterface {
 	 * This method is public so integrations and tests can inspect the decision
 	 * without executing a redirect.
 	 *
-	 * @return string Empty when no LocalePress redirect should occur.
+	 * @return string Empty when no ShapeTranslate redirect should occur.
 	 */
 	public function get_unprefixed_redirect_url() {
 		if (
@@ -1858,9 +1858,9 @@ final class RoutingModule implements ModuleInterface {
 			$post_type = get_post_type_object( $post->post_type );
 
 			if ( $post_type && $post_type->hierarchical ) {
-				$query_vars['pagename'] = '__localepress_missing_translation__';
+				$query_vars['pagename'] = '__shapetranslate_missing_translation__';
 			} else {
-				$query_vars['name'] = '__localepress_missing_translation__';
+				$query_vars['name'] = '__shapetranslate_missing_translation__';
 			}
 
 			$query_vars['post_type'] = $post->post_type;
@@ -1955,7 +1955,7 @@ final class RoutingModule implements ModuleInterface {
 
 			$query_vars[ $query_var ] = $target instanceof WP_Term
 				? $target->slug
-				: '__localepress_missing_translation__';
+				: '__shapetranslate_missing_translation__';
 		}
 	}
 
@@ -1988,7 +1988,7 @@ final class RoutingModule implements ModuleInterface {
 		return $this->url_manager->background()->scopes_request()
 			&& $query->is_main_query()
 			&& ! $query->get( 'suppress_filters' )
-			&& ! $query->get( 'localepress_skip_language_filter' );
+			&& ! $query->get( 'shapetranslate_skip_language_filter' );
 	}
 
 	/**
@@ -2000,7 +2000,7 @@ final class RoutingModule implements ModuleInterface {
 	 * reader who chose a language should not be handed a list written in another
 	 * one. So a listing built anywhere on a rendered page is scoped the same way
 	 * the page is, which is how the language reaches code that has never heard of
-	 * LocalePress.
+	 * ShapeTranslate.
 	 *
 	 * A listing loaded into that page afterwards is part of the same page and is
 	 * scoped the same way — a "load more" batch fetched over AJAX, a block the
@@ -2017,7 +2017,7 @@ final class RoutingModule implements ModuleInterface {
 	 *
 	 * A query that says which language it wants is honoured further down, in
 	 * get_requested_query_language_id(), and one that wants none says so with
-	 * `localepress_skip_language_filter`.
+	 * `shapetranslate_skip_language_filter`.
 	 *
 	 * @param WP_Query $query Query object.
 	 * @return bool
@@ -2027,7 +2027,7 @@ final class RoutingModule implements ModuleInterface {
 			! $this->url_manager->background()->scopes_request()
 			|| $query->is_main_query()
 			|| $query->is_singular
-			|| $query->get( 'localepress_skip_language_filter' )
+			|| $query->get( 'shapetranslate_skip_language_filter' )
 		) {
 			return false;
 		}
@@ -2049,7 +2049,7 @@ final class RoutingModule implements ModuleInterface {
 	 * @return bool
 	 */
 	private function is_block_query( WP_Query $query ) {
-		return (bool) $query->get( 'localepress_block_query' ) || 0 < $this->block_query_depth;
+		return (bool) $query->get( 'shapetranslate_block_query' ) || 0 < $this->block_query_depth;
 	}
 
 	/**
@@ -2091,7 +2091,7 @@ final class RoutingModule implements ModuleInterface {
 		 *
 		 * @param array<int, string> $block_names Block names scoped for language filtering.
 		 */
-		$block_names = apply_filters( 'localepress_post_query_block_names', array( 'core/latest-posts' ) );
+		$block_names = apply_filters( 'shapetranslate_post_query_block_names', array( 'core/latest-posts' ) );
 		$resolved    = array();
 
 		foreach ( is_array( $block_names ) ? $block_names : array() as $block_name ) {
@@ -2197,7 +2197,7 @@ final class RoutingModule implements ModuleInterface {
 		 * @param bool     $constrain Whether the archive stays constrained.
 		 * @param WP_Query $query     Main frontend query.
 		 */
-		return (bool) apply_filters( 'localepress_constrain_untranslated_archive', true, $query );
+		return (bool) apply_filters( 'shapetranslate_constrain_untranslated_archive', true, $query );
 	}
 
 	/**

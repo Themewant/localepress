@@ -2,14 +2,14 @@
 /**
  * Translation dashboard admin module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Assets;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -59,21 +59,21 @@ final class TranslationDashboardModule implements ModuleInterface {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_filter( 'set_screen_option_localepress_translations_per_page', array( $this, 'save_per_page' ), 10, 3 );
+		add_filter( 'set_screen_option_shapetranslate_translations_per_page', array( $this, 'save_per_page' ), 10, 3 );
 	}
 
 	/**
-	 * Registers LocalePress -> Translations and its load callback.
+	 * Registers ShapeTranslate -> Translations and its load callback.
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
 		$this->hook_suffix = (string) add_submenu_page(
-			'localepress',
-			esc_html__( 'LocalePress Translations', 'localepress' ),
-			esc_html__( 'Translations', 'localepress' ),
+			'shapetranslate',
+			esc_html__( 'ShapeTranslate Translations', 'shapetranslate' ),
+			esc_html__( 'Translations', 'shapetranslate' ),
 			AdminModule::capability(),
-			'localepress-translations',
+			'shapetranslate-translations',
 			array( $this, 'render' )
 		);
 
@@ -91,9 +91,9 @@ final class TranslationDashboardModule implements ModuleInterface {
 		add_screen_option(
 			'per_page',
 			array(
-				'label'   => __( 'Content per page', 'localepress' ),
+				'label'   => __( 'Content per page', 'shapetranslate' ),
 				'default' => 20,
-				'option'  => 'localepress_translations_per_page',
+				'option'  => 'shapetranslate_translations_per_page',
 			)
 		);
 	}
@@ -107,7 +107,7 @@ final class TranslationDashboardModule implements ModuleInterface {
 	 * @return mixed
 	 */
 	public function save_per_page( $status, $option, $value ) {
-		if ( 'localepress_translations_per_page' !== $option ) {
+		if ( 'shapetranslate_translations_per_page' !== $option ) {
 			return $status;
 		}
 
@@ -126,8 +126,8 @@ final class TranslationDashboardModule implements ModuleInterface {
 		}
 
 		wp_enqueue_style(
-			'localepress-admin',
-			LOCALEPRESS_URL . 'assets/css/admin.css',
+			'shapetranslate-admin',
+			SHAPETRANSLATE_URL . 'assets/css/admin.css',
 			array(),
 			Assets::version( 'assets/css/admin.css' )
 		);
@@ -141,18 +141,18 @@ final class TranslationDashboardModule implements ModuleInterface {
 	public function render() {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
 			wp_die(
-				esc_html__( 'You are not allowed to access this page.', 'localepress' ),
+				esc_html__( 'You are not allowed to access this page.', 'shapetranslate' ),
 				'',
 				array( 'response' => 403 )
 			);
 		}
 
-		echo '<div class="wrap localepress-translation-dashboard">';
-		echo '<h1>' . esc_html__( 'Translations', 'localepress' ) . '</h1>';
+		echo '<div class="wrap shapetranslate-translation-dashboard">';
+		echo '<h1>' . esc_html__( 'Translations', 'shapetranslate' ) . '</h1>';
 
 		if ( ! $this->dashboard_query->is_available() ) {
-			echo '<div class="localepress-notice notice notice-warning inline"><p>';
-			esc_html_e( 'The active translation storage does not provide dashboard reporting.', 'localepress' );
+			echo '<div class="shapetranslate-notice notice notice-warning inline"><p>';
+			esc_html_e( 'The active translation storage does not provide dashboard reporting.', 'shapetranslate' );
 			echo '</p></div></div>';
 			return;
 		}
@@ -173,11 +173,11 @@ final class TranslationDashboardModule implements ModuleInterface {
 		 *
 		 * @param TranslationDashboardListTable $table Prepared list table.
 		 */
-		do_action( 'localepress_translation_dashboard_before_table', $table );
+		do_action( 'shapetranslate_translation_dashboard_before_table', $table );
 
 		echo '<form method="get">';
-		echo '<input type="hidden" name="page" value="localepress-translations" />';
-		$table->search_box( __( 'Search content', 'localepress' ), 'localepress-translations' );
+		echo '<input type="hidden" name="page" value="shapetranslate-translations" />';
+		$table->search_box( __( 'Search content', 'shapetranslate' ), 'shapetranslate-translations' );
 		$table->display();
 		echo '</form>';
 
@@ -186,7 +186,7 @@ final class TranslationDashboardModule implements ModuleInterface {
 		 *
 		 * @param TranslationDashboardListTable $table Prepared list table.
 		 */
-		do_action( 'localepress_translation_dashboard_after_table', $table );
+		do_action( 'shapetranslate_translation_dashboard_after_table', $table );
 		echo '</div>';
 	}
 }

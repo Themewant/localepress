@@ -2,14 +2,14 @@
 /**
  * Term translation form fields.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Term;
 
 defined( 'ABSPATH' ) || exit;
@@ -75,14 +75,14 @@ final class TermTranslationFields {
 		$selected_language = (string) $this->new_term_language_id( $taxonomy );
 
 		wp_nonce_field(
-			'localepress_add_term_language_' . $taxonomy,
-			'localepress_term_language_nonce'
+			'shapetranslate_add_term_language_' . $taxonomy,
+			'shapetranslate_term_language_nonce'
 		);
 		?>
-		<div class="form-field term-localepress-language-wrap">
-			<label for="localepress-term-language"><?php esc_html_e( 'Language', 'localepress' ); ?></label>
+		<div class="form-field term-shapetranslate-language-wrap">
+			<label for="shapetranslate-term-language"><?php esc_html_e( 'Language', 'shapetranslate' ); ?></label>
 			<?php $this->render_language_select( $selected_language, '' ); ?>
-			<p><?php esc_html_e( 'Language assigned to this term.', 'localepress' ); ?></p>
+			<p><?php esc_html_e( 'Language assigned to this term.', 'shapetranslate' ); ?></p>
 		</div>
 		<?php
 	}
@@ -100,21 +100,21 @@ final class TermTranslationFields {
 			: (string) $this->new_term_language_id( $term->taxonomy );
 
 		wp_nonce_field(
-			'localepress_edit_term_language_' . $term->taxonomy . '_' . $term->term_id,
-			'localepress_term_language_nonce'
+			'shapetranslate_edit_term_language_' . $term->taxonomy . '_' . $term->term_id,
+			'shapetranslate_term_language_nonce'
 		);
 		?>
-		<tr class="form-field term-localepress-language-wrap">
+		<tr class="form-field term-shapetranslate-language-wrap">
 			<th scope="row">
-				<label for="localepress-term-language"><?php esc_html_e( 'Language', 'localepress' ); ?></label>
+				<label for="shapetranslate-term-language"><?php esc_html_e( 'Language', 'shapetranslate' ); ?></label>
 			</th>
 			<td>
 				<?php $this->render_language_select( $selected_language, $current_language_id ); ?>
-				<p class="description"><?php esc_html_e( 'Language assigned to this term.', 'localepress' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Language assigned to this term.', 'shapetranslate' ); ?></p>
 			</td>
 		</tr>
-		<tr class="form-field term-localepress-translations-wrap">
-			<th scope="row"><?php esc_html_e( 'Translations', 'localepress' ); ?></th>
+		<tr class="form-field term-shapetranslate-translations-wrap">
+			<th scope="row"><?php esc_html_e( 'Translations', 'shapetranslate' ); ?></th>
 			<td>
 				<?php $this->render_translations( $term, $current_language_id ); ?>
 			</td>
@@ -136,7 +136,7 @@ final class TermTranslationFields {
 		 * @param string $taxonomy    Taxonomy name.
 		 */
 		return (string) apply_filters(
-			'localepress_new_term_language_id',
+			'shapetranslate_new_term_language_id',
 			$this->language_manager->get_default_id(),
 			(string) $taxonomy
 		);
@@ -151,9 +151,9 @@ final class TermTranslationFields {
 	 */
 	private function render_language_select( $selected_language_id, $current_language_id ) {
 		?>
-		<select id="localepress-term-language" name="localepress_term_language_id">
+		<select id="shapetranslate-term-language" name="shapetranslate_term_language_id">
 			<?php if ( '' === $selected_language_id ) : ?>
-				<option value=""><?php esc_html_e( 'Select a language', 'localepress' ); ?></option>
+				<option value=""><?php esc_html_e( 'Select a language', 'shapetranslate' ); ?></option>
 			<?php endif; ?>
 			<?php foreach ( $this->language_manager->get_languages() as $language ) : ?>
 				<?php if ( empty( $language['enabled'] ) && $current_language_id !== $language['id'] ) : ?>
@@ -178,7 +178,7 @@ final class TermTranslationFields {
 		if ( '' === $current_language_id ) {
 			?>
 			<p class="description">
-				<?php esc_html_e( 'Update the term to assign its language before adding translations.', 'localepress' ); ?>
+				<?php esc_html_e( 'Update the term to assign its language before adding translations.', 'shapetranslate' ); ?>
 			</p>
 			<?php
 			return;
@@ -186,7 +186,7 @@ final class TermTranslationFields {
 
 		$translations = $this->translation_manager->get_translations( $term->term_id, $term->taxonomy );
 		?>
-		<ul class="localepress-translation-links">
+		<ul class="shapetranslate-translation-links">
 			<?php foreach ( $this->language_manager->get_languages() as $language ) : ?>
 				<?php $this->render_language_action( $term, $language, $current_language_id, $translations ); ?>
 			<?php endforeach; ?>
@@ -208,32 +208,32 @@ final class TermTranslationFields {
 		$target_id   = isset( $translations[ $language_id ] ) ? absint( $translations[ $language_id ] ) : 0;
 		$add_label   = sprintf(
 			/* translators: %s: native language name. */
-			__( 'Add %s translation', 'localepress' ),
+			__( 'Add %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 		?>
 		<li>
-			<span class="localepress-language-code">
+			<span class="shapetranslate-language-code">
 				<?php echo $this->flags->get_flag_html( $language ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html(). ?>
 				<?php echo esc_html( strtoupper( $language['language_code'] ) ); ?>
 			</span>
-			<span class="localepress-translation-action">
+			<span class="shapetranslate-translation-action">
 				<?php if ( $language_id === $current_language_id ) : ?>
-					<span class="localepress-translation-icon is-current" title="<?php esc_attr_e( 'Current language', 'localepress' ); ?>">
+					<span class="shapetranslate-translation-icon is-current" title="<?php esc_attr_e( 'Current language', 'shapetranslate' ); ?>">
 						<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-						<span class="screen-reader-text"><?php esc_html_e( 'Current language', 'localepress' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Current language', 'shapetranslate' ); ?></span>
 					</span>
 				<?php elseif ( 0 < $target_id ) : ?>
 					<?php $this->render_existing_translation( $target_id, $term->taxonomy, $language ); ?>
 				<?php elseif ( ! empty( $language['enabled'] ) && $this->actions->can_create_translation( $term ) ) : ?>
-					<a class="localepress-translation-icon is-add" href="<?php echo esc_url( $this->actions->get_create_url( $term->term_id, $term->taxonomy, $language_id ) ); ?>" title="<?php echo esc_attr( $add_label ); ?>" aria-label="<?php echo esc_attr( $add_label ); ?>">
+					<a class="shapetranslate-translation-icon is-add" href="<?php echo esc_url( $this->actions->get_create_url( $term->term_id, $term->taxonomy, $language_id ) ); ?>" title="<?php echo esc_attr( $add_label ); ?>" aria-label="<?php echo esc_attr( $add_label ); ?>">
 						<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php echo esc_html( $add_label ); ?></span>
 					</a>
 				<?php else : ?>
-					<span class="localepress-translation-icon is-unavailable" title="<?php esc_attr_e( 'Unavailable', 'localepress' ); ?>">
+					<span class="shapetranslate-translation-icon is-unavailable" title="<?php esc_attr_e( 'Unavailable', 'shapetranslate' ); ?>">
 						<span class="dashicons dashicons-minus" aria-hidden="true"></span>
-						<span class="screen-reader-text"><?php esc_html_e( 'Unavailable', 'localepress' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Unavailable', 'shapetranslate' ); ?></span>
 					</span>
 				<?php endif; ?>
 			</span>
@@ -255,13 +255,13 @@ final class TermTranslationFields {
 			: '';
 		$label    = sprintf(
 			/* translators: %s: language name. */
-			__( 'Edit %s translation', 'localepress' ),
+			__( 'Edit %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
 		if ( '' !== $edit_url ) {
 			?>
-			<a class="localepress-translation-icon is-edit" href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_attr( $label ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
+			<a class="shapetranslate-translation-icon is-edit" href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_attr( $label ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
 				<span class="dashicons dashicons-edit" aria-hidden="true"></span>
 				<span class="screen-reader-text"><?php echo esc_html( $label ); ?></span>
 			</a>
@@ -269,6 +269,6 @@ final class TermTranslationFields {
 			return;
 		}
 
-		esc_html_e( 'Translation exists', 'localepress' );
+		esc_html_e( 'Translation exists', 'shapetranslate' );
 	}
 }

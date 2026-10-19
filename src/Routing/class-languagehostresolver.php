@@ -2,12 +2,12 @@
 /**
  * Host-based language routing resolver.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -107,7 +107,7 @@ final class LanguageHostResolver {
 		 * both cheap and exact — cheaper than re-reading, and unlike a cleared
 		 * cache it needs nothing to have been wired up in advance.
 		 */
-		$generation = (int) did_action( 'localepress_settings_updated' );
+		$generation = (int) did_action( 'shapetranslate_settings_updated' );
 
 		if ( null !== $this->mode && $generation === $this->mode_generation ) {
 			return $this->mode;
@@ -341,7 +341,7 @@ final class LanguageHostResolver {
 		 *
 		 * @param string $host Registrable base host.
 		 */
-		$filtered = apply_filters( 'localepress_subdomain_base_host', $host );
+		$filtered = apply_filters( 'shapetranslate_subdomain_base_host', $host );
 
 		return is_string( $filtered ) ? $this->normalize( $filtered ) : $host;
 	}

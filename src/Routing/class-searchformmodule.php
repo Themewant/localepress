@@ -2,12 +2,12 @@
 /**
  * Language-aware search form.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -89,7 +89,7 @@ final class SearchFormModule implements ModuleInterface {
 		 * @param array<string, mixed> $language Current language record.
 		 */
 		$url = apply_filters(
-			'localepress_search_form_action',
+			'shapetranslate_search_form_action',
 			$this->url_manager->get_language_home_url( $language ),
 			$language
 		);

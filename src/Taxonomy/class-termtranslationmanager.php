@@ -2,13 +2,13 @@
 /**
  * Term translation relationship manager.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Taxonomy;
+namespace ShapeTranslate\Taxonomy;
 
-use LocalePress\Contracts\TermTranslationRepositoryInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Contracts\TermTranslationRepositoryInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 use WP_Term;
 
@@ -48,7 +48,7 @@ final class TermTranslationManager {
 	private $synchronizing_hierarchy = false;
 
 	/**
-	 * Whether LocalePress is inserting a translated term copy.
+	 * Whether ShapeTranslate is inserting a translated term copy.
 	 *
 	 * @var bool
 	 */
@@ -113,7 +113,7 @@ final class TermTranslationManager {
 		 * @param string                    $taxonomy Taxonomy name.
 		 */
 		$filtered = apply_filters(
-			'localepress_term_language',
+			'shapetranslate_term_language',
 			$language,
 			absint( $term_id ),
 			sanitize_key( $taxonomy )
@@ -205,7 +205,7 @@ final class TermTranslationManager {
 		 * @param string             $group_id     Translation group identifier.
 		 */
 		$filtered = apply_filters(
-			'localepress_term_translations',
+			'shapetranslate_term_translations',
 			$translations,
 			$term_id,
 			$taxonomy,
@@ -259,7 +259,7 @@ final class TermTranslationManager {
 			if ( $language_id === $member['language_id'] && $term->term_taxonomy_id !== $member['term_taxonomy_id'] ) {
 				return new WP_Error(
 					'duplicate_term_translation_language',
-					__( 'This translation group already contains a term for that language.', 'localepress' )
+					__( 'This translation group already contains a term for that language.', 'shapetranslate' )
 				);
 			}
 		}
@@ -282,7 +282,7 @@ final class TermTranslationManager {
 		 * @param string $group_id        Translation group identifier.
 		 */
 		do_action(
-			'localepress_term_language_changed',
+			'shapetranslate_term_language_changed',
 			$term->term_id,
 			$term->taxonomy,
 			$language_id,
@@ -308,13 +308,13 @@ final class TermTranslationManager {
 		$translations = $this->normalize_translation_map( $translations );
 
 		if ( empty( $translations ) ) {
-			return new WP_Error( 'empty_term_translation_group', __( 'Provide at least one term to link.', 'localepress' ) );
+			return new WP_Error( 'empty_term_translation_group', __( 'Provide at least one term to link.', 'shapetranslate' ) );
 		}
 
 		if ( count( $translations ) !== count( array_unique( array_values( $translations ) ) ) ) {
 			return new WP_Error(
 				'conflicting_term_languages',
-				__( 'A term cannot represent more than one language in a translation group.', 'localepress' )
+				__( 'A term cannot represent more than one language in a translation group.', 'shapetranslate' )
 			);
 		}
 
@@ -337,7 +337,7 @@ final class TermTranslationManager {
 				if ( $language_id !== $existing_assignment['language_id'] ) {
 					return new WP_Error(
 						'conflicting_term_language',
-						__( 'A term is already assigned to a different language.', 'localepress' )
+						__( 'A term is already assigned to a different language.', 'shapetranslate' )
 					);
 				}
 
@@ -357,7 +357,7 @@ final class TermTranslationManager {
 		if ( count( $group_ids ) > 1 ) {
 			return new WP_Error(
 				'conflicting_term_translation_groups',
-				__( 'Terms from different translation groups cannot be linked implicitly.', 'localepress' )
+				__( 'Terms from different translation groups cannot be linked implicitly.', 'shapetranslate' )
 			);
 		}
 
@@ -373,7 +373,7 @@ final class TermTranslationManager {
 		if ( $is_new_group && ! $source_term instanceof WP_Term ) {
 			return new WP_Error(
 				'invalid_term_translation_source',
-				__( 'The source term must belong to the new translation group.', 'localepress' )
+				__( 'The source term must belong to the new translation group.', 'shapetranslate' )
 			);
 		}
 
@@ -384,7 +384,7 @@ final class TermTranslationManager {
 				if ( $language_id === $member['language_id'] && $term_id !== $member['term_id'] ) {
 					return new WP_Error(
 						'duplicate_term_translation_language',
-						__( 'This translation group already contains a term for that language.', 'localepress' )
+						__( 'This translation group already contains a term for that language.', 'shapetranslate' )
 					);
 				}
 			}
@@ -444,7 +444,7 @@ final class TermTranslationManager {
 		 * @param string             $taxonomy      Taxonomy name.
 		 */
 		do_action(
-			'localepress_term_translations_linked',
+			'shapetranslate_term_translations_linked',
 			$group_id,
 			$result['translations'],
 			$source_term_id,
@@ -481,13 +481,13 @@ final class TermTranslationManager {
 		$source_term_id = absint( $source_term_id );
 
 		if ( empty( $translations ) ) {
-			return new WP_Error( 'empty_term_translation_group', __( 'Provide at least one term to link.', 'localepress' ) );
+			return new WP_Error( 'empty_term_translation_group', __( 'Provide at least one term to link.', 'shapetranslate' ) );
 		}
 
 		if ( count( $translations ) !== count( array_unique( array_values( $translations ) ) ) ) {
 			return new WP_Error(
 				'conflicting_term_languages',
-				__( 'A term cannot represent more than one language in a translation group.', 'localepress' )
+				__( 'A term cannot represent more than one language in a translation group.', 'shapetranslate' )
 			);
 		}
 
@@ -519,7 +519,7 @@ final class TermTranslationManager {
 			if ( $language_id !== $assignment['language_id'] ) {
 				return new WP_Error(
 					'conflicting_term_language',
-					__( 'A term is already assigned to a different language.', 'localepress' )
+					__( 'A term is already assigned to a different language.', 'shapetranslate' )
 				);
 			}
 
@@ -549,7 +549,7 @@ final class TermTranslationManager {
 				if ( isset( $languages[ $member['language_id'] ] ) ) {
 					return new WP_Error(
 						'duplicate_term_translation_language',
-						__( 'This translation group already contains a term for that language.', 'localepress' )
+						__( 'This translation group already contains a term for that language.', 'shapetranslate' )
 					);
 				}
 
@@ -571,7 +571,7 @@ final class TermTranslationManager {
 			if ( isset( $languages[ $language_id ] ) ) {
 				return new WP_Error(
 					'duplicate_term_translation_language',
-					__( 'This translation group already contains a term for that language.', 'localepress' )
+					__( 'This translation group already contains a term for that language.', 'shapetranslate' )
 				);
 			}
 
@@ -620,7 +620,7 @@ final class TermTranslationManager {
 			$this->repository->delete_group( $group_id );
 
 			/** This action is documented in src/Taxonomy/class-termtranslationmanager.php */
-			do_action( 'localepress_term_translation_group_deleted', $group_id, $taxonomy );
+			do_action( 'shapetranslate_term_translation_group_deleted', $group_id, $taxonomy );
 		}
 
 		$source       = isset( $terms[ $source_term_id ] ) ? $terms[ $source_term_id ] : null;
@@ -652,7 +652,7 @@ final class TermTranslationManager {
 
 		/** This action is documented in src/Taxonomy/class-termtranslationmanager.php */
 		do_action(
-			'localepress_term_translations_linked',
+			'shapetranslate_term_translations_linked',
 			$keeper_group_id,
 			$result['translations'],
 			$result['source_term_id'],
@@ -699,13 +699,13 @@ final class TermTranslationManager {
 		if ( 0 < $this->get_translation( $source->term_id, $source->taxonomy, $language_id ) ) {
 			return new WP_Error(
 				'duplicate_term_translation_language',
-				__( 'This translation group already contains a term for that language.', 'localepress' )
+				__( 'This translation group already contains a term for that language.', 'shapetranslate' )
 			);
 		}
 
 		$generated_name = sprintf(
 			/* translators: 1: source term name, 2: target language native name. */
-			_x( '%1$s (%2$s)', 'generated translated term name', 'localepress' ),
+			_x( '%1$s (%2$s)', 'generated translated term name', 'shapetranslate' ),
 			$source->name,
 			$language['native_name']
 		);
@@ -730,7 +730,7 @@ final class TermTranslationManager {
 		 * @param array<string, mixed> $language Target language record.
 		 */
 		$filtered_data              = apply_filters(
-			'localepress_term_translation_copy_data',
+			'shapetranslate_term_translation_copy_data',
 			$term_data,
 			$source,
 			$language
@@ -790,7 +790,7 @@ final class TermTranslationManager {
 		 * @param string               $group_id    Translation group identifier.
 		 */
 		do_action(
-			'localepress_term_translation_created',
+			'shapetranslate_term_translation_created',
 			$new_term_id,
 			$source->term_id,
 			$source->taxonomy,
@@ -820,7 +820,7 @@ final class TermTranslationManager {
 		if ( '' === $language_id ) {
 			return new WP_Error(
 				'missing_default_language',
-				__( 'Configure an enabled default language before translating terms.', 'localepress' )
+				__( 'Configure an enabled default language before translating terms.', 'shapetranslate' )
 			);
 		}
 
@@ -828,7 +828,7 @@ final class TermTranslationManager {
 	}
 
 	/**
-	 * Reports whether LocalePress is inserting a translated term copy.
+	 * Reports whether ShapeTranslate is inserting a translated term copy.
 	 *
 	 * @return bool
 	 */
@@ -863,7 +863,7 @@ final class TermTranslationManager {
 
 		if ( empty( $members ) ) {
 			$this->repository->delete_group( $group_id );
-			do_action( 'localepress_term_translation_group_deleted', $group_id, $taxonomy );
+			do_action( 'shapetranslate_term_translation_group_deleted', $group_id, $taxonomy );
 		} else {
 			$group = $this->repository->find_group( $group_id );
 
@@ -881,7 +881,7 @@ final class TermTranslationManager {
 		 * @param string               $taxonomy   Taxonomy name.
 		 * @param array<string, mixed> $assignment Removed assignment.
 		 */
-		do_action( 'localepress_term_translation_unlinked', $term_id, $taxonomy, $assignment );
+		do_action( 'shapetranslate_term_translation_unlinked', $term_id, $taxonomy, $assignment );
 	}
 
 	/**
@@ -964,14 +964,14 @@ final class TermTranslationManager {
 		if ( ! $this->taxonomy_support->supports( $taxonomy ) ) {
 			return new WP_Error(
 				'unsupported_translation_taxonomy',
-				__( 'That taxonomy is not supported by LocalePress.', 'localepress' )
+				__( 'That taxonomy is not supported by ShapeTranslate.', 'shapetranslate' )
 			);
 		}
 
 		$term = get_term( absint( $term_id ), $taxonomy );
 
 		if ( ! $term instanceof WP_Term ) {
-			return new WP_Error( 'translation_term_not_found', __( 'The requested term could not be found.', 'localepress' ) );
+			return new WP_Error( 'translation_term_not_found', __( 'The requested term could not be found.', 'shapetranslate' ) );
 		}
 
 		return $term;
@@ -988,11 +988,11 @@ final class TermTranslationManager {
 		$language    = $this->language_manager->find( $language_id );
 
 		if ( null === $language || 64 < strlen( $language_id ) ) {
-			return new WP_Error( 'term_translation_language_not_found', __( 'Select a registered language.', 'localepress' ) );
+			return new WP_Error( 'term_translation_language_not_found', __( 'Select a registered language.', 'shapetranslate' ) );
 		}
 
 		if ( empty( $language['enabled'] ) ) {
-			return new WP_Error( 'term_translation_language_disabled', __( 'Select an enabled language.', 'localepress' ) );
+			return new WP_Error( 'term_translation_language_disabled', __( 'Select an enabled language.', 'shapetranslate' ) );
 		}
 
 		return $language;
@@ -1208,7 +1208,7 @@ final class TermTranslationManager {
 	private function storage_error() {
 		return new WP_Error(
 			'term_translation_storage_error',
-			__( 'LocalePress could not save the term translation relationship.', 'localepress' )
+			__( 'ShapeTranslate could not save the term translation relationship.', 'shapetranslate' )
 		);
 	}
 }

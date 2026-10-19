@@ -3,7 +3,7 @@
 /**
  * Language switcher block editor asset metadata.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +26,7 @@ return array(
 	 * The fallback covers this file being read before the plugin has booted,
 	 * where the class is not loaded and there is nothing to measure against.
 	 */
-	'version'      => class_exists( 'LocalePress\Assets' )
-		? LocalePress\Assets::version( 'blocks/language-switcher/index.js' )
+	'version'      => class_exists( 'ShapeTranslate\Assets' )
+		? ShapeTranslate\Assets::version( 'blocks/language-switcher/index.js' )
 		: '1.0.0',
 );

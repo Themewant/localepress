@@ -2,10 +2,10 @@
 /**
  * A template part slug and the language it names.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
 defined( 'ABSPATH' ) || exit;
 

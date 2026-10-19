@@ -2,14 +2,14 @@
 /**
  * REST routes behind the Site Editor language panel.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Admin\AdminModule;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Admin\AdminModule;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 use WP_Post;
 use WP_REST_Request;
@@ -36,7 +36,7 @@ final class SiteEditorRoutes implements ModuleInterface {
 	/**
 	 * REST namespace.
 	 */
-	const NAMESPACE = 'localepress/v1';
+	const NAMESPACE = 'shapetranslate/v1';
 
 	/**
 	 * Route serving one language's version of a template.
@@ -207,8 +207,8 @@ final class SiteEditorRoutes implements ModuleInterface {
 		}
 
 		return new WP_Error(
-			'localepress_forbidden',
-			__( 'You are not allowed to manage template languages.', 'localepress' ),
+			'shapetranslate_forbidden',
+			__( 'You are not allowed to manage template languages.', 'shapetranslate' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}
@@ -225,8 +225,8 @@ final class SiteEditorRoutes implements ModuleInterface {
 		}
 
 		return new WP_Error(
-			'localepress_language_not_found',
-			__( 'The requested language does not exist.', 'localepress' ),
+			'shapetranslate_language_not_found',
+			__( 'The requested language does not exist.', 'shapetranslate' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -257,8 +257,8 @@ final class SiteEditorRoutes implements ModuleInterface {
 
 		if ( ! $post instanceof WP_Post ) {
 			return new WP_Error(
-				'localepress_part_missing',
-				__( 'The template was created but could not be read back.', 'localepress' ),
+				'shapetranslate_part_missing',
+				__( 'The template was created but could not be read back.', 'shapetranslate' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -287,7 +287,7 @@ final class SiteEditorRoutes implements ModuleInterface {
 
 		if ( ! isset( $translated[ $language_id ] ) ) {
 			return new WP_Error(
-				'localepress_part_not_translated',
+				'shapetranslate_part_not_translated',
 				$this->templates->message( 'not_translated' ),
 				array( 'status' => 404 )
 			);
@@ -302,7 +302,7 @@ final class SiteEditorRoutes implements ModuleInterface {
 			 * do.
 			 */
 			return new WP_Error(
-				'localepress_part_from_theme',
+				'shapetranslate_part_from_theme',
 				$this->templates->message( 'from_theme' ),
 				array( 'status' => 409 )
 			);
@@ -410,14 +410,14 @@ final class SiteEditorRoutes implements ModuleInterface {
 	 */
 	private function as_rest_error( WP_Error $error ) {
 		$statuses = array(
-			'localepress_part_not_found'      => 404,
-			'localepress_language_not_found'  => 400,
-			'localepress_part_is_translation' => 400,
-			'localepress_link_self'           => 400,
-			'localepress_link_default'        => 400,
-			'localepress_part_is_fallback'    => 409,
-			'localepress_part_exists'         => 409,
-			'localepress_part_slug_taken'     => 409,
+			'shapetranslate_part_not_found'      => 404,
+			'shapetranslate_language_not_found'  => 400,
+			'shapetranslate_part_is_translation' => 400,
+			'shapetranslate_link_self'           => 400,
+			'shapetranslate_link_default'        => 400,
+			'shapetranslate_part_is_fallback'    => 409,
+			'shapetranslate_part_exists'         => 409,
+			'shapetranslate_part_slug_taken'     => 409,
 			'duplicate_translation_language'  => 409,
 			'conflicting_post_language'       => 409,
 			'conflicting_translation_groups'  => 409,

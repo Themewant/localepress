@@ -2,14 +2,14 @@
 /**
  * Happy Elementor Addons Theme Builder integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\HappyAddons;
+namespace ShapeTranslate\Integrations\HappyAddons;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Post;
 use WP_Query;
 
@@ -94,12 +94,12 @@ final class HappyAddonsModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 		add_action( 'transition_post_status', array( $this, 'record_published_template' ), 10, 3 );
 
 		// Behind anything WPML itself would answer, so a site running both is left
@@ -126,7 +126,7 @@ final class HappyAddonsModule implements ModuleInterface {
 	 * for every language says so through the filter below, which leaves the rest
 	 * of the module inert on its own.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -358,7 +358,7 @@ final class HappyAddonsModule implements ModuleInterface {
 		 * @param int  $rendered_id Template identifier that will print.
 		 * @param int  $source_id   Template identifier the builder chose.
 		 */
-		if ( ! apply_filters( 'localepress_happyaddons_template_styles', true, $rendered_id, absint( $source_id ) ) ) {
+		if ( ! apply_filters( 'shapetranslate_happyaddons_template_styles', true, $rendered_id, absint( $source_id ) ) ) {
 			return;
 		}
 
@@ -409,7 +409,7 @@ final class HappyAddonsModule implements ModuleInterface {
 		 */
 		$resolved_id = absint(
 			apply_filters(
-				'localepress_happyaddons_template_id',
+				'shapetranslate_happyaddons_template_id',
 				$this->resolved[ $cache_key ],
 				$source_id,
 				$language_id
@@ -484,7 +484,7 @@ final class HappyAddonsModule implements ModuleInterface {
 		 * @param bool $record  Whether the conditions are recorded.
 		 * @param int  $post_id Template post identifier.
 		 */
-		if ( ! apply_filters( 'localepress_happyaddons_record_conditions', true, $post_id ) ) {
+		if ( ! apply_filters( 'shapetranslate_happyaddons_record_conditions', true, $post_id ) ) {
 			return;
 		}
 
@@ -522,7 +522,7 @@ final class HappyAddonsModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether Happy Addons templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_happyaddons_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_happyaddons_translate_templates', true );
 	}
 
 	/**
@@ -545,7 +545,7 @@ final class HappyAddonsModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		return (bool) apply_filters(
-			'localepress_happyaddons_translate_conditions',
+			'shapetranslate_happyaddons_translate_conditions',
 			true,
 			absint( $target_post_id ),
 			(string) $language_id
@@ -563,12 +563,12 @@ final class HappyAddonsModule implements ModuleInterface {
 		 * still answer a location because it is in the language being read.
 		 *
 		 * Returning false leaves the builder's choice standing whenever the chosen
-		 * template has no translation, so only templates LocalePress links are ever
+		 * template has no translation, so only templates ShapeTranslate links are ever
 		 * swapped.
 		 *
 		 * @param bool $match Whether an unlinked same-language template may answer.
 		 */
-		return (bool) apply_filters( 'localepress_happyaddons_match_untranslated', true );
+		return (bool) apply_filters( 'shapetranslate_happyaddons_match_untranslated', true );
 	}
 
 	/**

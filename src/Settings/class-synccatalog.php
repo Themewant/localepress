@@ -2,15 +2,15 @@
 /**
  * Synchronization item catalog.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Settings;
+namespace ShapeTranslate\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Describes every item LocalePress can keep synchronized across translations.
+ * Describes every item ShapeTranslate can keep synchronized across translations.
  *
  * Creating a translation always copies what an editor needs to start from, so
  * the copy phase has no options. This catalog therefore describes the ongoing
@@ -70,11 +70,11 @@ final class SyncCatalog {
 		 *
 		 * Addons can describe their own item here to receive an option key, a
 		 * settings-screen row, and the engine's synchronization event. Labels come
-		 * from `localepress_sync_catalog_labels`.
+		 * from `shapetranslate_sync_catalog_labels`.
 		 *
 		 * @param array<string, array<string, mixed>> $built Catalog items keyed by identifier.
 		 */
-		$filtered = apply_filters( 'localepress_sync_catalog', $built );
+		$filtered = apply_filters( 'shapetranslate_sync_catalog', $built );
 
 		return self::normalize_items( is_array( $filtered ) ? $filtered : $built );
 	}
@@ -105,30 +105,30 @@ final class SyncCatalog {
 	public static function labels() {
 		$labels = array(
 			'taxonomies'     => array(
-				'label'       => __( 'Taxonomies', 'localepress' ),
-				'description' => __( 'Terms of translatable taxonomies are mapped to their translations; other taxonomies are shared as stored.', 'localepress' ),
+				'label'       => __( 'Taxonomies', 'shapetranslate' ),
+				'description' => __( 'Terms of translatable taxonomies are mapped to their translations; other taxonomies are shared as stored.', 'shapetranslate' ),
 			),
 			'post_meta'      => array(
-				'label'       => __( 'Custom fields', 'localepress' ),
-				'description' => __( 'Public custom fields only. Protected keys stay with their own post unless a filter adds them.', 'localepress' ),
+				'label'       => __( 'Custom fields', 'shapetranslate' ),
+				'description' => __( 'Public custom fields only. Protected keys stay with their own post unless a filter adds them.', 'shapetranslate' ),
 			),
-			'comment_status' => array( 'label' => __( 'Comment status', 'localepress' ) ),
-			'ping_status'    => array( 'label' => __( 'Ping status', 'localepress' ) ),
-			'sticky'         => array( 'label' => __( 'Sticky status', 'localepress' ) ),
+			'comment_status' => array( 'label' => __( 'Comment status', 'shapetranslate' ) ),
+			'ping_status'    => array( 'label' => __( 'Ping status', 'shapetranslate' ) ),
+			'sticky'         => array( 'label' => __( 'Sticky status', 'shapetranslate' ) ),
 			'post_date'      => array(
-				'label'       => __( 'Published date', 'localepress' ),
-				'description' => __( 'Also decides whether a new translation starts with the source date instead of the date it was created.', 'localepress' ),
+				'label'       => __( 'Published date', 'shapetranslate' ),
+				'description' => __( 'Also decides whether a new translation starts with the source date instead of the date it was created.', 'shapetranslate' ),
 			),
-			'post_format'    => array( 'label' => __( 'Post format', 'localepress' ) ),
+			'post_format'    => array( 'label' => __( 'Post format', 'shapetranslate' ) ),
 			'post_parent'    => array(
-				'label'       => __( 'Page parent', 'localepress' ),
-				'description' => __( 'Uses the parent’s translation when one exists, otherwise the source parent.', 'localepress' ),
+				'label'       => __( 'Page parent', 'shapetranslate' ),
+				'description' => __( 'Uses the parent’s translation when one exists, otherwise the source parent.', 'shapetranslate' ),
 			),
-			'page_template'  => array( 'label' => __( 'Page template', 'localepress' ) ),
-			'menu_order'     => array( 'label' => __( 'Page order', 'localepress' ) ),
+			'page_template'  => array( 'label' => __( 'Page template', 'shapetranslate' ) ),
+			'menu_order'     => array( 'label' => __( 'Page order', 'shapetranslate' ) ),
 			'featured_image' => array(
-				'label'       => __( 'Featured image', 'localepress' ),
-				'description' => __( 'Translations reuse the source attachment; the file is never duplicated.', 'localepress' ),
+				'label'       => __( 'Featured image', 'shapetranslate' ),
+				'description' => __( 'Translations reuse the source attachment; the file is never duplicated.', 'shapetranslate' ),
 			),
 		);
 
@@ -137,7 +137,7 @@ final class SyncCatalog {
 		 *
 		 * @param array<string, array<string, string>> $labels Labels keyed by item identifier.
 		 */
-		$filtered = apply_filters( 'localepress_sync_catalog_labels', $labels );
+		$filtered = apply_filters( 'shapetranslate_sync_catalog_labels', $labels );
 
 		return is_array( $filtered ) ? $filtered : $labels;
 	}

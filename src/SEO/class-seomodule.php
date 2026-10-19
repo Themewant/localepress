@@ -2,12 +2,12 @@
 /**
  * Multilingual SEO integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\SEO;
+namespace ShapeTranslate\SEO;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -69,15 +69,15 @@ final class SeoModule implements ModuleInterface {
 		$canonical = $this->metadata->get_canonical_url();
 
 		/**
-		 * Filters whether LocalePress should output its archive canonical link.
+		 * Filters whether ShapeTranslate should output its archive canonical link.
 		 *
 		 * WordPress core handles singular canonicals. Yoast SEO and Rank Math own
-		 * all canonical output while active, so LocalePress does not duplicate it.
+		 * all canonical output while active, so ShapeTranslate does not duplicate it.
 		 *
 		 * @param bool   $output    Whether to output the canonical.
 		 * @param string $canonical Canonical URL.
 		 */
-		$output = apply_filters( 'localepress_output_canonical', '' !== $canonical, $canonical );
+		$output = apply_filters( 'shapetranslate_output_canonical', '' !== $canonical, $canonical );
 
 		if ( $output && '' !== $canonical ) {
 			echo '<link rel="canonical" href="' . esc_url( $canonical ) . '" />' . "\n";
@@ -105,11 +105,11 @@ final class SeoModule implements ModuleInterface {
 		);
 
 		/**
-		 * Filters the SEO provider canonical hooks LocalePress makes language-aware.
+		 * Filters the SEO provider canonical hooks ShapeTranslate makes language-aware.
 		 *
 		 * @param array<int, string> $filters Canonical filter hook names.
 		 */
-		$filtered = apply_filters( 'localepress_provider_canonical_filters', $filters );
+		$filtered = apply_filters( 'shapetranslate_provider_canonical_filters', $filters );
 
 		return is_array( $filtered ) ? array_values( array_unique( array_filter( $filtered, 'is_string' ) ) ) : $filters;
 	}
@@ -142,7 +142,7 @@ final class SeoModule implements ModuleInterface {
 		 *
 		 * @param array<int, string> $constants Provider constant names.
 		 */
-		$filtered  = apply_filters( 'localepress_canonical_provider_constants', $constants );
+		$filtered  = apply_filters( 'shapetranslate_canonical_provider_constants', $constants );
 		$constants = is_array( $filtered ) ? array_filter( $filtered, 'is_string' ) : $constants;
 
 		$has_provider = false;
@@ -159,6 +159,6 @@ final class SeoModule implements ModuleInterface {
 		 *
 		 * @param bool $has_provider Whether an SEO provider was detected.
 		 */
-		return (bool) apply_filters( 'localepress_has_canonical_provider', $has_provider );
+		return (bool) apply_filters( 'shapetranslate_has_canonical_provider', $has_provider );
 	}
 }

@@ -2,17 +2,17 @@
 /**
  * Language switcher WordPress integrations.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
 use WP_Block_Type;
 
 defined( 'ABSPATH' ) || exit;
@@ -99,7 +99,7 @@ final class SwitcherModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		add_shortcode( 'localepress_switcher', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'shapetranslate_switcher', array( $this, 'render_shortcode' ) );
 		add_action( 'init', array( $this, 'register_assets_and_block' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'add_preview_languages' ) );
 		add_action( 'widgets_init', array( $this, 'register_classic_widget' ) );
@@ -131,8 +131,8 @@ final class SwitcherModule implements ModuleInterface {
 	 */
 	public function register_assets_and_block() {
 		wp_register_style(
-			'localepress-switcher',
-			LOCALEPRESS_URL . 'assets/css/switcher.css',
+			'shapetranslate-switcher',
+			SHAPETRANSLATE_URL . 'assets/css/switcher.css',
 			array(),
 			Assets::version( 'assets/css/switcher.css' )
 		);
@@ -144,8 +144,8 @@ final class SwitcherModule implements ModuleInterface {
 		 * behavior the stylesheet alone describes.
 		 */
 		wp_register_script(
-			'localepress-switcher',
-			LOCALEPRESS_URL . 'assets/js/switcher.js',
+			'shapetranslate-switcher',
+			SHAPETRANSLATE_URL . 'assets/js/switcher.js',
 			array(),
 			Assets::version( 'assets/js/switcher.js' ),
 			true
@@ -157,9 +157,9 @@ final class SwitcherModule implements ModuleInterface {
 		 * switcher itself never fetches it.
 		 */
 		wp_register_style(
-			'localepress-floating-switcher',
-			LOCALEPRESS_URL . 'assets/css/floating-switcher.css',
-			array( 'localepress-switcher' ),
+			'shapetranslate-floating-switcher',
+			SHAPETRANSLATE_URL . 'assets/css/floating-switcher.css',
+			array( 'shapetranslate-switcher' ),
 			Assets::version( 'assets/css/floating-switcher.css' )
 		);
 
@@ -168,22 +168,22 @@ final class SwitcherModule implements ModuleInterface {
 		}
 
 		wp_register_style(
-			'localepress-navigation-switcher-editor',
-			LOCALEPRESS_URL . 'assets/css/navigation-switcher-editor.css',
+			'shapetranslate-navigation-switcher-editor',
+			SHAPETRANSLATE_URL . 'assets/css/navigation-switcher-editor.css',
 			array(),
 			Assets::version( 'assets/css/navigation-switcher-editor.css' )
 		);
 
 		$this->prepare_block_type(
 			register_block_type(
-				LOCALEPRESS_PATH . 'blocks/language-switcher',
+				SHAPETRANSLATE_PATH . 'blocks/language-switcher',
 				array( 'render_callback' => array( $this, 'render_block' ) )
 			),
 			false
 		);
 		$this->prepare_block_type(
 			register_block_type(
-				LOCALEPRESS_PATH . 'blocks/navigation-language-switcher',
+				SHAPETRANSLATE_PATH . 'blocks/navigation-language-switcher',
 				array( 'render_callback' => array( $this->navigation_block, 'render' ) )
 			),
 			true
@@ -208,7 +208,7 @@ final class SwitcherModule implements ModuleInterface {
 			 * block script handle needs its own JSON catalogue: the PHP text domain
 			 * alone never reaches the inspector panel.
 			 */
-			wp_set_script_translations( $handle, 'localepress', LOCALEPRESS_PATH . 'languages' );
+			wp_set_script_translations( $handle, 'shapetranslate', SHAPETRANSLATE_PATH . 'languages' );
 
 			if ( $needs_languages ) {
 				$this->preview_handles[] = $handle;
@@ -232,7 +232,7 @@ final class SwitcherModule implements ModuleInterface {
 			return;
 		}
 
-		$payload = 'window.localePressSwitcherLanguages = '
+		$payload = 'window.shapeTranslateSwitcherLanguages = '
 			. wp_json_encode( $this->get_editor_languages() ) . ';';
 
 		foreach ( $this->preview_handles as $handle ) {
@@ -319,7 +319,7 @@ final class SwitcherModule implements ModuleInterface {
 				'class'                => '',
 			),
 			$attributes,
-			'localepress_switcher'
+			'shapetranslate_switcher'
 		);
 
 		return $this->switcher->render(

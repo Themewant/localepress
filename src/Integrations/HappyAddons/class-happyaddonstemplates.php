@@ -2,13 +2,13 @@
 /**
  * Happy Elementor Addons Theme Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\HappyAddons;
+namespace ShapeTranslate\Integrations\HappyAddons;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -151,7 +151,7 @@ final class HappyAddonsTemplates {
 	 * Reports whether Happy Elementor Addons is present.
 	 *
 	 * The constant, not one of the builder's classes. The builder registers its
-	 * autoloader on `plugins_loaded`, the same hook LocalePress composes its
+	 * autoloader on `plugins_loaded`, the same hook ShapeTranslate composes its
 	 * modules on, so asking for a class here answers no on whichever sites load
 	 * the two in the wrong order. The constant is defined as the plugin file is
 	 * read, which is before any of this; what it cannot promise is that the Theme
@@ -168,7 +168,7 @@ final class HappyAddonsTemplates {
 		 *
 		 * @param bool $available Whether the builder is present.
 		 */
-		return (bool) apply_filters( 'localepress_happyaddons_available', $available );
+		return (bool) apply_filters( 'shapetranslate_happyaddons_available', $available );
 	}
 
 	/**

@@ -2,15 +2,15 @@
 /**
  * Compatibility module for wpml-config.xml.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Wpml;
+namespace ShapeTranslate\Integrations\Wpml;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\WorkflowSettings;
-use LocalePress\StringTranslation\OptionStringTranslator;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\WorkflowSettings;
+use ShapeTranslate\StringTranslation\OptionStringTranslator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The file is the one place where an author has already written down what a
  * multilingual plugin should do with their content, and most of the ecosystem
- * ships one. Reading it turns that existing work into LocalePress support with
+ * ships one. Reading it turns that existing work into ShapeTranslate support with
  * no code on either side.
  *
  * What a declaration is allowed to decide is deliberately narrower than what
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  *   screen: which of the available objects a site translates stays the site
  *   owner's decision.
  * - `custom-field` and `custom-term-field` decide *which* fields travel into a
- *   translation, which is exactly the question LocalePress has no way to answer
+ *   translation, which is exactly the question ShapeTranslate has no way to answer
  *   on its own for a third-party field. Whether ongoing synchronization runs at
  *   all stays the site's own switch: a declaration cannot turn it back on.
  * - `admin-texts` options are registered as translatable strings and
@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Rules the engine has no consumer for yet, such as `custom-term-fields` while
  * term meta has no synchronization phase, are still parsed and exposed through
- * `localepress_wpml_config_rules`.
+ * `shapetranslate_wpml_config_rules`.
  */
 final class WpmlConfigModule implements ModuleInterface {
 
@@ -109,10 +109,10 @@ final class WpmlConfigModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_supported_post_types', array( $this, 'filter_post_types' ) );
-		add_filter( 'localepress_non_public_post_types', array( $this, 'filter_non_public_post_types' ) );
-		add_filter( 'localepress_supported_taxonomies', array( $this, 'filter_taxonomies' ) );
-		add_filter( 'localepress_copy_post_meta_keys', array( $this, 'filter_post_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_supported_post_types', array( $this, 'filter_post_types' ) );
+		add_filter( 'shapetranslate_non_public_post_types', array( $this, 'filter_non_public_post_types' ) );
+		add_filter( 'shapetranslate_supported_taxonomies', array( $this, 'filter_taxonomies' ) );
+		add_filter( 'shapetranslate_copy_post_meta_keys', array( $this, 'filter_post_meta_keys' ), 10, 2 );
 
 		$rules = $this->reader->get_rules();
 
@@ -178,7 +178,7 @@ final class WpmlConfigModule implements ModuleInterface {
 	 * `copy` keeps a field aligned in both phases. `copy-once` and `translate`
 	 * seed a new translation and are then left alone, so an editor's work is
 	 * never overwritten by a later save of the source. Anything else is removed,
-	 * including fields LocalePress would otherwise have copied on its own.
+	 * including fields ShapeTranslate would otherwise have copied on its own.
 	 *
 	 * A declaration never starts the synchronization phase for a site that turned
 	 * custom fields off. Removals still apply in both phases, because excluding a
@@ -238,7 +238,7 @@ final class WpmlConfigModule implements ModuleInterface {
 	 * @return bool
 	 */
 	private function is_enabled() {
-		if ( defined( 'LOCALEPRESS_WPML_CONFIG' ) && ! LOCALEPRESS_WPML_CONFIG ) {
+		if ( defined( 'SHAPETRANSLATE_WPML_CONFIG' ) && ! SHAPETRANSLATE_WPML_CONFIG ) {
 			return false;
 		}
 
@@ -251,6 +251,6 @@ final class WpmlConfigModule implements ModuleInterface {
 		 *
 		 * @param bool $enabled Whether the compatibility layer is active.
 		 */
-		return (bool) apply_filters( 'localepress_wpml_config_enabled', true );
+		return (bool) apply_filters( 'shapetranslate_wpml_config_enabled', true );
 	}
 }

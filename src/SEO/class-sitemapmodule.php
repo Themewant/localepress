@@ -2,18 +2,18 @@
 /**
  * WordPress core sitemap compatibility module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\SEO;
+namespace ShapeTranslate\SEO;
 
-use LocalePress\Content\LanguageQueryConstraint;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\LanguageQueryConstraint;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Query;
 use WP_Sitemaps_Provider;
 
@@ -38,7 +38,7 @@ final class SitemapModule implements ModuleInterface {
 	/**
 	 * Query argument marking a query built by a sitemap provider.
 	 */
-	const QUERY_MARKER = 'localepress_sitemap_query';
+	const QUERY_MARKER = 'shapetranslate_sitemap_query';
 
 	/**
 	 * Language URL API.
@@ -235,7 +235,7 @@ final class SitemapModule implements ModuleInterface {
 
 		/*
 		 * Only the two providers whose queries this module constrains. A
-		 * provider LocalePress cannot scope would be advertised once per
+		 * provider ShapeTranslate cannot scope would be advertised once per
 		 * language and answer every one of them with the same URLs.
 		 */
 		if ( ! in_array( (string) $name, array( 'posts', 'taxonomies' ), true ) ) {
@@ -367,7 +367,7 @@ final class SitemapModule implements ModuleInterface {
 		 *
 		 * @param bool $split Whether per-language sitemaps are produced.
 		 */
-		return (bool) apply_filters( 'localepress_split_sitemaps_by_language', $split );
+		return (bool) apply_filters( 'shapetranslate_split_sitemaps_by_language', $split );
 	}
 
 	/**
@@ -406,7 +406,7 @@ final class SitemapModule implements ModuleInterface {
 		 *
 		 * @param array<int, string> $ids Enabled language identifiers.
 		 */
-		$filtered = apply_filters( 'localepress_sitemap_language_ids', $ids );
+		$filtered = apply_filters( 'shapetranslate_sitemap_language_ids', $ids );
 
 		$this->enabled_ids = is_array( $filtered ) ? array_values( array_filter( array_map( 'strval', $filtered ) ) ) : $ids;
 

@@ -2,13 +2,14 @@
 /**
  * Shared language constraint for post and term queries.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Infrastructure\DatabaseTermTranslationRepository;
-use LocalePress\Infrastructure\DatabaseTranslationRepository;
+use ShapeTranslate\Infrastructure\DatabaseTermTranslationRepository;
+use ShapeTranslate\Infrastructure\DatabaseTranslationRepository;
+use ShapeTranslate\Infrastructure\RelationshipTaxonomies;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Frontend routing and the REST API both need the same constraint, so the SQL
  * lives here once. Queries for the default language also include content with no
- * stored assignment, which keeps a site that installed LocalePress later working
+ * stored assignment, which keeps a site that installed ShapeTranslate later working
  * before every item has been assigned.
  */
 final class LanguageQueryConstraint {
@@ -27,14 +28,14 @@ final class LanguageQueryConstraint {
 	 *
 	 * @var string
 	 */
-	const POST_ALIAS = 'localepress_route_language';
+	const POST_ALIAS = 'shapetranslate_route_language';
 
 	/**
 	 * SQL alias used for the term assignment join.
 	 *
 	 * @var string
 	 */
-	const TERM_ALIAS = 'localepress_term_language';
+	const TERM_ALIAS = 'shapetranslate_term_language';
 
 	/**
 	 * Constrains a post query to one language.
@@ -122,23 +123,30 @@ final class LanguageQueryConstraint {
 			return $this->posts_language_condition( $language_id, $default_language_id );
 		}
 
-		$table = DatabaseTranslationRepository::assignments_table();
-
-		// The SQL aliases are fixed LocalePress identifiers; only the values are variable.
+		/*
+		 * The translated sibling is looked up on the core term tables directly,
+		 * so the statement holds nothing but table names and placeholders.
+		 */
 		return $wpdb->prepare(
-			'(localepress_route_language.post_id IS NULL
-				OR localepress_route_language.language_id = %s
+			"(shapetranslate_route_language.post_id IS NULL
+				OR shapetranslate_route_language.language_id = %s
 				OR (
-					localepress_route_language.language_id = %s
+					shapetranslate_route_language.language_id = %s
 					AND NOT EXISTS (
-						SELECT 1 FROM %i AS localepress_route_translated
-						WHERE localepress_route_translated.group_id = localepress_route_language.group_id
-						AND localepress_route_translated.language_id = %s
+						SELECT 1 FROM {$wpdb->term_relationships} AS shapetranslate_ft_lr
+						INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ft_ltt ON shapetranslate_ft_ltt.term_taxonomy_id = shapetranslate_ft_lr.term_taxonomy_id AND shapetranslate_ft_ltt.taxonomy = %s
+						INNER JOIN {$wpdb->terms} AS shapetranslate_ft_lt ON shapetranslate_ft_lt.term_id = shapetranslate_ft_ltt.term_id
+						INNER JOIN {$wpdb->term_relationships} AS shapetranslate_ft_gr ON shapetranslate_ft_gr.object_id = shapetranslate_ft_lr.object_id
+						INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ft_gtt ON shapetranslate_ft_gtt.term_taxonomy_id = shapetranslate_ft_gr.term_taxonomy_id AND shapetranslate_ft_gtt.taxonomy = %s
+						INNER JOIN {$wpdb->terms} AS shapetranslate_ft_gt ON shapetranslate_ft_gt.term_id = shapetranslate_ft_gtt.term_id
+						WHERE shapetranslate_ft_gt.slug = shapetranslate_route_language.group_id
+						AND shapetranslate_ft_lt.slug = %s
 					)
-				))',
+				))",
 			(string) $language_id,
 			(string) $default_language_id,
-			$table,
+			RelationshipTaxonomies::POST_LANGUAGE,
+			RelationshipTaxonomies::POST_GROUP,
 			(string) $language_id
 		);
 	}
@@ -157,12 +165,10 @@ final class LanguageQueryConstraint {
 	public function posts_join_clause( $posts_alias = '' ) {
 		global $wpdb;
 
-		$table       = DatabaseTranslationRepository::assignments_table();
+		$table       = DatabaseTranslationRepository::assignments_sql();
 		$alias       = self::POST_ALIAS;
 		$posts_alias = is_string( $posts_alias ) && '' !== $posts_alias ? $posts_alias : $wpdb->posts;
 
-		// Every name here is a WordPress or LocalePress identifier; none is input.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return " LEFT JOIN {$table} AS {$alias} ON ({$posts_alias}.ID = {$alias}.post_id)";
 	}
 
@@ -199,19 +205,19 @@ final class LanguageQueryConstraint {
 
 		if ( (string) $default_language_id === (string) $language_id ) {
 			/*
-			 * Content written before LocalePress carries no assignment at all,
+			 * Content written before ShapeTranslate carries no assignment at all,
 			 * and the default language is the one it was written in.
 			 */
-			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			// The SQL alias is a fixed ShapeTranslate identifier; only the value is variable.
 			return $wpdb->prepare(
-				'(localepress_route_language.language_id = %s OR localepress_route_language.post_id IS NULL)',
+				'(shapetranslate_route_language.language_id = %s OR shapetranslate_route_language.post_id IS NULL)',
 				$language_id
 			);
 		}
 
-		// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+		// The SQL alias is a fixed ShapeTranslate identifier; only the value is variable.
 		return $wpdb->prepare(
-			'localepress_route_language.language_id = %s',
+			'shapetranslate_route_language.language_id = %s',
 			$language_id
 		);
 	}
@@ -221,7 +227,7 @@ final class LanguageQueryConstraint {
 	 *
 	 * Used where "every publicly reachable language" is the rule rather than one
 	 * request language, so content assigned to a disabled language is excluded
-	 * while content that predates LocalePress still qualifies.
+	 * while content that predates ShapeTranslate still qualifies.
 	 *
 	 * @param array<string, string> $clauses      SQL clauses.
 	 * @param array<int, string>    $language_ids Allowed language identifiers.
@@ -237,10 +243,8 @@ final class LanguageQueryConstraint {
 		}
 
 		if ( false === strpos( $clauses['join'], self::POST_ALIAS ) ) {
-			$clauses['join'] .= $wpdb->prepare(
-				" LEFT JOIN %i AS localepress_route_language ON ({$wpdb->posts}.ID = localepress_route_language.post_id)",
-				DatabaseTranslationRepository::assignments_table()
-			);
+			$clauses['join'] .= ' LEFT JOIN ' . DatabaseTranslationRepository::assignments_sql()
+				. " AS shapetranslate_route_language ON ({$wpdb->posts}.ID = shapetranslate_route_language.post_id)";
 		}
 
 		/*
@@ -248,9 +252,9 @@ final class LanguageQueryConstraint {
 		 * one `%s` per identifier, so the statement carries no value of its own.
 		 */
 		$clauses['where'] .= $wpdb->prepare(
-			' AND (localepress_route_language.language_id IN ('
+			' AND (shapetranslate_route_language.language_id IN ('
 				. implode( ', ', array_fill( 0, count( $language_ids ), '%s' ) )
-				. ') OR localepress_route_language.post_id IS NULL)',
+				. ') OR shapetranslate_route_language.post_id IS NULL)',
 			$language_ids
 		);
 
@@ -274,17 +278,15 @@ final class LanguageQueryConstraint {
 		}
 
 		if ( false === strpos( $clauses['join'], self::TERM_ALIAS ) ) {
-			$clauses['join'] .= $wpdb->prepare(
-				' LEFT JOIN %i AS localepress_term_language ON (tt.term_taxonomy_id = localepress_term_language.term_taxonomy_id)',
-				DatabaseTermTranslationRepository::assignments_table()
-			);
+			$clauses['join'] .= ' LEFT JOIN ' . DatabaseTermTranslationRepository::assignments_sql()
+				. ' AS shapetranslate_term_language ON (tt.term_taxonomy_id = shapetranslate_term_language.term_taxonomy_id)';
 		}
 
 		/** This placeholder list is built the way restrict_posts_to_languages() explains. */
 		$clauses['where'] .= $wpdb->prepare(
-			' AND (localepress_term_language.language_id IN ('
+			' AND (shapetranslate_term_language.language_id IN ('
 				. implode( ', ', array_fill( 0, count( $language_ids ), '%s' ) )
-				. ') OR localepress_term_language.term_taxonomy_id IS NULL)',
+				. ') OR shapetranslate_term_language.term_taxonomy_id IS NULL)',
 			$language_ids
 		);
 
@@ -309,25 +311,24 @@ final class LanguageQueryConstraint {
 			return $clauses;
 		}
 
-		$table = DatabaseTermTranslationRepository::assignments_table();
+		$table = DatabaseTermTranslationRepository::assignments_sql();
 		$alias = self::TERM_ALIAS;
 
 		if ( false === strpos( $clauses['join'], $alias ) ) {
-			// The table name is generated exclusively by the repository and WordPress prefix.
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// The derived table is fixed SQL generated by the repository.
 			$clauses['join'] .= " LEFT JOIN {$table} AS {$alias} ON (tt.term_taxonomy_id = {$alias}.term_taxonomy_id)";
 		}
 
 		if ( (string) $default_language_id === (string) $language_id ) {
-			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			// The SQL alias is a fixed ShapeTranslate identifier; only the value is variable.
 			$clauses['where'] .= $wpdb->prepare(
-				' AND (localepress_term_language.language_id = %s OR localepress_term_language.term_taxonomy_id IS NULL)',
+				' AND (shapetranslate_term_language.language_id = %s OR shapetranslate_term_language.term_taxonomy_id IS NULL)',
 				$language_id
 			);
 		} else {
-			// The SQL alias is a fixed LocalePress identifier; only the value is variable.
+			// The SQL alias is a fixed ShapeTranslate identifier; only the value is variable.
 			$clauses['where'] .= $wpdb->prepare(
-				' AND localepress_term_language.language_id = %s',
+				' AND shapetranslate_term_language.language_id = %s',
 				$language_id
 			);
 		}
@@ -362,27 +363,33 @@ final class LanguageQueryConstraint {
 		}
 
 		/*
-		 * The table name arrives as an identifier placeholder and every value as
-		 * its own, so the two forms of the language test are written out in full
-		 * rather than assembled: a statement built from fragments cannot be read
-		 * as the statement it becomes.
+		 * Every value arrives as its own placeholder, so the two forms of the
+		 * language test are written out in full rather than assembled: a
+		 * statement built from fragments cannot be read as the statement it
+		 * becomes.
+		 *
+		 * A post holds at most one assignment, so "in the default language or
+		 * unassigned" is the same as "not assigned to any other language".
 		 */
-		$values = array_merge(
-			array( DatabaseTranslationRepository::assignments_table() ),
-			$post_types,
-			array( (string) $language_id )
-		);
+		$values = array_merge( $post_types, array( RelationshipTaxonomies::POST_LANGUAGE, RelationshipTaxonomies::POST_GROUP, (string) $language_id ) );
 
 		if ( (string) $language_id === (string) $default_language_id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			return null !== $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT {$wpdb->posts}.ID FROM {$wpdb->posts}
-					LEFT JOIN %i AS localepress_route_language ON ({$wpdb->posts}.ID = localepress_route_language.post_id)
 					WHERE {$wpdb->posts}.post_status = 'publish'
-					AND {$wpdb->posts}.post_type IN (" . implode( ', ', array_fill( 0, count( $post_types ), '%s' ) ) . ')
-					AND (localepress_route_language.language_id = %s OR localepress_route_language.post_id IS NULL)
-					LIMIT 1',
+					AND {$wpdb->posts}.post_type IN (" . implode( ', ', array_fill( 0, count( $post_types ), '%s' ) ) . ")
+					AND NOT EXISTS (
+						SELECT 1 FROM {$wpdb->term_relationships} AS shapetranslate_lr
+						INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ltt ON shapetranslate_ltt.term_taxonomy_id = shapetranslate_lr.term_taxonomy_id AND shapetranslate_ltt.taxonomy = %s
+						INNER JOIN {$wpdb->terms} AS shapetranslate_lt ON shapetranslate_lt.term_id = shapetranslate_ltt.term_id
+						INNER JOIN {$wpdb->term_relationships} AS shapetranslate_gr ON shapetranslate_gr.object_id = shapetranslate_lr.object_id
+						INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_gtt ON shapetranslate_gtt.term_taxonomy_id = shapetranslate_gr.term_taxonomy_id AND shapetranslate_gtt.taxonomy = %s
+						WHERE shapetranslate_lr.object_id = {$wpdb->posts}.ID
+						AND shapetranslate_lt.slug <> %s
+					)
+					LIMIT 1",
 					$values
 				)
 			);
@@ -392,11 +399,18 @@ final class LanguageQueryConstraint {
 		return null !== $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT {$wpdb->posts}.ID FROM {$wpdb->posts}
-				LEFT JOIN %i AS localepress_route_language ON ({$wpdb->posts}.ID = localepress_route_language.post_id)
 				WHERE {$wpdb->posts}.post_status = 'publish'
-				AND {$wpdb->posts}.post_type IN (" . implode( ', ', array_fill( 0, count( $post_types ), '%s' ) ) . ')
-				AND localepress_route_language.language_id = %s
-				LIMIT 1',
+				AND {$wpdb->posts}.post_type IN (" . implode( ', ', array_fill( 0, count( $post_types ), '%s' ) ) . ")
+				AND EXISTS (
+					SELECT 1 FROM {$wpdb->term_relationships} AS shapetranslate_lr
+					INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ltt ON shapetranslate_ltt.term_taxonomy_id = shapetranslate_lr.term_taxonomy_id AND shapetranslate_ltt.taxonomy = %s
+					INNER JOIN {$wpdb->terms} AS shapetranslate_lt ON shapetranslate_lt.term_id = shapetranslate_ltt.term_id
+					INNER JOIN {$wpdb->term_relationships} AS shapetranslate_gr ON shapetranslate_gr.object_id = shapetranslate_lr.object_id
+					INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_gtt ON shapetranslate_gtt.term_taxonomy_id = shapetranslate_gr.term_taxonomy_id AND shapetranslate_gtt.taxonomy = %s
+					WHERE shapetranslate_lr.object_id = {$wpdb->posts}.ID
+					AND shapetranslate_lt.slug = %s
+				)
+				LIMIT 1",
 				$values
 			)
 		);
@@ -422,8 +436,6 @@ final class LanguageQueryConstraint {
 			return false;
 		}
 
-		// Everything written before a language was ever assigned belongs to the
-		// default one, so the site always speaks it.
 		if ( (string) $language_id === (string) $default_language_id ) {
 			return true;
 		}
@@ -431,12 +443,17 @@ final class LanguageQueryConstraint {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return null !== $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT assignment.post_id FROM %i AS assignment
-				INNER JOIN {$wpdb->posts} AS post ON (post.ID = assignment.post_id)
-				WHERE assignment.language_id = %s
+				"SELECT shapetranslate_lr.object_id FROM {$wpdb->term_relationships} AS shapetranslate_lr
+				INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ltt ON shapetranslate_ltt.term_taxonomy_id = shapetranslate_lr.term_taxonomy_id AND shapetranslate_ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS shapetranslate_lt ON shapetranslate_lt.term_id = shapetranslate_ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS shapetranslate_gr ON shapetranslate_gr.object_id = shapetranslate_lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_gtt ON shapetranslate_gtt.term_taxonomy_id = shapetranslate_gr.term_taxonomy_id AND shapetranslate_gtt.taxonomy = %s
+				INNER JOIN {$wpdb->posts} AS post ON (post.ID = shapetranslate_lr.object_id)
+				WHERE shapetranslate_lt.slug = %s
 				AND post.post_status = 'publish'
 				LIMIT 1",
-				DatabaseTranslationRepository::assignments_table(),
+				RelationshipTaxonomies::POST_LANGUAGE,
+				RelationshipTaxonomies::POST_GROUP,
 				(string) $language_id
 			)
 		);

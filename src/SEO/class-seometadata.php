@@ -2,17 +2,17 @@
 /**
  * Multilingual SEO metadata service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\SEO;
+namespace ShapeTranslate\SEO;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Language\LanguageTag;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageTag;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 use WP_Term;
 
@@ -153,7 +153,7 @@ final class SeoMetadata {
 		 * @param array<string, mixed> $language   Current language record.
 		 * @param string               $doctype    Document type.
 		 */
-		$filtered = apply_filters( 'localepress_language_attributes', $attributes, $language, $doctype );
+		$filtered = apply_filters( 'shapetranslate_language_attributes', $attributes, $language, $doctype );
 
 		return is_string( $filtered ) ? $filtered : $attributes;
 	}
@@ -206,7 +206,7 @@ final class SeoMetadata {
 		 *
 		 * @param array<int, array<string, mixed>> $languages Enabled languages.
 		 */
-		$filtered_languages = apply_filters( 'localepress_hreflang_languages', $languages );
+		$filtered_languages = apply_filters( 'shapetranslate_hreflang_languages', $languages );
 		$languages          = is_array( $filtered_languages ) ? $filtered_languages : $languages;
 		$alternates         = array();
 		$seen_tags          = array();
@@ -249,7 +249,7 @@ final class SeoMetadata {
 		 * @param array<string, mixed>|null    $default    Default language record.
 		 */
 		$filtered_default = $this->settings->is_x_default_enabled()
-			? apply_filters( 'localepress_x_default_url', $x_default, $alternates, $default )
+			? apply_filters( 'shapetranslate_x_default_url', $x_default, $alternates, $default )
 			: '';
 
 		if ( is_string( $filtered_default ) && $this->is_absolute_web_url( $filtered_default ) ) {
@@ -261,7 +261,7 @@ final class SeoMetadata {
 		 *
 		 * @param array<string, string> $alternates Alternate URLs keyed by hreflang.
 		 */
-		$filtered_alternates  = apply_filters( 'localepress_hreflang_urls', $alternates );
+		$filtered_alternates  = apply_filters( 'shapetranslate_hreflang_urls', $alternates );
 		$alternates           = is_array( $filtered_alternates ) ? $filtered_alternates : $alternates;
 		$this->alternate_urls = $this->normalize_alternates( $alternates );
 
@@ -269,7 +269,7 @@ final class SeoMetadata {
 	}
 
 	/**
-	 * Returns LocalePress's canonical URL for the current indexable context.
+	 * Returns ShapeTranslate's canonical URL for the current indexable context.
 	 *
 	 * @return string
 	 */
@@ -282,12 +282,12 @@ final class SeoMetadata {
 		$canonical = null === $current ? '' : $this->get_context_url( $current );
 
 		/**
-		 * Filters the LocalePress canonical URL generated for core output.
+		 * Filters the ShapeTranslate canonical URL generated for core output.
 		 *
 		 * @param string                       $canonical Canonical URL.
 		 * @param array<string, mixed>|null    $current   Current language record.
 		 */
-		$filtered = apply_filters( 'localepress_canonical_url', $canonical, $current );
+		$filtered = apply_filters( 'shapetranslate_canonical_url', $canonical, $current );
 
 		return is_string( $filtered ) && $this->is_absolute_web_url( $filtered ) ? $filtered : '';
 	}
@@ -320,7 +320,7 @@ final class SeoMetadata {
 		$prefixed = $this->url_manager->prefix_url( $canonical, $current );
 
 		/**
-		 * Filters a canonical after LocalePress applies the current prefix.
+		 * Filters a canonical after ShapeTranslate applies the current prefix.
 		 *
 		 * This runs for WordPress core, Yoast SEO, and Rank Math canonicals.
 		 *
@@ -328,7 +328,7 @@ final class SeoMetadata {
 		 * @param string               $canonical Original provider URL.
 		 * @param array<string, mixed> $current   Current language record.
 		 */
-		$filtered = apply_filters( 'localepress_provider_canonical_url', $prefixed, $canonical, $current );
+		$filtered = apply_filters( 'shapetranslate_provider_canonical_url', $prefixed, $canonical, $current );
 
 		return is_string( $filtered ) ? $filtered : $canonical;
 	}
@@ -352,7 +352,7 @@ final class SeoMetadata {
 	}
 
 	/**
-	 * Reports whether LocalePress SEO metadata applies to this request.
+	 * Reports whether ShapeTranslate SEO metadata applies to this request.
 	 *
 	 * @return bool
 	 */
@@ -364,14 +364,14 @@ final class SeoMetadata {
 			&& ! is_trackback();
 
 		/**
-		 * Filters whether LocalePress should emit indexable metadata for a request.
+		 * Filters whether ShapeTranslate should emit indexable metadata for a request.
 		 *
-		 * This controls LocalePress canonical and hreflang output only. It does not
+		 * This controls ShapeTranslate canonical and hreflang output only. It does not
 		 * override an SEO plugin's existing noindex decision.
 		 *
 		 * @param bool $indexable Whether metadata may be emitted.
 		 */
-		return (bool) apply_filters( 'localepress_seo_is_indexable_request', $indexable );
+		return (bool) apply_filters( 'shapetranslate_seo_is_indexable_request', $indexable );
 	}
 
 	/**
@@ -466,7 +466,7 @@ final class SeoMetadata {
 					 * translations. The identifiers must survive too: they name
 					 * the other languages on purpose.
 					 */
-					'localepress_skip_language_filter' => true,
+					'shapetranslate_skip_language_filter' => true,
 				)
 			);
 			$posts_by_id = array();
@@ -526,7 +526,7 @@ final class SeoMetadata {
 					'taxonomy'                         => $term->taxonomy,
 					'include'                          => $term_ids,
 					'hide_empty'                       => false,
-					'localepress_skip_language_filter' => true,
+					'shapetranslate_skip_language_filter' => true,
 				)
 			);
 			$terms_by_id = array();
@@ -697,7 +697,7 @@ final class SeoMetadata {
 	}
 
 	/**
-	 * Reports whether this is a frontend HTML request LocalePress owns.
+	 * Reports whether this is a frontend HTML request ShapeTranslate owns.
 	 *
 	 * @return bool
 	 */
@@ -713,7 +713,7 @@ final class SeoMetadata {
 	}
 
 	/**
-	 * Reports whether LocalePress should add noindex to this request.
+	 * Reports whether ShapeTranslate should add noindex to this request.
 	 *
 	 * @return bool
 	 */

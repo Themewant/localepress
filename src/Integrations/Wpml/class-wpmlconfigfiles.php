@@ -2,10 +2,10 @@
 /**
  * Discovery of wpml-config.xml files.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Wpml;
+namespace ShapeTranslate\Integrations\Wpml;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,14 +43,14 @@ final class WpmlConfigFiles {
 		);
 
 		/**
-		 * Filters the wpml-config.xml files LocalePress reads.
+		 * Filters the wpml-config.xml files ShapeTranslate reads.
 		 *
 		 * A site can add a file for a plugin that ships none, or drop one whose
 		 * declarations conflict with its own configuration.
 		 *
 		 * @param array<string, string> $files Absolute paths keyed by context identifier.
 		 */
-		$filtered = apply_filters( 'localepress_wpml_config_files', $files );
+		$filtered = apply_filters( 'shapetranslate_wpml_config_files', $files );
 
 		if ( ! is_array( $filtered ) ) {
 			return $files;
@@ -206,22 +206,22 @@ final class WpmlConfigFiles {
 	 * Returns the site's own configuration file.
 	 *
 	 * A site owner can declare rules for a plugin that ships no file of its own
-	 * by dropping one into the LocalePress directory inside wp-content. It is
+	 * by dropping one into the ShapeTranslate directory inside wp-content. It is
 	 * read last, so it is the file that survives an update.
 	 *
 	 * @return array<string, string>
 	 */
 	private function custom_files() {
-		if ( ! defined( 'LOCALEPRESS_LOCAL_DIR' ) ) {
+		if ( ! defined( 'SHAPETRANSLATE_LOCAL_DIR' ) ) {
 			return array();
 		}
 
-		$path = trailingslashit( LOCALEPRESS_LOCAL_DIR ) . self::FILE_NAME;
+		$path = trailingslashit( SHAPETRANSLATE_LOCAL_DIR ) . self::FILE_NAME;
 
 		if ( ! is_readable( $path ) ) {
 			return array();
 		}
 
-		return array( 'localepress' => $path );
+		return array( 'shapetranslate' => $path );
 	}
 }

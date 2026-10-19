@@ -2,10 +2,10 @@
 /**
  * Full page cache detection.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Cache;
+namespace ShapeTranslate\Integrations\Cache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +36,7 @@ final class CacheCompatibility {
 			|| defined( 'WPO_VERSION' );   // So does WP-Optimize.
 
 		/**
-		 * Filters whether LocalePress treats this site as page-cached.
+		 * Filters whether ShapeTranslate treats this site as page-cached.
 		 *
 		 * Return true on a host that caches pages above WordPress — a CDN or a
 		 * server-level cache leaves no constant behind — so the language cookie
@@ -45,6 +45,6 @@ final class CacheCompatibility {
 		 *
 		 * @param bool $active Whether a page cache was detected.
 		 */
-		return (bool) apply_filters( 'localepress_is_cache_active', $active );
+		return (bool) apply_filters( 'shapetranslate_is_cache_active', $active );
 	}
 }

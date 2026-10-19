@@ -2,13 +2,13 @@
 /**
  * Language management for a block theme's navigation menus.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 use WP_Post;
 
@@ -164,7 +164,7 @@ final class NavigationMenus {
 
 		$title = (string) $post->post_title;
 
-		return '' !== $title ? $title : __( 'Navigation', 'localepress' );
+		return '' !== $title ? $title : __( 'Navigation', 'shapetranslate' );
 	}
 
 	/**
@@ -343,16 +343,16 @@ final class NavigationMenus {
 
 		if ( null === $target ) {
 			return new WP_Error(
-				'localepress_menu_not_found',
-				__( 'That menu no longer exists.', 'localepress' ),
+				'shapetranslate_menu_not_found',
+				__( 'That menu no longer exists.', 'shapetranslate' ),
 				array( 'status' => 404 )
 			);
 		}
 
 		if ( $target->ID === $source->ID ) {
 			return new WP_Error(
-				'localepress_link_self',
-				__( 'A menu cannot be its own translation.', 'localepress' ),
+				'shapetranslate_link_self',
+				__( 'A menu cannot be its own translation.', 'shapetranslate' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -361,8 +361,8 @@ final class NavigationMenus {
 
 		if ( isset( $translations[ (string) $language_id ] ) ) {
 			return new WP_Error(
-				'localepress_menu_exists',
-				__( 'That language already has a version of this menu.', 'localepress' ),
+				'shapetranslate_menu_exists',
+				__( 'That language already has a version of this menu.', 'shapetranslate' ),
 				array( 'status' => 409 )
 			);
 		}
@@ -395,8 +395,8 @@ final class NavigationMenus {
 
 		if ( null === $post ) {
 			return new WP_Error(
-				'localepress_menu_not_found',
-				__( 'That menu no longer exists.', 'localepress' ),
+				'shapetranslate_menu_not_found',
+				__( 'That menu no longer exists.', 'shapetranslate' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -432,8 +432,8 @@ final class NavigationMenus {
 
 		if ( ! isset( $translations[ $language_id ] ) ) {
 			return new WP_Error(
-				'localepress_menu_not_translated',
-				__( 'That language has no version of this menu.', 'localepress' ),
+				'shapetranslate_menu_not_translated',
+				__( 'That language has no version of this menu.', 'shapetranslate' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -488,7 +488,7 @@ final class NavigationMenus {
 				'orderby'                          => 'title',
 				'order'                            => 'ASC',
 				'suppress_filters'                 => false,
-				'localepress_skip_language_filter' => true,
+				'shapetranslate_skip_language_filter' => true,
 			)
 		);
 
@@ -524,8 +524,8 @@ final class NavigationMenus {
 
 		if ( null === $post ) {
 			return new WP_Error(
-				'localepress_menu_not_found',
-				__( 'That menu no longer exists.', 'localepress' ),
+				'shapetranslate_menu_not_found',
+				__( 'That menu no longer exists.', 'shapetranslate' ),
 				array( 'status' => 404 )
 			);
 		}

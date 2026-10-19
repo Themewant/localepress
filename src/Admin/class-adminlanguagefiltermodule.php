@@ -2,17 +2,17 @@
 /**
  * Admin bar language filter module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\LanguageQueryConstraint;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\LanguageQueryConstraint;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Admin_Bar;
 use WP_Post;
 use WP_Query;
@@ -36,7 +36,7 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const NODE_ID = 'localepress-languages';
+	const NODE_ID = 'shapetranslate-languages';
 
 	/**
 	 * Filter state.
@@ -117,8 +117,8 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_bar_styles' ) );
 		add_filter( 'posts_clauses', array( $this, 'filter_post_clauses' ), 10, 2 );
 		add_filter( 'terms_clauses', array( $this, 'filter_term_clauses' ), 10, 3 );
-		add_filter( 'localepress_new_post_language_id', array( $this, 'filtered_language_id' ) );
-		add_filter( 'localepress_new_term_language_id', array( $this, 'filtered_language_id' ) );
+		add_filter( 'shapetranslate_new_post_language_id', array( $this, 'filtered_language_id' ) );
+		add_filter( 'shapetranslate_new_term_language_id', array( $this, 'filtered_language_id' ) );
 
 		// Runs before TranslationLifecycleModule::assign_default_language() at priority 20.
 		add_action( 'wp_after_insert_post', array( $this, 'assign_filtered_language' ), 15, 2 );
@@ -129,7 +129,7 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 	 *
 	 * The rules ride on the core admin bar stylesheet because the menu appears
 	 * on every screen, while the plugin's own stylesheet loads only on
-	 * LocalePress and translation screens.
+	 * ShapeTranslate and translation screens.
 	 *
 	 * @return void
 	 */
@@ -144,7 +144,7 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 
 		wp_add_inline_style(
 			'admin-bar',
-			'#wpadminbar #wp-admin-bar-' . self::NODE_ID . ' .localepress-flag{'
+			'#wpadminbar #wp-admin-bar-' . self::NODE_ID . ' .shapetranslate-flag{'
 				. 'width:16px;height:11px;margin-right:6px;vertical-align:baseline;'
 			. '}'
 		);
@@ -168,14 +168,14 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 		}
 
 		$current  = $this->filter->get_language();
-		$show_all = __( 'Show all languages', 'localepress' );
+		$show_all = __( 'Show all languages', 'shapetranslate' );
 
 		$admin_bar->add_node(
 			array(
 				'id'     => self::NODE_ID,
 				'title'  => $this->node_title( null === $current ? $show_all : $current['native_name'], $current ),
 				'href'   => $this->filter->get_filter_url( AdminLanguageFilter::SHOW_ALL ),
-				'meta'   => array( 'title' => __( 'Filters content by language', 'localepress' ) ),
+				'meta'   => array( 'title' => __( 'Filters content by language', 'shapetranslate' ) ),
 				'parent' => false,
 			)
 		);
@@ -370,7 +370,7 @@ final class AdminLanguageFilterModule implements ModuleInterface {
 		 *
 		 * @param bool $available Whether the filter is available.
 		 */
-		$this->available = (bool) apply_filters( 'localepress_enable_admin_language_filter', $available );
+		$this->available = (bool) apply_filters( 'shapetranslate_enable_admin_language_filter', $available );
 
 		return $this->available;
 	}

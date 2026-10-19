@@ -1,125 +1,125 @@
 <?php
 /**
- * LocalePress application bootstrap.
+ * ShapeTranslate application bootstrap.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress;
+namespace ShapeTranslate;
 
 defined( 'ABSPATH' ) || exit;
 
-use LocalePress\Admin\AdminLanguageFilter;
-use LocalePress\Admin\AdminLanguageFilterModule;
-use LocalePress\Admin\AdminModule;
-use LocalePress\Admin\AdminNoticeGate;
-use LocalePress\Admin\AdminTextDirectionModule;
-use LocalePress\Admin\ContentTranslationModule;
-use LocalePress\Admin\SetupWizardModule;
-use LocalePress\Admin\SettingsModule;
-use LocalePress\Admin\StringTranslationModule;
-use LocalePress\Admin\StringTranslationQuery;
-use LocalePress\Admin\MediaTranslationFields;
-use LocalePress\Admin\TermTranslationModule;
-use LocalePress\Admin\TranslationActions;
-use LocalePress\Admin\TranslationDashboardModule;
-use LocalePress\Admin\TranslationDashboardQuery;
-use LocalePress\Content\CommentLanguageModule;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Content\PostTypeSupport;
-use LocalePress\Content\DirectQueryLanguageModule;
-use LocalePress\Content\QueryIdTranslationModule;
-use LocalePress\Content\TranslationLifecycleModule;
-use LocalePress\Contracts\LanguageRepositoryInterface;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Contracts\StringRepositoryInterface;
-use LocalePress\Contracts\TermTranslationRepositoryInterface;
-use LocalePress\Contracts\TranslationDashboardRepositoryInterface;
-use LocalePress\Contracts\TranslationRepositoryInterface;
-use LocalePress\Infrastructure\DatabaseTermTranslationRepository;
-use LocalePress\Infrastructure\DatabaseStringRepository;
-use LocalePress\Infrastructure\DatabaseTranslationDashboardRepository;
-use LocalePress\Infrastructure\DatabaseTranslationRepository;
-use LocalePress\Infrastructure\OptionsLanguageRepository;
-use LocalePress\Integrations\Elementor\ElementorCompatibility;
-use LocalePress\Integrations\Cache\CacheCompatibilityModule;
-use LocalePress\Integrations\Elementor\ElementorModule;
-use LocalePress\Integrations\Elementor\ElementorSiteEditor;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilderModule;
-use LocalePress\Integrations\Elementor\ElementorWidgetModule;
-use LocalePress\Integrations\ElementsKit\ElementsKitModule;
-use LocalePress\Integrations\ElementsKit\ElementsKitTemplates;
-use LocalePress\Integrations\ElementPack\ElementPackModule;
-use LocalePress\Integrations\ElementPack\ElementPackTemplates;
-use LocalePress\Integrations\EssentialAddons\EssentialAddonsAdmin;
-use LocalePress\Integrations\EssentialAddons\EssentialAddonsModule;
-use LocalePress\Integrations\EssentialAddons\EssentialAddonsTemplates;
-use LocalePress\Integrations\HappyAddons\HappyAddonsModule;
-use LocalePress\Integrations\HappyAddons\HappyAddonsTemplates;
-use LocalePress\Integrations\HeaderFooter\HeaderFooterModule;
-use LocalePress\Integrations\HeaderFooter\HeaderFooterTemplates;
-use LocalePress\Integrations\JegKit\JegKitDashboard;
-use LocalePress\Integrations\JegKit\JegKitModule;
-use LocalePress\Integrations\JegKit\JegKitTemplates;
-use LocalePress\Integrations\RoyalAddons\RoyalAddonsModule;
-use LocalePress\Integrations\RoyalAddons\RoyalAddonsTemplates;
-use LocalePress\Integrations\Seo\RankMathProvider;
-use LocalePress\Integrations\Seo\SeoMetaModule;
-use LocalePress\Integrations\Seo\SeoPressProvider;
-use LocalePress\Integrations\Seo\YoastSeoProvider;
-use LocalePress\Integrations\SiteEditor\SiteEditorModule;
-use LocalePress\Integrations\SiteEditor\SiteEditorSidebar;
-use LocalePress\Integrations\SiteEditor\BlockTemplateLifecycle;
-use LocalePress\Integrations\SiteEditor\SiteEditorPanel;
-use LocalePress\Integrations\SiteEditor\SiteEditorRoutes;
-use LocalePress\Integrations\SiteEditor\TemplateParts;
-use LocalePress\Integrations\SiteEditor\TemplateResolver;
-use LocalePress\Integrations\SiteEditor\Templates;
-use LocalePress\Integrations\Wpml\WpmlConfigModule;
-use LocalePress\Integrations\Wpml\WpmlConfigReader;
-use LocalePress\Language\BrowserLanguageDetector;
-use LocalePress\Language\CurrentLanguageResolver;
-use LocalePress\Language\LanguageCatalog;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Language\LanguageTag;
-use LocalePress\Language\LanguageValidator;
-use LocalePress\Language\LocaleModule;
-use LocalePress\Lifecycle\Installer;
-use LocalePress\Media\MediaModule;
-use LocalePress\Media\MediaTranslationManager;
-use LocalePress\Navigation\MenuLanguageManager;
-use LocalePress\Navigation\MenuLocationsModule;
-use LocalePress\Navigation\NavigationBlockModule;
-use LocalePress\Navigation\NavigationLinkTranslator;
-use LocalePress\Navigation\NavigationMenuRoutes;
-use LocalePress\Navigation\NavigationMenus;
-use LocalePress\Navigation\NavigationModule;
-use LocalePress\Rest\RestLanguageModule;
-use LocalePress\Routing\HostOriginModule;
-use LocalePress\Routing\LanguageDetectionModule;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Routing\RoutingModule;
-use LocalePress\Routing\SearchFormModule;
-use LocalePress\SEO\SeoMetadata;
-use LocalePress\SEO\SeoModule;
-use LocalePress\SEO\SitemapModule;
-use LocalePress\Settings\PluginSettings;
-use LocalePress\Settings\WorkflowSettings;
-use LocalePress\StringTranslation\CoreStringModule;
-use LocalePress\StringTranslation\OptionStringTranslator;
-use LocalePress\StringTranslation\RegisteredStringValidator;
-use LocalePress\Sync\SyncModule;
-use LocalePress\Sync\TranslationSynchronizer;
-use LocalePress\StringTranslation\StringManager;
-use LocalePress\StringTranslation\StringModule;
-use LocalePress\Switcher\LanguageSwitcher;
-use LocalePress\Switcher\NavigationMenuIntegration;
-use LocalePress\Switcher\SwitcherModule;
-use LocalePress\Taxonomy\DefaultTermModule;
-use LocalePress\Taxonomy\TaxonomySupport;
-use LocalePress\Taxonomy\TermTranslationLifecycleModule;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Admin\AdminLanguageFilter;
+use ShapeTranslate\Admin\AdminLanguageFilterModule;
+use ShapeTranslate\Admin\AdminModule;
+use ShapeTranslate\Admin\AdminNoticeGate;
+use ShapeTranslate\Admin\AdminTextDirectionModule;
+use ShapeTranslate\Admin\ContentTranslationModule;
+use ShapeTranslate\Admin\SetupWizardModule;
+use ShapeTranslate\Admin\SettingsModule;
+use ShapeTranslate\Admin\StringTranslationModule;
+use ShapeTranslate\Admin\StringTranslationQuery;
+use ShapeTranslate\Admin\MediaTranslationFields;
+use ShapeTranslate\Admin\TermTranslationModule;
+use ShapeTranslate\Admin\TranslationActions;
+use ShapeTranslate\Admin\TranslationDashboardModule;
+use ShapeTranslate\Admin\TranslationDashboardQuery;
+use ShapeTranslate\Content\CommentLanguageModule;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Content\PostTypeSupport;
+use ShapeTranslate\Content\DirectQueryLanguageModule;
+use ShapeTranslate\Content\QueryIdTranslationModule;
+use ShapeTranslate\Content\TranslationLifecycleModule;
+use ShapeTranslate\Contracts\LanguageRepositoryInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\StringRepositoryInterface;
+use ShapeTranslate\Contracts\TermTranslationRepositoryInterface;
+use ShapeTranslate\Contracts\TranslationDashboardRepositoryInterface;
+use ShapeTranslate\Contracts\TranslationRepositoryInterface;
+use ShapeTranslate\Infrastructure\DatabaseTermTranslationRepository;
+use ShapeTranslate\Infrastructure\DatabaseStringRepository;
+use ShapeTranslate\Infrastructure\DatabaseTranslationDashboardRepository;
+use ShapeTranslate\Infrastructure\DatabaseTranslationRepository;
+use ShapeTranslate\Infrastructure\OptionsLanguageRepository;
+use ShapeTranslate\Integrations\Elementor\ElementorCompatibility;
+use ShapeTranslate\Integrations\Cache\CacheCompatibilityModule;
+use ShapeTranslate\Integrations\Elementor\ElementorModule;
+use ShapeTranslate\Integrations\Elementor\ElementorSiteEditor;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilderModule;
+use ShapeTranslate\Integrations\Elementor\ElementorWidgetModule;
+use ShapeTranslate\Integrations\ElementsKit\ElementsKitModule;
+use ShapeTranslate\Integrations\ElementsKit\ElementsKitTemplates;
+use ShapeTranslate\Integrations\ElementPack\ElementPackModule;
+use ShapeTranslate\Integrations\ElementPack\ElementPackTemplates;
+use ShapeTranslate\Integrations\EssentialAddons\EssentialAddonsAdmin;
+use ShapeTranslate\Integrations\EssentialAddons\EssentialAddonsModule;
+use ShapeTranslate\Integrations\EssentialAddons\EssentialAddonsTemplates;
+use ShapeTranslate\Integrations\HappyAddons\HappyAddonsModule;
+use ShapeTranslate\Integrations\HappyAddons\HappyAddonsTemplates;
+use ShapeTranslate\Integrations\HeaderFooter\HeaderFooterModule;
+use ShapeTranslate\Integrations\HeaderFooter\HeaderFooterTemplates;
+use ShapeTranslate\Integrations\JegKit\JegKitDashboard;
+use ShapeTranslate\Integrations\JegKit\JegKitModule;
+use ShapeTranslate\Integrations\JegKit\JegKitTemplates;
+use ShapeTranslate\Integrations\RoyalAddons\RoyalAddonsModule;
+use ShapeTranslate\Integrations\RoyalAddons\RoyalAddonsTemplates;
+use ShapeTranslate\Integrations\Seo\RankMathProvider;
+use ShapeTranslate\Integrations\Seo\SeoMetaModule;
+use ShapeTranslate\Integrations\Seo\SeoPressProvider;
+use ShapeTranslate\Integrations\Seo\YoastSeoProvider;
+use ShapeTranslate\Integrations\SiteEditor\SiteEditorModule;
+use ShapeTranslate\Integrations\SiteEditor\SiteEditorSidebar;
+use ShapeTranslate\Integrations\SiteEditor\BlockTemplateLifecycle;
+use ShapeTranslate\Integrations\SiteEditor\SiteEditorPanel;
+use ShapeTranslate\Integrations\SiteEditor\SiteEditorRoutes;
+use ShapeTranslate\Integrations\SiteEditor\TemplateParts;
+use ShapeTranslate\Integrations\SiteEditor\TemplateResolver;
+use ShapeTranslate\Integrations\SiteEditor\Templates;
+use ShapeTranslate\Integrations\Wpml\WpmlConfigModule;
+use ShapeTranslate\Integrations\Wpml\WpmlConfigReader;
+use ShapeTranslate\Language\BrowserLanguageDetector;
+use ShapeTranslate\Language\CurrentLanguageResolver;
+use ShapeTranslate\Language\LanguageCatalog;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageTag;
+use ShapeTranslate\Language\LanguageValidator;
+use ShapeTranslate\Language\LocaleModule;
+use ShapeTranslate\Lifecycle\Installer;
+use ShapeTranslate\Media\MediaModule;
+use ShapeTranslate\Media\MediaTranslationManager;
+use ShapeTranslate\Navigation\MenuLanguageManager;
+use ShapeTranslate\Navigation\MenuLocationsModule;
+use ShapeTranslate\Navigation\NavigationBlockModule;
+use ShapeTranslate\Navigation\NavigationLinkTranslator;
+use ShapeTranslate\Navigation\NavigationMenuRoutes;
+use ShapeTranslate\Navigation\NavigationMenus;
+use ShapeTranslate\Navigation\NavigationModule;
+use ShapeTranslate\Rest\RestLanguageModule;
+use ShapeTranslate\Routing\HostOriginModule;
+use ShapeTranslate\Routing\LanguageDetectionModule;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Routing\RoutingModule;
+use ShapeTranslate\Routing\SearchFormModule;
+use ShapeTranslate\SEO\SeoMetadata;
+use ShapeTranslate\SEO\SeoModule;
+use ShapeTranslate\SEO\SitemapModule;
+use ShapeTranslate\Settings\PluginSettings;
+use ShapeTranslate\Settings\WorkflowSettings;
+use ShapeTranslate\StringTranslation\CoreStringModule;
+use ShapeTranslate\StringTranslation\OptionStringTranslator;
+use ShapeTranslate\StringTranslation\RegisteredStringValidator;
+use ShapeTranslate\Sync\SyncModule;
+use ShapeTranslate\Sync\TranslationSynchronizer;
+use ShapeTranslate\StringTranslation\StringManager;
+use ShapeTranslate\StringTranslation\StringModule;
+use ShapeTranslate\Switcher\LanguageSwitcher;
+use ShapeTranslate\Switcher\NavigationMenuIntegration;
+use ShapeTranslate\Switcher\SwitcherModule;
+use ShapeTranslate\Taxonomy\DefaultTermModule;
+use ShapeTranslate\Taxonomy\TaxonomySupport;
+use ShapeTranslate\Taxonomy\TermTranslationLifecycleModule;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 
 /**
  * Composes services and modules for the plugin.
@@ -268,11 +268,11 @@ final class Plugin {
 		/**
 		 * Filters the language repository implementation.
 		 *
-		 * Addons may provide a different repository before LocalePress boots.
+		 * Addons may provide a different repository before ShapeTranslate boots.
 		 *
 		 * @param LanguageRepositoryInterface $repository Default Options API repository.
 		 */
-		$repository = apply_filters( 'localepress_language_repository', $repository );
+		$repository = apply_filters( 'shapetranslate_language_repository', $repository );
 
 		if ( ! $repository instanceof LanguageRepositoryInterface ) {
 			$repository = new OptionsLanguageRepository();
@@ -288,7 +288,7 @@ final class Plugin {
 		 *
 		 * @param StringRepositoryInterface $string_repository Default database repository.
 		 */
-		$string_repository = apply_filters( 'localepress_string_repository', $string_repository );
+		$string_repository = apply_filters( 'shapetranslate_string_repository', $string_repository );
 
 		if ( ! $string_repository instanceof StringRepositoryInterface ) {
 			$string_repository = new DatabaseStringRepository();
@@ -312,7 +312,7 @@ final class Plugin {
 		 *
 		 * @param TranslationRepositoryInterface $translation_repository Default database repository.
 		 */
-		$translation_repository = apply_filters( 'localepress_translation_repository', $translation_repository );
+		$translation_repository = apply_filters( 'shapetranslate_translation_repository', $translation_repository );
 
 		if ( ! $translation_repository instanceof TranslationRepositoryInterface ) {
 			$translation_repository = new DatabaseTranslationRepository();
@@ -334,7 +334,7 @@ final class Plugin {
 		 * @param TermTranslationRepositoryInterface $term_translation_repository Default database repository.
 		 */
 		$term_translation_repository = apply_filters(
-			'localepress_term_translation_repository',
+			'shapetranslate_term_translation_repository',
 			$term_translation_repository
 		);
 
@@ -381,8 +381,6 @@ final class Plugin {
 
 		$option_strings = new OptionStringTranslator( $this->string_manager );
 
-		// Held in a variable because the cache compatibility module writes the
-		// same cookie from the browser, and has to describe it identically.
 		$language_detection = new LanguageDetectionModule(
 			$this->language_url_manager,
 			$this->language_manager,
@@ -390,17 +388,11 @@ final class Plugin {
 			$this->plugin_settings
 		);
 
-		// Held in a variable because two builders store a template's language the
-		// same way — an Elementor document whose translation has to be published
-		// before a location may render it — and both integrations resolve it here.
 		$elementor_documents = new ElementorThemeBuilder(
 			$this->post_translation_manager,
 			$this->term_translation_manager
 		);
 
-		// Held in a variable because the administration screen offers the same
-		// assignments the frontend reads, and the two must agree on what a slug
-		// means in a language before either of them is registered.
 		$template_parts = new TemplateParts( $this->language_manager, $this->post_translation_manager );
 		$templates      = new Templates( $this->language_manager, $this->post_translation_manager );
 
@@ -643,7 +635,7 @@ final class Plugin {
 			 * @param TranslationRepositoryInterface                $translation_repository Active relationship repository.
 			 */
 			$dashboard_repository = apply_filters(
-				'localepress_translation_dashboard_repository',
+				'shapetranslate_translation_dashboard_repository',
 				$dashboard_repository,
 				$translation_repository
 			);
@@ -699,7 +691,7 @@ final class Plugin {
 		}
 
 		/**
-		 * Filters the modules registered by LocalePress.
+		 * Filters the modules registered by ShapeTranslate.
 		 *
 		 * Future builder and addon modules can register
 		 * through this composition boundary.
@@ -707,7 +699,7 @@ final class Plugin {
 		 * @param array<int, ModuleInterface> $modules Plugin modules.
 		 * @param Plugin                      $plugin  Plugin application.
 		 */
-		$filtered_modules = apply_filters( 'localepress_modules', $modules, $this );
+		$filtered_modules = apply_filters( 'shapetranslate_modules', $modules, $this );
 
 		if ( ! is_array( $filtered_modules ) ) {
 			$filtered_modules = $modules;
@@ -722,11 +714,11 @@ final class Plugin {
 		}
 
 		/**
-		 * Fires after LocalePress services and modules have been registered.
+		 * Fires after ShapeTranslate services and modules have been registered.
 		 *
 		 * @param Plugin $plugin Plugin application.
 		 */
-		do_action( 'localepress_loaded', $this );
+		do_action( 'shapetranslate_loaded', $this );
 	}
 
 	/**

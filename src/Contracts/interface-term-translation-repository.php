@@ -2,10 +2,10 @@
 /**
  * Term translation repository contract.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Contracts;
+namespace ShapeTranslate\Contracts;
 
 defined( 'ABSPATH' ) || exit;
 

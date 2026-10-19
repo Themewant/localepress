@@ -2,14 +2,14 @@
 /**
  * Essential Addons Theme Builder integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\EssentialAddons;
+namespace ShapeTranslate\Integrations\EssentialAddons;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Carries Essential Addons Theme Builder templates across languages.
  *
  * The post type is registered non-public, so it has to be declared translatable
- * before LocalePress will touch it at all. From there the work is the same shape
+ * before ShapeTranslate will touch it at all. From there the work is the same shape
  * as every other builder: a translation has to carry the template type and the
  * display conditions or it fills no location, the conditions have to name the
  * target language's own pages, and the location has to be answered in the
@@ -26,8 +26,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * One thing is particular to this builder. It finds its candidates with an
  * ordinary WP_Query and caches the result in a transient keyed by a language it
- * only knows how to read from Polylang and WPML — so for LocalePress that key is
- * blank. Letting LocalePress narrow that query by language would put one
+ * only knows how to read from Polylang and WPML — so for ShapeTranslate that key is
+ * blank. Letting ShapeTranslate narrow that query by language would put one
  * language's templates in a cache every language then reads. The query is left
  * unfiltered for that reason, and the language is resolved afterwards, on the one
  * template the builder chose.
@@ -87,15 +87,15 @@ final class EssentialAddonsModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_non_public_post_types', array( $this, 'declare_post_type' ) );
-		add_filter( 'localepress_supported_post_types', array( $this, 'declare_post_type' ) );
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_non_public_post_types', array( $this, 'declare_post_type' ) );
+		add_filter( 'shapetranslate_supported_post_types', array( $this, 'declare_post_type' ) );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
 
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		add_filter( 'eael/theme_builder/active_template_id', array( $this, 'filter_template_id' ), 10, 2 );
 	}
@@ -104,7 +104,7 @@ final class EssentialAddonsModule implements ModuleInterface {
 	 * Declares the Theme Builder post type translatable.
 	 *
 	 * The builder registers it non-public — nothing should reach a header
-	 * fragment by URL — so it is invisible to LocalePress until it is named on
+	 * fragment by URL — so it is invisible to ShapeTranslate until it is named on
 	 * both lists: one says the engine may translate a non-public type, the other
 	 * offers this one.
 	 *
@@ -131,10 +131,10 @@ final class EssentialAddonsModule implements ModuleInterface {
 	 * templates carry no language, so there is nothing to resolve and nothing to
 	 * copy. The checkbox therefore reads as selected and stays that way; a site
 	 * that would rather keep one set of headers and footers for every language
-	 * says so through `localepress_eael_translate_templates`, which leaves the
+	 * says so through `shapetranslate_eael_translate_templates`, which leaves the
 	 * rest of the module inert on its own.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -299,7 +299,7 @@ final class EssentialAddonsModule implements ModuleInterface {
 		 */
 		$resolved_id = absint(
 			apply_filters(
-				'localepress_eael_template_id',
+				'shapetranslate_eael_template_id',
 				$this->resolved[ $cache_key ],
 				$source_id,
 				(string) $type,
@@ -354,7 +354,7 @@ final class EssentialAddonsModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether Theme Builder templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_eael_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_eael_translate_templates', true );
 	}
 
 	/**
@@ -377,7 +377,7 @@ final class EssentialAddonsModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		return (bool) apply_filters(
-			'localepress_eael_translate_conditions',
+			'shapetranslate_eael_translate_conditions',
 			true,
 			absint( $target_post_id ),
 			(string) $language_id

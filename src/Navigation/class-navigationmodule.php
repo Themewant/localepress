@@ -2,16 +2,16 @@
 /**
  * Multilingual navigation integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Switcher\NavigationMenuIntegration;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Switcher\NavigationMenuIntegration;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Error;
 use WP_Post;
 use WP_Term;
@@ -78,7 +78,7 @@ final class NavigationModule implements ModuleInterface {
 		add_filter( 'wp_nav_menu_args', array( $this, 'select_language_menu' ), 20 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'translate_menu_items' ), 5, 2 );
 		add_action( 'wp_delete_nav_menu', array( $this, 'remove_deleted_menu' ) );
-		add_filter( 'localepress_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
+		add_filter( 'shapetranslate_pre_delete_language', array( $this, 'prevent_language_deletion' ), 10, 3 );
 	}
 
 	/**
@@ -109,7 +109,7 @@ final class NavigationModule implements ModuleInterface {
 		 * @param bool                 $override Whether to replace an explicit menu.
 		 * @param array<string, mixed> $args     Menu arguments.
 		 */
-		$override_explicit = (bool) apply_filters( 'localepress_override_explicit_nav_menu', false, $args );
+		$override_explicit = (bool) apply_filters( 'shapetranslate_override_explicit_nav_menu', false, $args );
 
 		if ( $has_explicit_menu && ! $override_explicit ) {
 			return $args;
@@ -149,14 +149,14 @@ final class NavigationModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress translates object links in one rendered menu.
+		 * Filters whether ShapeTranslate translates object links in one rendered menu.
 		 *
 		 * @param bool                 $translate Whether links should be translated.
 		 * @param array<int, WP_Post>  $items     Menu items.
 		 * @param object               $args      Menu arguments.
 		 * @param array<string, mixed> $language  Current language.
 		 */
-		$translate = apply_filters( 'localepress_translate_menu_links', true, $items, $args, $language );
+		$translate = apply_filters( 'shapetranslate_translate_menu_links', true, $items, $args, $language );
 
 		if ( ! $translate ) {
 			return $items;
@@ -190,7 +190,7 @@ final class NavigationModule implements ModuleInterface {
 		 * @param object               $args     Menu arguments.
 		 * @param array<string, mixed> $language Current language.
 		 */
-		$filtered = apply_filters( 'localepress_translated_menu_items', $items, $args, $language );
+		$filtered = apply_filters( 'shapetranslate_translated_menu_items', $items, $args, $language );
 
 		return is_array( $filtered ) ? $filtered : $items;
 	}
@@ -222,7 +222,7 @@ final class NavigationModule implements ModuleInterface {
 
 		return new WP_Error(
 			'menu_language_in_use',
-			__( 'This language is assigned to a navigation menu and cannot be deleted.', 'localepress' )
+			__( 'This language is assigned to a navigation menu and cannot be deleted.', 'shapetranslate' )
 		);
 	}
 
@@ -375,8 +375,8 @@ final class NavigationModule implements ModuleInterface {
 			return $this->apply_missing_behavior( $item, $language, $behavior );
 		}
 
-		$item->_localepress_original_object_id   = absint( $item->object_id );
-		$item->_localepress_translated_object_id = $target_id;
+		$item->_shapetranslate_original_object_id   = absint( $item->object_id );
+		$item->_shapetranslate_translated_object_id = $target_id;
 		$item->object_id                         = (string) $target_id;
 		$item->url                               = $url;
 
@@ -387,7 +387,7 @@ final class NavigationModule implements ModuleInterface {
 		 * @param int                  $target_id Target post or term identifier.
 		 * @param array<string, mixed> $language  Current language.
 		 */
-		do_action( 'localepress_menu_item_translated', $item, $target_id, $language );
+		do_action( 'shapetranslate_menu_item_translated', $item, $target_id, $language );
 
 		return '';
 	}
@@ -411,7 +411,7 @@ final class NavigationModule implements ModuleInterface {
 		 * @param WP_Post              $item      Menu item.
 		 * @param array<string, mixed> $language  Current language.
 		 */
-		return (bool) apply_filters( 'localepress_menu_post_translation_available', $available, $post, $item, $language );
+		return (bool) apply_filters( 'shapetranslate_menu_post_translation_available', $available, $post, $item, $language );
 	}
 
 	/**
@@ -434,7 +434,7 @@ final class NavigationModule implements ModuleInterface {
 		}
 
 		$item->classes   = is_array( $item->classes ) ? $item->classes : array();
-		$item->classes[] = 'localepress-menu-item-unavailable';
+		$item->classes[] = 'shapetranslate-menu-item-unavailable';
 
 		return '';
 	}
@@ -450,7 +450,7 @@ final class NavigationModule implements ModuleInterface {
 	 * the page exists, and this is the language it is written in so far.
 	 *
 	 * So an untranslated entry stays and keeps pointing at the page it names,
-	 * carrying `localepress-menu-item-unavailable` for a theme that wants to mark
+	 * carrying `shapetranslate-menu-item-unavailable` for a theme that wants to mark
 	 * it. A site that would rather hide those entries says so through the filter,
 	 * and a site that gives each language its own menu never reaches this at all.
 	 *
@@ -468,7 +468,7 @@ final class NavigationModule implements ModuleInterface {
 		 * @param object               $args     Menu arguments.
 		 * @param array<string, mixed> $language Current language.
 		 */
-		$behavior = apply_filters( 'localepress_menu_missing_translation_behavior', 'preserve', $args, $language );
+		$behavior = apply_filters( 'shapetranslate_menu_missing_translation_behavior', 'preserve', $args, $language );
 		$behavior = is_scalar( $behavior ) ? sanitize_key( (string) $behavior ) : '';
 
 		return in_array( $behavior, array( 'hide', 'home', 'current', 'preserve' ), true )
@@ -523,7 +523,7 @@ final class NavigationModule implements ModuleInterface {
 		foreach ( $items as $item ) {
 			$items_by_id[ $item->ID ] = $item;
 
-			if ( isset( $item->_localepress_translated_object_id ) ) {
+			if ( isset( $item->_shapetranslate_translated_object_id ) ) {
 				$item->classes = array_values(
 					array_diff(
 						(array) $item->classes,
@@ -573,7 +573,7 @@ final class NavigationModule implements ModuleInterface {
 	 * @return bool
 	 */
 	private function is_current_translated_item( WP_Post $item, $queried ) {
-		$target_id = absint( $item->_localepress_translated_object_id );
+		$target_id = absint( $item->_shapetranslate_translated_object_id );
 
 		if ( 'post_type' === $item->type ) {
 			return $queried instanceof WP_Post && $target_id === $queried->ID;

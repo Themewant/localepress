@@ -1,5 +1,5 @@
 /**
- * LocalePress styles for the Elementor editor.
+ * ShapeTranslate styles for the Elementor editor.
  *
  * Loaded only inside the editor, never on the front end, because the only
  * thing it describes is the placeholder the widget draws while it has nothing
@@ -15,7 +15,7 @@
  * 1. Widget placeholder
  * ------------------------------------------------------------------------ */
 
-.localepress-elementor-placeholder {
+.shapetranslate-elementor-placeholder {
 	padding: 1em;
 	border: 1px dashed currentColor;
 	border-radius: 4px;

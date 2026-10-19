@@ -2,16 +2,16 @@
 /**
  * Translation copy and synchronization engine.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Sync;
+namespace ShapeTranslate\Sync;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Settings\SyncCatalog;
-use LocalePress\Settings\WorkflowSettings;
-use LocalePress\Taxonomy\TaxonomySupport;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Settings\SyncCatalog;
+use ShapeTranslate\Settings\WorkflowSettings;
+use ShapeTranslate\Taxonomy\TaxonomySupport;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -133,7 +133,7 @@ final class TranslationSynchronizer {
 		 * @param string              $language_id Target language identifier.
 		 * @param array<string, bool> $options     Applied copy options.
 		 */
-		do_action( 'localepress_translation_items_copied', $target->ID, $source->ID, (string) $language_id, $options );
+		do_action( 'shapetranslate_translation_items_copied', $target->ID, $source->ID, (string) $language_id, $options );
 	}
 
 	/**
@@ -171,7 +171,7 @@ final class TranslationSynchronizer {
 			 * @param int    $source_id   Edited post identifier.
 			 * @param string $language_id Target language identifier.
 			 */
-			do_action( 'localepress_translation_items_synchronized', $target->ID, $source->ID, (string) $language_id );
+			do_action( 'shapetranslate_translation_items_synchronized', $target->ID, $source->ID, (string) $language_id );
 		}
 	}
 
@@ -207,7 +207,7 @@ final class TranslationSynchronizer {
 		 * @param bool $allowed Whether synchronization is permitted.
 		 * @param int  $post_id Post the editor is working on.
 		 */
-		return (bool) apply_filters( 'localepress_current_user_can_synchronize', $allowed, $post_id );
+		return (bool) apply_filters( 'shapetranslate_current_user_can_synchronize', $allowed, $post_id );
 	}
 
 	/**
@@ -256,7 +256,7 @@ final class TranslationSynchronizer {
 		 * @param int                $target_id   Target post identifier.
 		 * @param string             $language_id Target language identifier.
 		 */
-		$filtered = apply_filters( 'localepress_copy_post_meta_keys', $keys, $sync, $source_id, $target_id, $language_id );
+		$filtered = apply_filters( 'shapetranslate_copy_post_meta_keys', $keys, $sync, $source_id, $target_id, $language_id );
 		$keys     = is_array( $filtered ) ? $filtered : $keys;
 		$resolved = array();
 
@@ -366,7 +366,7 @@ final class TranslationSynchronizer {
 		 * @param int    $source_id   Source post identifier.
 		 * @param int    $target_id   Target post identifier.
 		 */
-		return apply_filters( 'localepress_translate_post_meta_value', $value, $meta_key, $language_id, $source_id, $target_id );
+		return apply_filters( 'shapetranslate_translate_post_meta_value', $value, $meta_key, $language_id, $source_id, $target_id );
 	}
 
 	/**
@@ -469,7 +469,7 @@ final class TranslationSynchronizer {
 	 * A term with no translation in the target language is dropped rather than
 	 * carried over, because an assignment naming another language's term shows a
 	 * translation holding terms its own language cannot list, and the editor then
-	 * removes them on the next save anyway. `localepress_mapped_term_id` can keep
+	 * removes them on the next save anyway. `shapetranslate_mapped_term_id` can keep
 	 * the source term instead.
 	 *
 	 * @param array<int, mixed> $term_ids    Source term identifiers.
@@ -511,7 +511,7 @@ final class TranslationSynchronizer {
 			 */
 			$translation = absint(
 				apply_filters(
-					'localepress_mapped_term_id',
+					'shapetranslate_mapped_term_id',
 					$translation,
 					$term_id,
 					$taxonomy,

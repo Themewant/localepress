@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "localepress/navigation-language-switcher",
+	"name": "shapetranslate/navigation-language-switcher",
 	"version": "1.0.0",
 	"title": "Language Switcher",
 	"category": "design",
 	"icon": "translation",
 	"description": "Add language links to a Navigation block.",
-	"textdomain": "localepress",
+	"textdomain": "shapetranslate",
 	"parent": [ "core/navigation" ],
 	"usesContext": [
 		"textColor",
@@ -62,5 +62,5 @@
 		"renaming": false
 	},
 	"editorScript": "file:./index.js",
-	"editorStyle": "localepress-navigation-switcher-editor"
+	"editorStyle": "shapetranslate-navigation-switcher-editor"
 }

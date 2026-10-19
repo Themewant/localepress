@@ -2,15 +2,15 @@
 /**
  * Module contract.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Contracts;
+namespace ShapeTranslate\Contracts;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Contract implemented by bootable LocalePress modules.
+ * Contract implemented by bootable ShapeTranslate modules.
  */
 interface ModuleInterface {
 

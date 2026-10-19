@@ -2,13 +2,13 @@
 /**
  * WordPress locale switching module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -57,6 +57,13 @@ final class LocaleModule implements ModuleInterface {
 	private $applied = null;
 
 	/**
+	 * Locale answered while refresh_locale() switches away from it.
+	 *
+	 * @var string|null
+	 */
+	private $holding = null;
+
+	/**
 	 * Language URL API.
 	 *
 	 * @var LanguageUrlManager
@@ -84,11 +91,26 @@ final class LocaleModule implements ModuleInterface {
 		add_filter( 'locale', array( $this, 'filter_locale' ), 20 );
 
 		/*
+		 * Any code can write an email or other output in another language with
+		 * switch_to_locale(), as WordPress itself does for a new user or a
+		 * password reset. ShapeTranslate strings and translated options follow the
+		 * same switch, so such output reads as one language end to end.
+		 */
+		add_filter( 'shapetranslate_current_language_id', array( $this, 'follow_switched_locale' ), 900, 2 );
+		add_filter( 'shapetranslate_translate_option', array( $this, 'translate_options_when_switched' ) );
+
+		/*
+		 * WordPress writes to a user in the user's own locale, such as the
+		 * welcome and password reset emails, and reads it from the profile.
+		 */
+		add_action( 'user_register', array( $this, 'save_user_locale' ) );
+
+		/*
 		 * A REST call can name its language in a body, which cannot be read
 		 * until the request is dispatched — long after the text domains were
 		 * loaded. When that happens the locale has to be resolved again.
 		 */
-		add_action( 'localepress_request_language_changed', array( $this, 'refresh_locale' ) );
+		add_action( 'shapetranslate_request_language_changed', array( $this, 'refresh_locale' ) );
 
 		/*
 		 * Before `$wp_locale` is built, which is what reads the global and
@@ -96,7 +118,7 @@ final class LocaleModule implements ModuleInterface {
 		 * still runs ahead of it.
 		 */
 		add_action( 'setup_theme', array( $this, 'apply_text_direction' ), 20 );
-		add_action( 'localepress_request_language_changed', array( $this, 'apply_text_direction' ), 20 );
+		add_action( 'shapetranslate_request_language_changed', array( $this, 'apply_text_direction' ), 20 );
 	}
 
 	/**
@@ -106,6 +128,31 @@ final class LocaleModule implements ModuleInterface {
 	 * @return string|mixed
 	 */
 	public function filter_locale( $locale ) {
+		/*
+		 * An explicit switch_to_locale() is a caller saying which language the
+		 * next piece of output is in, such as an email sent in its customer's
+		 * language from a request made in another. The switcher answers this
+		 * filter before it reaches here, and overriding it with the request's
+		 * language would undo the switch while leaving it on the stack.
+		 *
+		 * The switcher is read directly rather than through is_locale_switched():
+		 * the locale is asked for before WordPress creates the switcher, and that
+		 * function assumes it exists.
+		 */
+		if (
+			isset( $GLOBALS['wp_locale_switcher'] )
+			&& $GLOBALS['wp_locale_switcher'] instanceof \WP_Locale_Switcher
+			&& $GLOBALS['wp_locale_switcher']->is_switched()
+		) {
+			$this->applied = is_string( $locale ) ? $locale : '';
+
+			return $locale;
+		}
+
+		if ( null !== $this->holding ) {
+			return $this->holding;
+		}
+
 		$resolved = $this->resolve_request_locale();
 
 		if ( '' === $resolved ) {
@@ -115,14 +162,14 @@ final class LocaleModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters the locale LocalePress applies to a prefixed frontend request.
+		 * Filters the locale ShapeTranslate applies to a prefixed frontend request.
 		 *
 		 * Returning an empty string restores the locale WordPress resolved.
 		 *
 		 * @param string       $resolved Locale for the request language.
 		 * @param string|mixed $locale   Locale WordPress resolved.
 		 */
-		$filtered = apply_filters( 'localepress_request_locale', $resolved, $locale );
+		$filtered = apply_filters( 'shapetranslate_request_locale', $resolved, $locale );
 		$applied  = is_string( $filtered ) && '' !== $filtered ? $filtered : $locale;
 
 		$this->applied = is_string( $applied ) ? $applied : '';
@@ -163,7 +210,21 @@ final class LocaleModule implements ModuleInterface {
 			return;
 		}
 
-		switch_to_locale( $target );
+		/*
+		 * switch_to_locale() does nothing when the locale it is asked for is
+		 * already the current one, and this filter answers with the new
+		 * language as soon as the request changes, so the switch would be
+		 * refused and the text domains left in the old language. The locale
+		 * the text domains were loaded in is answered until the switch has
+		 * happened.
+		 */
+		$this->holding = $previous;
+
+		try {
+			switch_to_locale( $target );
+		} finally {
+			$this->holding = null;
+		}
 	}
 
 	/**
@@ -281,6 +342,87 @@ final class LocaleModule implements ModuleInterface {
 	}
 
 	/**
+	 * Answers the language of a locale that was switched to with switch_to_locale().
+	 *
+	 * Runs late, so it only decides when nothing else has declared a language.
+	 * A locale no enabled language uses leaves the answer as it was.
+	 *
+	 * @param string                         $language_id Language identifier resolved so far.
+	 * @param array<int, array<string,mixed>> $languages   Enabled languages.
+	 * @return string
+	 */
+	public function follow_switched_locale( $language_id, $languages = array() ) {
+		if ( ! $this->is_locale_switched() ) {
+			return $language_id;
+		}
+
+		$locale = get_locale();
+
+		foreach ( (array) $languages as $language ) {
+			if ( is_array( $language ) && isset( $language['id'], $language['locale'] ) && is_scalar( $language['locale'] ) && 0 === strcasecmp( $locale, (string) $language['locale'] ) ) {
+				return (string) $language['id'];
+			}
+		}
+
+		return $language_id;
+	}
+
+	/**
+	 * Remembers the language a visitor registered in as the user's locale.
+	 *
+	 * WordPress sends a user's emails in the 'locale' user meta, so a visitor who
+	 * registered on a translated page reads the welcome and password reset emails
+	 * in that language. An account created in wp-admin, or one that works in the
+	 * dashboard, says nothing about the language of its owner and is left alone.
+	 *
+	 * @param int $user_id New user ID.
+	 * @return void
+	 */
+	public function save_user_locale( $user_id ) {
+		$user_id = absint( $user_id );
+
+		if ( 0 === $user_id || ( is_admin() && ! wp_doing_ajax() ) || user_can( $user_id, 'edit_posts' ) ) {
+			return;
+		}
+
+		if ( '' !== (string) get_user_meta( $user_id, 'locale', true ) ) {
+			return;
+		}
+
+		$locale = $this->resolve_request_locale();
+
+		if ( '' !== $locale ) {
+			update_user_meta( $user_id, 'locale', $locale );
+		}
+	}
+
+	/**
+	 * Lets declared options be translated for output written in a switched locale.
+	 *
+	 * Without this, an email sent from wp-admin would read the stored original.
+	 *
+	 * @param bool $translate Whether the option is translated.
+	 * @return bool
+	 */
+	public function translate_options_when_switched( $translate ) {
+		return $this->is_locale_switched() ? true : (bool) $translate;
+	}
+
+	/**
+	 * Reports whether code has switched the locale with switch_to_locale().
+	 *
+	 * The switcher is read directly, because it does not exist until WordPress
+	 * creates it.
+	 *
+	 * @return bool
+	 */
+	private function is_locale_switched() {
+		return isset( $GLOBALS['wp_locale_switcher'] )
+			&& $GLOBALS['wp_locale_switcher'] instanceof \WP_Locale_Switcher
+			&& $GLOBALS['wp_locale_switcher']->is_switched();
+	}
+
+	/**
 	 * Reports whether this request may run in a translated locale.
 	 *
 	 * @return bool
@@ -290,10 +432,10 @@ final class LocaleModule implements ModuleInterface {
 			&& $this->url_manager->background()->scopes_request();
 
 		/**
-		 * Filters whether LocalePress may switch the WordPress locale.
+		 * Filters whether ShapeTranslate may switch the WordPress locale.
 		 *
 		 * @param bool $allowed Whether the locale may be switched.
 		 */
-		return (bool) apply_filters( 'localepress_should_switch_locale', $allowed );
+		return (bool) apply_filters( 'shapetranslate_should_switch_locale', $allowed );
 	}
 }

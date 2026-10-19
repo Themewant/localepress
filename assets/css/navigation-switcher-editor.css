@@ -15,14 +15,14 @@
  * 1. Block preview
  * ------------------------------------------------------------------------ */
 
-.wp-block-localepress-navigation-language-switcher {
+.wp-block-shapetranslate-navigation-language-switcher {
 	display: flex;
 	align-items: center;
 	gap: var( --wp--style--block-gap, 0.5rem );
 	flex-wrap: wrap;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher__item {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher__item {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4em;
@@ -32,11 +32,11 @@
  * A language that will render without a link, because it is disabled or because
  * the site publishes nothing in it and the block was told to show those anyway.
  */
-.wp-block-localepress-navigation-language-switcher .localepress-switcher__item--unavailable {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher__item--unavailable {
 	opacity: 0.5;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher__flag {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher__flag {
 	display: inline-block;
 	width: 16px;
 	height: 11px;
@@ -46,7 +46,7 @@
 	object-fit: cover;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__notice {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__notice {
 	opacity: 0.7;
 	font-style: italic;
 }
@@ -65,7 +65,7 @@
  * reader will first meet it.
  * ------------------------------------------------------------------------ */
 
-.wp-block-localepress-navigation-language-switcher.localepress-switcher-preview--submenu {
+.wp-block-shapetranslate-navigation-language-switcher.shapetranslate-switcher-preview--submenu {
 	position: relative;
 	/* One row: the label and its arrow, with the panel measured from the item. */
 	display: inline-flex;
@@ -74,14 +74,14 @@
 	gap: 0;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__toggle {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__toggle {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4em;
 	white-space: nowrap;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__icon {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__icon {
 	display: inline-flex;
 	align-items: center;
 	flex: 0 0 auto;
@@ -89,11 +89,11 @@
 	transition: transform 0.15s ease;
 }
 
-.wp-block-localepress-navigation-language-switcher.localepress-switcher-preview--open .localepress-switcher-preview__icon {
+.wp-block-shapetranslate-navigation-language-switcher.shapetranslate-switcher-preview--open .shapetranslate-switcher-preview__icon {
 	transform: rotate( 180deg );
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__submenu {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__submenu {
 	display: none;
 	position: absolute;
 	z-index: 28;
@@ -132,11 +132,11 @@
 	text-align: start;
 }
 
-.wp-block-localepress-navigation-language-switcher.localepress-switcher-preview--open .localepress-switcher-preview__submenu {
+.wp-block-shapetranslate-navigation-language-switcher.shapetranslate-switcher-preview--open .shapetranslate-switcher-preview__submenu {
 	display: flex;
 }
 
-.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__child {
+.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__child {
 	display: block;
 	margin: 0;
 	/* Written twice, so the inset survives in a right-to-left canvas too. */
@@ -155,7 +155,7 @@
  * ------------------------------------------------------------------------ */
 
 @media ( prefers-reduced-motion: reduce ) {
-	.wp-block-localepress-navigation-language-switcher .localepress-switcher-preview__icon {
+	.wp-block-shapetranslate-navigation-language-switcher .shapetranslate-switcher-preview__icon {
 		transition: none;
 	}
 }

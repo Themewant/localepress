@@ -2,17 +2,17 @@
 /**
  * Essential Addons Theme Builder administration integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\EssentialAddons;
+namespace ShapeTranslate\Integrations\EssentialAddons;
 
-use LocalePress\Admin\TranslationActions;
-use LocalePress\Admin\TranslationListTable;
-use LocalePress\Assets;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Admin\TranslationActions;
+use ShapeTranslate\Admin\TranslationListTable;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 use ReflectionException;
 use ReflectionProperty;
 use WP_List_Table;
@@ -39,7 +39,7 @@ defined( 'ABSPATH' ) || exit;
  * is given what the post list puts there, and the page is printed.
  *
  * Every step is guarded and every failure is the same failure — the columns do
- * not appear — because this reaches into a table LocalePress does not own. A
+ * not appear — because this reaches into a table ShapeTranslate does not own. A
  * builder that reorganized it would leave this screen exactly as it found it.
  */
 final class EssentialAddonsAdmin implements ModuleInterface {
@@ -57,7 +57,7 @@ final class EssentialAddonsAdmin implements ModuleInterface {
 	/**
 	 * Matches one of the two cells the table leaves empty.
 	 */
-	const CELL_PATTERN = '#<td class=(["\'])(localepress_language|localepress_translations)([^"\']*)\1([^>]*)></td>#';
+	const CELL_PATTERN = '#<td class=(["\'])(shapetranslate_language|shapetranslate_translations)([^"\']*)\1([^>]*)></td>#';
 
 	/**
 	 * Theme Builder language resolution service.
@@ -222,8 +222,8 @@ final class EssentialAddonsAdmin implements ModuleInterface {
 	 */
 	public function enqueue_assets() {
 		wp_enqueue_style(
-			'localepress-admin',
-			LOCALEPRESS_URL . 'assets/css/admin.css',
+			'shapetranslate-admin',
+			SHAPETRANSLATE_URL . 'assets/css/admin.css',
 			array(),
 			Assets::version( 'assets/css/admin.css' )
 		);
@@ -247,8 +247,8 @@ final class EssentialAddonsAdmin implements ModuleInterface {
 
 		$items = array_values( $this->table->items );
 		$rows  = array(
-			'localepress_language'     => 0,
-			'localepress_translations' => 0,
+			'shapetranslate_language'     => 0,
+			'shapetranslate_translations' => 0,
 		);
 
 		$filled = preg_replace_callback(
@@ -268,7 +268,7 @@ final class EssentialAddonsAdmin implements ModuleInterface {
 					return $matches[0];
 				}
 
-				$content = 'localepress_language' === $column
+				$content = 'shapetranslate_language' === $column
 					? $this->list_table->get_language_markup( $post_id )
 					: $this->list_table->get_translations_markup( $post_id );
 

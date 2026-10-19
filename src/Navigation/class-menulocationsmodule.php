@@ -2,13 +2,13 @@
 /**
  * Per-language theme locations on the WordPress menus screen.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,9 +17,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * A theme registers one location and expects one menu in it. On a translated
  * site that is one menu too few: the same location has to answer with a
- * different menu in every language. LocalePress already stores that mapping and
+ * different menu in every language. ShapeTranslate already stores that mapping and
  * applies it when a menu is rendered, but the assignment could only be made on
- * the LocalePress settings screen, away from the menu being edited.
+ * the ShapeTranslate settings screen, away from the menu being edited.
  *
  * This offers the same assignment where an editor expects to find it. While the
  * menus screen or the customizer is open, each registered location is presented
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  * the settings screen stores it, so both screens describe the same site.
  *
  * The default language keeps the location key the theme registered, so a theme
- * asking for `primary` is answered whether or not LocalePress is active.
+ * asking for `primary` is answered whether or not ShapeTranslate is active.
  */
 final class MenuLocationsModule implements ModuleInterface {
 
@@ -48,7 +48,7 @@ final class MenuLocationsModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const NOTICE_TRANSIENT = 'localepress_menu_locations_notice_';
+	const NOTICE_TRANSIENT = 'shapetranslate_menu_locations_notice_';
 
 	/**
 	 * Menu language and location manager.
@@ -109,7 +109,7 @@ final class MenuLocationsModule implements ModuleInterface {
 	public function register() {
 		/*
 		 * Only the two screens that assign menus to locations see the expanded
-		 * set. Everywhere else - the LocalePress settings screen included - keeps
+		 * set. Everywhere else - the ShapeTranslate settings screen included - keeps
 		 * reading the locations the theme actually registered, so nothing else
 		 * has to know this happened.
 		 */
@@ -283,7 +283,7 @@ final class MenuLocationsModule implements ModuleInterface {
 			 * @param \WP_Error                         $result      Reason the assignment was refused.
 			 * @param array<string, array<string, int>> $assignments Assignments that were refused.
 			 */
-			do_action( 'localepress_menu_locations_rejected', $result, $assignments );
+			do_action( 'shapetranslate_menu_locations_rejected', $result, $assignments );
 		}
 
 		return $mods;

@@ -2,14 +2,14 @@
 /**
  * ElementsKit header and footer integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\ElementsKit;
+namespace ShapeTranslate\Integrations\ElementsKit;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -84,12 +84,12 @@ final class ElementsKitModule implements ModuleInterface {
 			return;
 		}
 
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		// Ahead of the builder's own resolution, which runs on `wp` at the default
 		// priority and reads the cache this leaves behind.
@@ -106,7 +106,7 @@ final class ElementsKitModule implements ModuleInterface {
 	 * that would rather keep one header and footer for every language says so
 	 * through the filter below, which leaves the rest of the module inert.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -262,7 +262,7 @@ final class ElementsKitModule implements ModuleInterface {
 				 */
 				$resolved_id = absint(
 					apply_filters(
-						'localepress_elementskit_template_id',
+						'shapetranslate_elementskit_template_id',
 						absint( $this->templates->translate_template_id( $source_id, $language_id ) ),
 						$source_id,
 						$slot,
@@ -309,7 +309,7 @@ final class ElementsKitModule implements ModuleInterface {
 		 * @param int  $template_id Template post identifier.
 		 */
 		$announce = apply_filters(
-			'localepress_elementskit_atomic_styles',
+			'shapetranslate_elementskit_atomic_styles',
 			true,
 			absint( $template_id )
 		);
@@ -352,7 +352,7 @@ final class ElementsKitModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether ElementsKit templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_elementskit_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_elementskit_translate_templates', true );
 	}
 
 	/**
@@ -375,7 +375,7 @@ final class ElementsKitModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		return (bool) apply_filters(
-			'localepress_elementskit_translate_conditions',
+			'shapetranslate_elementskit_translate_conditions',
 			true,
 			absint( $target_post_id ),
 			(string) $language_id

@@ -1,18 +1,18 @@
 <?php
 /**
- * LocalePress setup wizard page.
+ * ShapeTranslate setup wizard page.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageCatalog;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageHostResolver;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageCatalog;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageHostResolver;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,16 +66,16 @@ final class SetupWizardPage {
 	/** Renders the current wizard step. */
 	public function render() {
 		if ( ! current_user_can( AdminModule::capability() ) ) {
-			wp_die( esc_html__( 'You are not allowed to set up LocalePress.', 'localepress' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to set up ShapeTranslate.', 'shapetranslate' ), '', array( 'response' => 403 ) );
 		}
 
 		$step = $this->current_step();
 		?>
-		<div class="wrap localepress-admin localepress-setup-wizard">
-			<h1><?php esc_html_e( 'Set Up LocalePress', 'localepress' ); ?></h1>
+		<div class="wrap shapetranslate-admin shapetranslate-setup-wizard">
+			<h1><?php esc_html_e( 'Set Up ShapeTranslate', 'shapetranslate' ); ?></h1>
 			<?php $this->render_notice(); ?>
 			<?php $this->render_progress( $step ); ?>
-			<div class="localepress-wizard-content">
+			<div class="shapetranslate-wizard-content">
 				<?php $this->render_step( $step ); ?>
 			</div>
 		</div>
@@ -97,12 +97,12 @@ final class SetupWizardPage {
 		$languages = $this->language_manager->get_languages();
 		$catalog   = $this->catalog->get_languages();
 		?>
-		<h2><?php esc_html_e( 'Site Language', 'localepress' ); ?></h2>
-		<p><?php esc_html_e( 'Choose the language used by your existing content.', 'localepress' ); ?></p>
+		<h2><?php esc_html_e( 'Site Language', 'shapetranslate' ); ?></h2>
+		<p><?php esc_html_e( 'Choose the language used by your existing content.', 'shapetranslate' ); ?></p>
 		<?php $this->form_start( 1 ); ?>
 		<table class="form-table" role="presentation"><tbody><tr>
-			<th scope="row"><label for="localepress-setup-language"><?php esc_html_e( 'Default language', 'localepress' ); ?></label></th>
-			<td><div class="localepress-flag-select" data-localepress-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'localepress' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'localepress' ); ?>"><select id="localepress-setup-language" name="<?php echo empty( $languages ) ? 'locale' : 'language_id'; ?>" class="regular-text">
+			<th scope="row"><label for="shapetranslate-setup-language"><?php esc_html_e( 'Default language', 'shapetranslate' ); ?></label></th>
+			<td><div class="shapetranslate-flag-select" data-shapetranslate-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'shapetranslate' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'shapetranslate' ); ?>"><select id="shapetranslate-setup-language" name="<?php echo empty( $languages ) ? 'locale' : 'language_id'; ?>" class="regular-text">
 			<?php if ( empty( $languages ) ) : ?>
 				<?php
 				foreach ( $catalog as $locale => $language ) :
@@ -116,7 +116,7 @@ final class SetupWizardPage {
 			<?php endif; ?>
 			</select></div></td>
 		</tr></tbody></table>
-		<?php $this->form_end( __( 'Continue', 'localepress' ) ); ?>
+		<?php $this->form_end( __( 'Continue', 'shapetranslate' ) ); ?>
 		<?php
 	}
 
@@ -127,17 +127,17 @@ final class SetupWizardPage {
 		$catalog   = $this->catalog->get_languages();
 		$used      = wp_list_pluck( $languages, 'locale' );
 		?>
-		<h2><?php esc_html_e( 'Languages', 'localepress' ); ?></h2>
-		<p><?php esc_html_e( 'Add every language this site will be translated into, and mark the one your existing content is written in. More can be added later from the Languages screen.', 'localepress' ); ?></p>
+		<h2><?php esc_html_e( 'Languages', 'shapetranslate' ); ?></h2>
+		<p><?php esc_html_e( 'Add every language this site will be translated into, and mark the one your existing content is written in. More can be added later from the Languages screen.', 'shapetranslate' ); ?></p>
 		<?php $this->form_start( 2 ); ?>
-		<table class="widefat striped localepress-wizard-languages">
+		<table class="widefat striped shapetranslate-wizard-languages">
 			<thead>
 				<tr>
-					<th scope="col"><?php esc_html_e( 'Language', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Locale', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'URL slug', 'localepress' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Default', 'localepress' ); ?></th>
-					<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'localepress' ); ?></span></th>
+					<th scope="col"><?php esc_html_e( 'Language', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Locale', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'URL slug', 'shapetranslate' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Default', 'shapetranslate' ); ?></th>
+					<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'shapetranslate' ); ?></span></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -145,12 +145,12 @@ final class SetupWizardPage {
 				<?php
 				$make_default = sprintf(
 					/* translators: %s: language name. */
-					__( 'Make %s the default language', 'localepress' ),
+					__( 'Make %s the default language', 'shapetranslate' ),
 					$language['native_name']
 				);
 				$confirm = sprintf(
 					/* translators: %s: language name. */
-					__( 'Remove %s? Content already assigned to it keeps its language until the content itself is deleted.', 'localepress' ),
+					__( 'Remove %s? Content already assigned to it keeps its language until the content itself is deleted.', 'shapetranslate' ),
 					$language['native_name']
 				);
 				// The default language stays, so the site keeps the language its
@@ -159,7 +159,7 @@ final class SetupWizardPage {
 				?>
 				<tr>
 					<td>
-						<span class="localepress-language-code">
+						<span class="shapetranslate-language-code">
 							<?php echo $this->flags->get_flag_html( $language ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html(). ?>
 							<?php echo esc_html( $language['native_name'] ); ?>
 						</span>
@@ -178,21 +178,21 @@ final class SetupWizardPage {
 					<td>
 						<?php if ( ! $is_default ) : ?>
 							<a
-								class="localepress-wizard-remove"
+								class="shapetranslate-wizard-remove"
 								href="<?php echo esc_url( $this->remove_language_url( $language['id'] ) ); ?>"
-								data-localepress-confirm="<?php echo esc_attr( $confirm ); ?>"
-							><?php esc_html_e( 'Remove', 'localepress' ); ?></a>
+								data-shapetranslate-confirm="<?php echo esc_attr( $confirm ); ?>"
+							><?php esc_html_e( 'Remove', 'shapetranslate' ); ?></a>
 						<?php endif; ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
 		</table>
-		<div class="localepress-wizard-add">
-			<label for="localepress-add-language"><?php esc_html_e( 'Add a language', 'localepress' ); ?></label>
-			<div class="localepress-flag-select" data-localepress-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'localepress' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'localepress' ); ?>">
-				<select id="localepress-add-language" name="add_locale">
-					<option value=""><?php esc_html_e( 'Select a language', 'localepress' ); ?></option>
+		<div class="shapetranslate-wizard-add">
+			<label for="shapetranslate-add-language"><?php esc_html_e( 'Add a language', 'shapetranslate' ); ?></label>
+			<div class="shapetranslate-flag-select" data-shapetranslate-flag-select data-search-label="<?php esc_attr_e( 'Search languages', 'shapetranslate' ); ?>" data-empty-text="<?php esc_attr_e( 'No languages found.', 'shapetranslate' ); ?>">
+				<select id="shapetranslate-add-language" name="add_locale">
+					<option value=""><?php esc_html_e( 'Select a language', 'shapetranslate' ); ?></option>
 					<?php foreach ( $catalog as $locale => $language ) : ?>
 						<?php if ( ! in_array( $locale, $used, true ) ) : ?>
 							<option value="<?php echo esc_attr( $locale ); ?>" data-flag="<?php echo esc_url( $this->flags->get_flag_url( $language ) ); ?>"><?php echo esc_html( $language['name'] . ' - ' . $language['native_name'] ); ?></option>
@@ -200,9 +200,9 @@ final class SetupWizardPage {
 					<?php endforeach; ?>
 				</select>
 			</div>
-			<button type="submit" class="button" name="wizard_action" value="add"><?php esc_html_e( 'Add language', 'localepress' ); ?></button>
+			<button type="submit" class="button" name="wizard_action" value="add"><?php esc_html_e( 'Add language', 'shapetranslate' ); ?></button>
 		</div>
-		<?php $this->form_end( __( 'Continue', 'localepress' ), 1, 'continue' ); ?>
+		<?php $this->form_end( __( 'Continue', 'shapetranslate' ), 1, 'continue' ); ?>
 		<?php
 	}
 
@@ -221,12 +221,12 @@ final class SetupWizardPage {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'action'   => 'localepress_setup_remove_language',
+					'action'   => 'shapetranslate_setup_remove_language',
 					'language' => $language_id,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'localepress_setup_remove_language_' . $language_id
+			'shapetranslate_setup_remove_language_' . $language_id
 		);
 	}
 
@@ -241,60 +241,60 @@ final class SetupWizardPage {
 		$site      = untrailingslashit( LanguageHostResolver::site_url() );
 		$scheme    = 0 === strpos( $site, 'https://' ) ? 'https://' : 'http://';
 		?>
-		<h2><?php esc_html_e( 'Language URLs', 'localepress' ); ?></h2>
-		<div class="localepress-notice notice notice-warning inline"><p><?php esc_html_e( 'This choice sets public URLs and canonical links. Changing it later may require link and cache updates.', 'localepress' ); ?></p></div>
+		<h2><?php esc_html_e( 'Language URLs', 'shapetranslate' ); ?></h2>
+		<div class="shapetranslate-notice notice notice-warning inline"><p><?php esc_html_e( 'This choice sets public URLs and canonical links. Changing it later may require link and cache updates.', 'shapetranslate' ); ?></p></div>
 		<?php $this->form_start( 3 ); ?>
 		<table class="form-table" role="presentation"><tbody>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'URL format', 'localepress' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'URL format', 'shapetranslate' ); ?></th>
 				<td>
-					<fieldset class="localepress-option-list localepress-option-list--examples" data-localepress-url-mode>
+					<fieldset class="shapetranslate-option-list shapetranslate-option-list--examples" data-shapetranslate-url-mode>
 						<label>
 							<input type="radio" name="url_mode" value="directory" <?php checked( $mode, LanguageHostResolver::MODE_DIRECTORY ); ?> />
-							<?php esc_html_e( 'The language is set from the directory name', 'localepress' ); ?>
+							<?php esc_html_e( 'The language is set from the directory name', 'shapetranslate' ); ?>
 							<code><?php echo esc_html( $site . '/' . $sample . '/my-post/' ); ?></code>
 						</label>
 						<label>
 							<input type="radio" name="url_mode" value="subdomain" <?php checked( $mode, LanguageHostResolver::MODE_SUBDOMAIN ); ?> />
-							<?php esc_html_e( 'The language is set from a subdomain', 'localepress' ); ?>
+							<?php esc_html_e( 'The language is set from a subdomain', 'shapetranslate' ); ?>
 							<code><?php echo esc_html( $scheme . $sample . '.' . $base . '/my-post/' ); ?></code>
 						</label>
 						<label>
 							<input type="radio" name="url_mode" value="domain" <?php checked( $mode, LanguageHostResolver::MODE_DOMAIN ); ?> />
-							<?php esc_html_e( 'The language is set from a separate domain', 'localepress' ); ?>
+							<?php esc_html_e( 'The language is set from a separate domain', 'shapetranslate' ); ?>
 							<code><?php echo esc_html( $scheme . 'example.fr/my-post/' ); ?></code>
 						</label>
 						<label>
 							<input type="radio" name="url_mode" value="query" <?php checked( $mode, LanguageHostResolver::MODE_QUERY ); ?> />
-							<?php esc_html_e( 'The language is set from a query argument', 'localepress' ); ?>
+							<?php esc_html_e( 'The language is set from a query argument', 'shapetranslate' ); ?>
 							<code><?php echo esc_html( $site . '/my-post/?' . LanguageUrlManager::PUBLIC_QUERY_VAR . '=' . $sample ); ?></code>
 						</label>
 					</fieldset>
-					<p class="description"><?php esc_html_e( 'Subdomains and separate domains must already point at this WordPress installation, each with its own certificate. The query argument is the only format that works on a site without pretty permalinks.', 'localepress' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Subdomains and separate domains must already point at this WordPress installation, each with its own certificate. The query argument is the only format that works on a site without pretty permalinks.', 'shapetranslate' ); ?></p>
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Default language', 'localepress' ); ?></th>
-				<td><fieldset class="localepress-option-list localepress-option-list--examples">
+				<th scope="row"><?php esc_html_e( 'Default language', 'shapetranslate' ); ?></th>
+				<td><fieldset class="shapetranslate-option-list shapetranslate-option-list--examples">
 					<label>
 						<input type="radio" name="prefix_default" value="0" <?php checked( empty( $url['prefix_default'] ) ); ?> />
-						<?php esc_html_e( 'Hide the language for the default language', 'localepress' ); ?>
+						<?php esc_html_e( 'Hide the language for the default language', 'shapetranslate' ); ?>
 						<code><?php echo esc_html( $site . '/my-post/' ); ?></code>
 					</label>
 					<label>
 						<input type="radio" name="prefix_default" value="1" <?php checked( ! empty( $url['prefix_default'] ) ); ?> />
-						<?php esc_html_e( 'Show the language for every language', 'localepress' ); ?>
+						<?php esc_html_e( 'Show the language for every language', 'shapetranslate' ); ?>
 						<code><?php echo esc_html( $site . '/' . $sample . '/my-post/' ); ?></code>
 					</label>
 				</fieldset></td>
 			</tr>
-			<tr class="localepress-domain-panel" data-localepress-mode-panel="domain" <?php echo LanguageHostResolver::MODE_DOMAIN === $mode ? '' : 'hidden'; ?>>
-				<th scope="row"><?php esc_html_e( 'Domains', 'localepress' ); ?></th>
+			<tr class="shapetranslate-domain-panel" data-shapetranslate-mode-panel="domain" <?php echo LanguageHostResolver::MODE_DOMAIN === $mode ? '' : 'hidden'; ?>>
+				<th scope="row"><?php esc_html_e( 'Domains', 'shapetranslate' ); ?></th>
 				<td>
-					<fieldset class="localepress-option-list">
+					<fieldset class="shapetranslate-option-list">
 					<?php foreach ( $languages as $language ) : ?>
 						<label>
-							<span class="localepress-language-code">
+							<span class="shapetranslate-language-code">
 								<?php echo $this->flags->get_flag_html( $language ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html(). ?>
 								<?php echo esc_html( $language['native_name'] ); ?>
 							</span>
@@ -308,11 +308,11 @@ final class SetupWizardPage {
 						</label>
 					<?php endforeach; ?>
 					</fieldset>
-					<p class="description"><?php esc_html_e( 'A language left empty is served from the site domain. Domains are saved whichever format is selected, so they can be filled in before the switch.', 'localepress' ); ?></p>
+					<p class="description"><?php esc_html_e( 'A language left empty is served from the site domain. Domains are saved whichever format is selected, so they can be filled in before the switch.', 'shapetranslate' ); ?></p>
 				</td>
 			</tr>
 		</tbody></table>
-		<?php $this->form_end( __( 'Continue', 'localepress' ), 2 ); ?>
+		<?php $this->form_end( __( 'Continue', 'shapetranslate' ), 2 ); ?>
 		<?php
 	}
 
@@ -321,18 +321,18 @@ final class SetupWizardPage {
 		$switcher = $this->settings->get_section( 'switcher' );
 		$menus    = current_user_can( 'edit_theme_options' ) ? wp_get_nav_menus() : array();
 		?>
-		<h2><?php esc_html_e( 'Language Switcher', 'localepress' ); ?></h2>
+		<h2><?php esc_html_e( 'Language Switcher', 'shapetranslate' ); ?></h2>
 		<?php $this->form_start( 4 ); ?>
 		<table class="form-table" role="presentation"><tbody>
-			<tr><th scope="row"><label for="localepress-setup-display"><?php esc_html_e( 'Label', 'localepress' ); ?></label></th><td><select id="localepress-setup-display" name="display"><option value="native_name" <?php selected( $switcher['display'], 'native_name' ); ?>><?php esc_html_e( 'Native name', 'localepress' ); ?></option><option value="name" <?php selected( $switcher['display'], 'name' ); ?>><?php esc_html_e( 'Language name', 'localepress' ); ?></option><option value="language_code" <?php selected( $switcher['display'], 'language_code' ); ?>><?php esc_html_e( 'Language code', 'localepress' ); ?></option></select></td></tr>
-			<tr><th scope="row"><label for="localepress-setup-layout"><?php esc_html_e( 'Layout', 'localepress' ); ?></label></th><td><select id="localepress-setup-layout" name="layout"><option value="horizontal" <?php selected( $switcher['layout'], 'horizontal' ); ?>><?php esc_html_e( 'Horizontal list', 'localepress' ); ?></option><option value="vertical" <?php selected( $switcher['layout'], 'vertical' ); ?>><?php esc_html_e( 'Vertical list', 'localepress' ); ?></option><option value="dropdown" <?php selected( $switcher['layout'], 'dropdown' ); ?>><?php esc_html_e( 'Dropdown', 'localepress' ); ?></option></select></td></tr>
-			<tr><th scope="row"><label for="localepress-setup-menu"><?php esc_html_e( 'Add to menu', 'localepress' ); ?></label></th><td><select id="localepress-setup-menu" name="menu_id"><option value="0"><?php esc_html_e( 'Do not add to a menu', 'localepress' ); ?></option>
+			<tr><th scope="row"><label for="shapetranslate-setup-display"><?php esc_html_e( 'Label', 'shapetranslate' ); ?></label></th><td><select id="shapetranslate-setup-display" name="display"><option value="native_name" <?php selected( $switcher['display'], 'native_name' ); ?>><?php esc_html_e( 'Native name', 'shapetranslate' ); ?></option><option value="name" <?php selected( $switcher['display'], 'name' ); ?>><?php esc_html_e( 'Language name', 'shapetranslate' ); ?></option><option value="language_code" <?php selected( $switcher['display'], 'language_code' ); ?>><?php esc_html_e( 'Language code', 'shapetranslate' ); ?></option></select></td></tr>
+			<tr><th scope="row"><label for="shapetranslate-setup-layout"><?php esc_html_e( 'Layout', 'shapetranslate' ); ?></label></th><td><select id="shapetranslate-setup-layout" name="layout"><option value="horizontal" <?php selected( $switcher['layout'], 'horizontal' ); ?>><?php esc_html_e( 'Horizontal list', 'shapetranslate' ); ?></option><option value="vertical" <?php selected( $switcher['layout'], 'vertical' ); ?>><?php esc_html_e( 'Vertical list', 'shapetranslate' ); ?></option><option value="dropdown" <?php selected( $switcher['layout'], 'dropdown' ); ?>><?php esc_html_e( 'Dropdown', 'shapetranslate' ); ?></option></select></td></tr>
+			<tr><th scope="row"><label for="shapetranslate-setup-menu"><?php esc_html_e( 'Add to menu', 'shapetranslate' ); ?></label></th><td><select id="shapetranslate-setup-menu" name="menu_id"><option value="0"><?php esc_html_e( 'Do not add to a menu', 'shapetranslate' ); ?></option>
 			<?php
 			foreach ( $menus as $menu ) :
 				?>
-				<option value="<?php echo esc_attr( $menu->term_id ); ?>"><?php echo esc_html( $menu->name ); ?></option><?php endforeach; ?></select><p class="description"><?php esc_html_e( 'The switcher can also be added later with the block, shortcode, or Appearance > Menus.', 'localepress' ); ?></p></td></tr>
+				<option value="<?php echo esc_attr( $menu->term_id ); ?>"><?php echo esc_html( $menu->name ); ?></option><?php endforeach; ?></select><p class="description"><?php esc_html_e( 'The switcher can also be added later with the block, shortcode, or Appearance > Menus.', 'shapetranslate' ); ?></p></td></tr>
 		</tbody></table>
-		<?php $this->form_end( __( 'Continue', 'localepress' ), 3 ); ?>
+		<?php $this->form_end( __( 'Continue', 'shapetranslate' ), 3 ); ?>
 		<?php
 	}
 
@@ -340,23 +340,23 @@ final class SetupWizardPage {
 	private function render_step_5() {
 		$languages = $this->language_manager->get_languages( true );
 		?>
-		<h2><?php esc_html_e( 'Ready to Translate', 'localepress' ); ?></h2>
+		<h2><?php esc_html_e( 'Ready to Translate', 'shapetranslate' ); ?></h2>
 		<p>
 		<?php
 		echo esc_html(
 			sprintf(
 				/* translators: %d: number of enabled languages. */
-				_n( '%d language is enabled.', '%d languages are enabled.', count( $languages ), 'localepress' ),
+				_n( '%d language is enabled.', '%d languages are enabled.', count( $languages ), 'shapetranslate' ),
 				count( $languages )
 			)
 		);
 		?>
 		</p>
-		<p><code>[localepress_switcher]</code></p>
-		<p class="description"><?php esc_html_e( 'A single placement can override these settings by passing them along with it. Settings > Switcher writes that snippet for you.', 'localepress' ); ?></p>
+		<p><code>[shapetranslate_switcher]</code></p>
+		<p class="description"><?php esc_html_e( 'A single placement can override these settings by passing them along with it. Settings > Switcher writes that snippet for you.', 'shapetranslate' ); ?></p>
 		<?php $this->form_start( 5 ); ?>
-		<?php $this->form_end( __( 'Finish Setup', 'localepress' ), 4 ); ?>
-		<p class="localepress-wizard-links"><a href="<?php echo esc_url( admin_url( 'admin.php?page=localepress' ) ); ?>"><?php esc_html_e( 'Languages', 'localepress' ); ?></a><a href="<?php echo esc_url( admin_url( 'admin.php?page=localepress-translations' ) ); ?>"><?php esc_html_e( 'Translations', 'localepress' ); ?></a><a href="<?php echo esc_url( admin_url( 'admin.php?page=localepress-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'localepress' ); ?></a></p>
+		<?php $this->form_end( __( 'Finish Setup', 'shapetranslate' ), 4 ); ?>
+		<p class="shapetranslate-wizard-links"><a href="<?php echo esc_url( admin_url( 'admin.php?page=shapetranslate' ) ); ?>"><?php esc_html_e( 'Languages', 'shapetranslate' ); ?></a><a href="<?php echo esc_url( admin_url( 'admin.php?page=shapetranslate-translations' ) ); ?>"><?php esc_html_e( 'Translations', 'shapetranslate' ); ?></a><a href="<?php echo esc_url( admin_url( 'admin.php?page=shapetranslate-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'shapetranslate' ); ?></a></p>
 		<?php
 	}
 
@@ -368,9 +368,9 @@ final class SetupWizardPage {
 	private function form_start( $step ) {
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="localepress_setup_step" />
+			<input type="hidden" name="action" value="shapetranslate_setup_step" />
 			<input type="hidden" name="step" value="<?php echo esc_attr( $step ); ?>" />
-			<?php wp_nonce_field( 'localepress_setup_step_' . $step ); ?>
+			<?php wp_nonce_field( 'shapetranslate_setup_step_' . $step ); ?>
 		<?php
 	}
 
@@ -383,11 +383,11 @@ final class SetupWizardPage {
 	 */
 	private function form_end( $label, $back_step = 0, $action = '' ) {
 		?>
-		<p class="submit localepress-wizard-actions">
+		<p class="submit shapetranslate-wizard-actions">
 			<?php
 			if ( 0 < $back_step ) :
 				?>
-				<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=localepress-setup&step=' . $back_step ) ); ?>"><?php esc_html_e( 'Back', 'localepress' ); ?></a><?php endif; ?>
+				<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=shapetranslate-setup&step=' . $back_step ) ); ?>"><?php esc_html_e( 'Back', 'shapetranslate' ); ?></a><?php endif; ?>
 			<button type="submit" class="button button-primary" <?php echo '' === $action ? '' : 'name="wizard_action" value="' . esc_attr( $action ) . '"'; ?>><?php echo esc_html( $label ); ?></button>
 		</p></form>
 		<?php
@@ -399,9 +399,9 @@ final class SetupWizardPage {
 	 * @param int $current Current step.
 	 */
 	private function render_progress( $current ) {
-		$labels = array( __( 'Site Language', 'localepress' ), __( 'Languages', 'localepress' ), __( 'URL Format', 'localepress' ), __( 'Switcher', 'localepress' ), __( 'Finish', 'localepress' ) );
+		$labels = array( __( 'Site Language', 'shapetranslate' ), __( 'Languages', 'shapetranslate' ), __( 'URL Format', 'shapetranslate' ), __( 'Switcher', 'shapetranslate' ), __( 'Finish', 'shapetranslate' ) );
 		?>
-		<ol class="localepress-wizard-progress">
+		<ol class="shapetranslate-wizard-progress">
 		<?php
 		foreach ( $labels as $index => $label ) :
 			?>
@@ -425,15 +425,15 @@ final class SetupWizardPage {
 	/** Renders a wizard notice. */
 	private function render_notice() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only allowlisted notice.
-		$notice = isset( $_GET['localepress_notice'] ) ? sanitize_key( wp_unslash( $_GET['localepress_notice'] ) ) : '';
+		$notice = isset( $_GET['shapetranslate_notice'] ) ? sanitize_key( wp_unslash( $_GET['shapetranslate_notice'] ) ) : '';
 
 		if ( 'setup_error' === $notice ) {
-			$key     = 'localepress_setup_error_' . get_current_user_id();
+			$key     = 'shapetranslate_setup_error_' . get_current_user_id();
 			$message = get_transient( $key );
 			delete_transient( $key );
-			printf( '<div class="localepress-notice notice notice-error"><p>%s</p></div>', esc_html( is_string( $message ) ? $message : __( 'LocalePress could not save this setup step.', 'localepress' ) ) );
+			printf( '<div class="shapetranslate-notice notice notice-error"><p>%s</p></div>', esc_html( is_string( $message ) ? $message : __( 'ShapeTranslate could not save this setup step.', 'shapetranslate' ) ) );
 		} elseif ( 'setup_complete' === $notice ) {
-			echo '<div class="localepress-notice notice notice-success"><p>' . esc_html__( 'LocalePress setup is complete.', 'localepress' ) . '</p></div>';
+			echo '<div class="shapetranslate-notice notice notice-success"><p>' . esc_html__( 'ShapeTranslate setup is complete.', 'shapetranslate' ) . '</p></div>';
 		}
 	}
 }

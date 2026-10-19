@@ -2,16 +2,16 @@
 /**
  * Visitor language detection module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Integrations\Cache\CacheCompatibility;
-use LocalePress\Language\BrowserLanguageDetector;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Integrations\Cache\CacheCompatibility;
+use ShapeTranslate\Language\BrowserLanguageDetector;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,7 +29,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 	/**
 	 * Cookie that remembers the visitor's last language.
 	 */
-	const COOKIE_NAME = 'localepress_language';
+	const COOKIE_NAME = 'shapetranslate_language';
 
 	/**
 	 * Language URL API.
@@ -145,7 +145,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 			 *
 			 * @param bool $exclude Whether to mark the response uncacheable.
 			 */
-			if ( apply_filters( 'localepress_exclude_detected_root_from_cache', true ) ) {
+			if ( apply_filters( 'shapetranslate_exclude_detected_root_from_cache', true ) ) {
 				/*
 				 * Not this plugin's constant to name. DONOTCACHEPAGE is the signal the
 				 * page cache plugins already watch for — W3 Total Cache, WP Super Cache,
@@ -184,7 +184,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 *
 		 * @param array<int, string> $headers Request header names.
 		 */
-		$headers = apply_filters( 'localepress_vary_headers', array( 'Accept-Language', 'Cookie' ) );
+		$headers = apply_filters( 'shapetranslate_vary_headers', array( 'Accept-Language', 'Cookie' ) );
 
 		if ( ! is_array( $headers ) ) {
 			return;
@@ -232,12 +232,12 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * Filters the URL a detected visitor is sent to.
 		 *
 		 * Returning an empty string cancels the redirect and leaves the request
-		 * to the normal LocalePress routing rules.
+		 * to the normal ShapeTranslate routing rules.
 		 *
 		 * @param string               $url      Target URL.
 		 * @param array<string, mixed> $language Detected language record.
 		 */
-		$url = apply_filters( 'localepress_detected_language_url', $url, $language );
+		$url = apply_filters( 'shapetranslate_detected_language_url', $url, $language );
 
 		if ( ! is_string( $url ) || '' === $url || '' === wp_validate_redirect( $url, '' ) ) {
 			return;
@@ -252,9 +252,9 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * @param array<string, mixed> $language Detected language record.
 		 * @param string               $url      Target URL.
 		 */
-		do_action( 'localepress_language_detected', $language, $url );
+		do_action( 'shapetranslate_language_detected', $language, $url );
 
-		wp_safe_redirect( $url, 302, 'LocalePress' );
+		wp_safe_redirect( $url, 302, 'ShapeTranslate' );
 		exit;
 	}
 
@@ -342,7 +342,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 *
 		 * @param bool $allowed Whether detection may run.
 		 */
-		return (bool) apply_filters( 'localepress_should_detect_language', $allowed );
+		return (bool) apply_filters( 'shapetranslate_should_detect_language', $allowed );
 	}
 
 	/**
@@ -391,7 +391,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * @param array<int, array<string, mixed>> $languages Enabled languages.
 		 * @param string                           $header    Accept-Language header.
 		 */
-		$filtered = apply_filters( 'localepress_browser_detection_languages', $languages, $header );
+		$filtered = apply_filters( 'shapetranslate_browser_detection_languages', $languages, $header );
 
 		return $this->detector->match( $header, is_array( $filtered ) ? $filtered : $languages );
 	}
@@ -485,7 +485,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * @param int                  $lifetime Cookie lifetime in seconds.
 		 * @param array<string, mixed> $language Language record.
 		 */
-		$lifetime = (int) apply_filters( 'localepress_language_cookie_lifetime', YEAR_IN_SECONDS, $language );
+		$lifetime = (int) apply_filters( 'shapetranslate_language_cookie_lifetime', YEAR_IN_SECONDS, $language );
 
 		$arguments = array(
 			'expires'  => 0 < $lifetime ? time() + $lifetime : 0,
@@ -504,7 +504,7 @@ final class LanguageDetectionModule implements ModuleInterface {
 		 * @param array<string, mixed> $arguments Arguments for setcookie().
 		 * @param array<string, mixed> $language  Language record.
 		 */
-		$filtered = apply_filters( 'localepress_language_cookie_args', $arguments, $language );
+		$filtered = apply_filters( 'shapetranslate_language_cookie_args', $arguments, $language );
 
 		return is_array( $filtered ) ? $filtered : $arguments;
 	}

@@ -2,17 +2,17 @@
 /**
  * Elementor Theme Builder application integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
-use LocalePress\Admin\TranslationActions;
-use LocalePress\Assets;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Admin\TranslationActions;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,19 +34,19 @@ defined( 'ABSPATH' ) || exit;
  * its own links carry.
  *
  * Every step fails the same way, by leaving the screen exactly as Elementor drew
- * it, because all of this reaches into an application LocalePress does not own.
+ * it, because all of this reaches into an application ShapeTranslate does not own.
  */
 final class ElementorSiteEditor implements ModuleInterface {
 
 	/**
 	 * Handle shared by the script and the stylesheet.
 	 */
-	const ASSET_HANDLE = 'localepress-elementor-site-editor';
+	const ASSET_HANDLE = 'shapetranslate-elementor-site-editor';
 
 	/**
 	 * Key the language is handed back under, beside Elementor's own.
 	 */
-	const PAYLOAD_KEY = 'localepress';
+	const PAYLOAD_KEY = 'shapetranslate';
 
 	/**
 	 * Theme Builder language resolution service.
@@ -165,14 +165,14 @@ final class ElementorSiteEditor implements ModuleInterface {
 
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
-			LOCALEPRESS_URL . 'assets/css/elementor-site-editor.css',
+			SHAPETRANSLATE_URL . 'assets/css/elementor-site-editor.css',
 			array(),
 			Assets::version( 'assets/css/elementor-site-editor.css' )
 		);
 
 		wp_enqueue_script(
 			self::ASSET_HANDLE,
-			LOCALEPRESS_URL . 'assets/js/elementor-site-editor.js',
+			SHAPETRANSLATE_URL . 'assets/js/elementor-site-editor.js',
 			array(),
 			Assets::version( 'assets/js/elementor-site-editor.js' ),
 			true
@@ -180,18 +180,18 @@ final class ElementorSiteEditor implements ModuleInterface {
 
 		wp_localize_script(
 			self::ASSET_HANDLE,
-			'localePressElementorSiteEditor',
+			'shapeTranslateElementorSiteEditor',
 			array(
 				'payloadKey'   => self::PAYLOAD_KEY,
 				'templates'    => $this->describe_templates(),
 				'labels'       => array(
 					/* translators: %s: language name. */
-					'language' => __( 'Language: %s', 'localepress' ),
+					'language' => __( 'Language: %s', 'shapetranslate' ),
 					/* translators: %s: language name. */
-					'edit'     => __( 'Edit the %s translation', 'localepress' ),
+					'edit'     => __( 'Edit the %s translation', 'shapetranslate' ),
 					/* translators: %s: language name. */
-					'create'   => __( 'Add a %s translation', 'localepress' ),
-					'untitled' => __( 'No language', 'localepress' ),
+					'create'   => __( 'Add a %s translation', 'shapetranslate' ),
+					'untitled' => __( 'No language', 'shapetranslate' ),
 				),
 			)
 		);
@@ -219,7 +219,7 @@ final class ElementorSiteEditor implements ModuleInterface {
 				'order'                            => 'DESC',
 				'no_found_rows'                    => true,
 				'suppress_filters'                 => false,
-				'localepress_skip_language_filter' => true,
+				'shapetranslate_skip_language_filter' => true,
 			)
 		);
 
@@ -306,7 +306,7 @@ final class ElementorSiteEditor implements ModuleInterface {
 	 *
 	 * `wp_nonce_url()` hands back a string meant to be printed into an HTML
 	 * attribute, so the separators between its arguments arrive written as
-	 * `&amp;`. Everywhere else in LocalePress that string is printed, and a
+	 * `&amp;`. Everywhere else in ShapeTranslate that string is printed, and a
 	 * browser reading an attribute turns the entities back into separators on
 	 * the way out. This one is not printed: it travels as JSON and is assigned
 	 * to a link from a script, where nothing decodes anything. Left alone, the
@@ -364,7 +364,7 @@ final class ElementorSiteEditor implements ModuleInterface {
 	 * @return bool
 	 */
 	private function translating_templates() {
-		return (bool) apply_filters( 'localepress_elementor_translate_templates', true )
+		return (bool) apply_filters( 'shapetranslate_elementor_translate_templates', true )
 			&& $this->post_translations->supports_post_type( ElementorThemeBuilder::POST_TYPE )
 			&& $this->language_manager->has_languages();
 	}

@@ -2,14 +2,14 @@
 /**
  * Translation dashboard query service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\TranslationDashboardRepositoryInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\TranslationDashboardRepositoryInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -87,7 +87,7 @@ final class TranslationDashboardQuery {
 		 *
 		 * @param array<string, \WP_Post_Type> $post_types Visible supported post types.
 		 */
-		$filtered = apply_filters( 'localepress_translation_dashboard_post_types', $post_types );
+		$filtered = apply_filters( 'shapetranslate_translation_dashboard_post_types', $post_types );
 
 		return is_array( $filtered ) ? $this->validate_post_types( $filtered ) : $post_types;
 	}
@@ -105,7 +105,7 @@ final class TranslationDashboardQuery {
 		 *
 		 * @param array<int, array<string, mixed>> $languages Enabled language records.
 		 */
-		$filtered = apply_filters( 'localepress_translation_dashboard_languages', $languages );
+		$filtered = apply_filters( 'shapetranslate_translation_dashboard_languages', $languages );
 
 		if ( ! is_array( $filtered ) ) {
 			return $languages;
@@ -158,7 +158,7 @@ final class TranslationDashboardQuery {
 		 *
 		 * @param array<string, mixed> $args Normalized query arguments.
 		 */
-		$filtered_args = apply_filters( 'localepress_translation_dashboard_query_args', $args );
+		$filtered_args = apply_filters( 'shapetranslate_translation_dashboard_query_args', $args );
 		$args          = $this->normalize_args( is_array( $filtered_args ) ? $filtered_args : $args );
 		$result        = $this->repository->query_dashboard( $args );
 		$source_ids    = isset( $result['items'] ) && is_array( $result['items'] )
@@ -201,7 +201,7 @@ final class TranslationDashboardQuery {
 		 * @param array<int, array<string, mixed>> $items Prepared rows.
 		 * @param array<string, mixed>             $args  Normalized query arguments.
 		 */
-		$filtered_items = apply_filters( 'localepress_translation_dashboard_items', $items, $args );
+		$filtered_items = apply_filters( 'shapetranslate_translation_dashboard_items', $items, $args );
 
 		return array(
 			'items' => is_array( $filtered_items ) ? array_values( $filtered_items ) : $items,
@@ -275,14 +275,14 @@ final class TranslationDashboardQuery {
 		 *
 		 * @param array<int, string> $complete_statuses Public post statuses.
 		 */
-		$complete_statuses = apply_filters( 'localepress_translation_dashboard_complete_statuses', $complete_statuses );
+		$complete_statuses = apply_filters( 'shapetranslate_translation_dashboard_complete_statuses', $complete_statuses );
 
 		/**
 		 * Filters post statuses included by the Draft translations view.
 		 *
 		 * @param array<int, string> $draft_statuses Draft post statuses.
 		 */
-		$draft_statuses = apply_filters( 'localepress_translation_dashboard_draft_statuses', array( 'draft' ) );
+		$draft_statuses = apply_filters( 'shapetranslate_translation_dashboard_draft_statuses', array( 'draft' ) );
 
 		return array(
 			'post_types'          => $post_type_ids,

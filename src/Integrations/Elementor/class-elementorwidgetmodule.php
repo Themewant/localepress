@@ -2,19 +2,19 @@
 /**
  * Elementor widget registration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
 use Elementor\Widgets_Manager;
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds the LocalePress panel category and the widgets filed under it.
+ * Adds the ShapeTranslate panel category and the widgets filed under it.
  *
  * Kept apart from ElementorModule, which copies a document when a translated
  * draft is created. That runs wherever translations are made, with or without
@@ -30,12 +30,12 @@ final class ElementorWidgetModule implements ModuleInterface {
 	 * a class extending `Elementor\Widget_Base` on every request — including the
 	 * ones where Elementor is not active and that parent does not exist.
 	 */
-	const CATEGORY = 'localepress';
+	const CATEGORY = 'shapetranslate';
 
 	/**
 	 * Handle of the stylesheet loaded inside the Elementor editor.
 	 */
-	const EDITOR_STYLE_HANDLE = 'localepress-elementor-editor';
+	const EDITOR_STYLE_HANDLE = 'shapetranslate-elementor-editor';
 
 	/**
 	 * {@inheritdoc}
@@ -57,14 +57,14 @@ final class ElementorWidgetModule implements ModuleInterface {
 	public function enqueue_editor_styles() {
 		wp_enqueue_style(
 			self::EDITOR_STYLE_HANDLE,
-			LOCALEPRESS_URL . 'assets/css/elementor-editor.css',
+			SHAPETRANSLATE_URL . 'assets/css/elementor-editor.css',
 			array(),
 			Assets::version( 'assets/css/elementor-editor.css' )
 		);
 	}
 
 	/**
-	 * Adds the LocalePress category to the Elementor panel.
+	 * Adds the ShapeTranslate category to the Elementor panel.
 	 *
 	 * @param object $elements_manager Elementor elements manager.
 	 * @return void
@@ -77,14 +77,14 @@ final class ElementorWidgetModule implements ModuleInterface {
 		$elements_manager->add_category(
 			self::CATEGORY,
 			array(
-				'title' => __( 'LocalePress', 'localepress' ),
+				'title' => __( 'ShapeTranslate', 'shapetranslate' ),
 				'icon'  => 'eicon-globe',
 			)
 		);
 	}
 
 	/**
-	 * Registers the widgets LocalePress contributes to the panel.
+	 * Registers the widgets ShapeTranslate contributes to the panel.
 	 *
 	 * @param Widgets_Manager $widgets_manager Elementor widgets manager.
 	 * @return void

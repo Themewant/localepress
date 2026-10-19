@@ -1,13 +1,13 @@
 <?php
 /**
- * LocalePress uninstall cleanup.
+ * ShapeTranslate uninstall cleanup.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-$localepress_delete_site_data = static function () {
+$shapetranslate_delete_site_data = static function () {
 	global $wpdb;
 
 	/*
@@ -17,7 +17,7 @@ $localepress_delete_site_data = static function () {
 	 * test here than the plugin applies everywhere else would quietly keep the
 	 * data of someone who ticked the box.
 	 */
-	$settings = get_option( 'localepress_settings', array() );
+	$settings = get_option( 'shapetranslate_settings', array() );
 	$advanced = is_array( $settings ) && isset( $settings['advanced'] ) && is_array( $settings['advanced'] )
 		? $settings['advanced']
 		: array();
@@ -27,12 +27,12 @@ $localepress_delete_site_data = static function () {
 	}
 
 	$tables = array(
-		$wpdb->prefix . 'localepress_translation_groups',
-		$wpdb->prefix . 'localepress_post_translations',
-		$wpdb->prefix . 'localepress_term_translation_groups',
-		$wpdb->prefix . 'localepress_term_translations',
-		$wpdb->prefix . 'localepress_strings',
-		$wpdb->prefix . 'localepress_string_translations',
+		$wpdb->prefix . 'shapetranslate_translation_groups',
+		$wpdb->prefix . 'shapetranslate_post_translations',
+		$wpdb->prefix . 'shapetranslate_term_translation_groups',
+		$wpdb->prefix . 'shapetranslate_term_translations',
+		$wpdb->prefix . 'shapetranslate_strings',
+		$wpdb->prefix . 'shapetranslate_string_translations',
 	);
 
 	foreach ( $tables as $table ) {
@@ -41,13 +41,12 @@ $localepress_delete_site_data = static function () {
 		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 	}
 
-	delete_metadata( 'term', 0, '_localepress_language_id', '', true );
-	delete_metadata( 'post', 0, '_localepress_switcher_settings', '', true );
-	delete_metadata( 'user', 0, 'localepress_translations_per_page', '', true );
-	delete_metadata( 'user', 0, 'localepress_strings_per_page', '', true );
-	delete_metadata( 'user', 0, 'localepress_admin_language', '', true );
+	delete_metadata( 'term', 0, '_shapetranslate_language_id', '', true );
+	delete_metadata( 'post', 0, '_shapetranslate_switcher_settings', '', true );
+	delete_metadata( 'user', 0, 'shapetranslate_translations_per_page', '', true );
+	delete_metadata( 'user', 0, 'shapetranslate_strings_per_page', '', true );
+	delete_metadata( 'user', 0, 'shapetranslate_admin_language', '', true );
 
-	// This uninstall-only query finds theme mods across active and inactive themes.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$theme_mod_options = $wpdb->get_col(
 		$wpdb->prepare(
@@ -65,7 +64,7 @@ $localepress_delete_site_data = static function () {
 
 		$changed = false;
 
-		foreach ( array( 'localepress_nav_menu_locations', 'localepress_template_parts' ) as $theme_mod ) {
+		foreach ( array( 'shapetranslate_nav_menu_locations', 'shapetranslate_template_parts' ) as $theme_mod ) {
 			if ( array_key_exists( $theme_mod, $theme_mods ) ) {
 				unset( $theme_mods[ $theme_mod ] );
 				$changed = true;
@@ -83,7 +82,7 @@ $localepress_delete_site_data = static function () {
 	 * one without the other leaves either settings nothing can reach or slots
 	 * naming a widget that no longer exists.
 	 */
-	delete_option( 'widget_localepress_language_switcher' );
+	delete_option( 'widget_shapetranslate_language_switcher' );
 
 	$sidebars_widgets = get_option( 'sidebars_widgets', array() );
 
@@ -100,7 +99,7 @@ $localepress_delete_site_data = static function () {
 					$widget_ids,
 					static function ( $widget_id ) {
 						return ! is_string( $widget_id )
-							|| ! str_starts_with( $widget_id, 'localepress_language_switcher-' );
+							|| ! str_starts_with( $widget_id, 'shapetranslate_language_switcher-' );
 					}
 				)
 			);
@@ -126,20 +125,20 @@ $localepress_delete_site_data = static function () {
 	$wpdb->query(
 		$wpdb->prepare(
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-			$wpdb->esc_like( '_transient_localepress_' ) . '%',
-			$wpdb->esc_like( '_transient_timeout_localepress_' ) . '%'
+			$wpdb->esc_like( '_transient_shapetranslate_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_shapetranslate_' ) . '%'
 		)
 	);
 
 	foreach (
 		array(
-			'localepress_language_registry',
-			'localepress_workflow_settings',
-			'localepress_version',
-			'localepress_rewrite_signature',
-			'localepress_setup_redirect',
-			'localepress_settings',
-			'localepress_seeded_default_term_languages',
+			'shapetranslate_language_registry',
+			'shapetranslate_workflow_settings',
+			'shapetranslate_version',
+			'shapetranslate_rewrite_signature',
+			'shapetranslate_setup_redirect',
+			'shapetranslate_settings',
+			'shapetranslate_seeded_default_term_languages',
 		) as $option_name
 	) {
 		delete_option( $option_name );
@@ -148,32 +147,32 @@ $localepress_delete_site_data = static function () {
 };
 
 if ( is_multisite() ) {
-	$localepress_site_offset = 0;
+	$shapetranslate_site_offset = 0;
 
 	do {
-		$localepress_site_ids = get_sites(
+		$shapetranslate_site_ids = get_sites(
 			array(
 				'fields'  => 'ids',
 				'number'  => 100,
-				'offset'  => $localepress_site_offset,
+				'offset'  => $shapetranslate_site_offset,
 				'orderby' => 'id',
 				'order'   => 'ASC',
 			)
 		);
 
-		foreach ( $localepress_site_ids as $localepress_site_id ) {
-			switch_to_blog( $localepress_site_id );
+		foreach ( $shapetranslate_site_ids as $shapetranslate_site_id ) {
+			switch_to_blog( $shapetranslate_site_id );
 
 			try {
-				$localepress_delete_site_data();
+				$shapetranslate_delete_site_data();
 			} finally {
 				restore_current_blog();
 			}
 		}
 
-		$localepress_site_count   = count( $localepress_site_ids );
-		$localepress_site_offset += 100;
-	} while ( 100 === $localepress_site_count );
+		$shapetranslate_site_count   = count( $shapetranslate_site_ids );
+		$shapetranslate_site_offset += 100;
+	} while ( 100 === $shapetranslate_site_count );
 } else {
-	$localepress_delete_site_data();
+	$shapetranslate_delete_site_data();
 }

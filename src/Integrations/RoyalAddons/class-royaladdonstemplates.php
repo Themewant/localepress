@@ -2,14 +2,14 @@
 /**
  * Royal Elementor Addons Theme Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\RoyalAddons;
+namespace ShapeTranslate\Integrations\RoyalAddons;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -187,7 +187,7 @@ final class RoyalAddonsTemplates {
 	 * Reports whether Royal Elementor Addons is present.
 	 *
 	 * The constant, not one of the builder's classes, because the builder loads
-	 * its own on `plugins_loaded` — the hook LocalePress composes its modules on.
+	 * its own on `plugins_loaded` — the hook ShapeTranslate composes its modules on.
 	 * The constant is defined as the plugin file is read, which is before any of
 	 * this; can_resolve() asks the later question, when it is knowable.
 	 *
@@ -201,7 +201,7 @@ final class RoyalAddonsTemplates {
 		 *
 		 * @param bool $available Whether the builder is present.
 		 */
-		return (bool) apply_filters( 'localepress_royaladdons_available', $available );
+		return (bool) apply_filters( 'shapetranslate_royaladdons_available', $available );
 	}
 
 	/**

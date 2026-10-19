@@ -2,12 +2,12 @@
 /**
  * Navigation menu language assignments.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Navigation;
+namespace ShapeTranslate\Navigation;
 
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,14 +22,14 @@ final class MenuLanguageManager {
 	 *
 	 * @var string
 	 */
-	const LANGUAGE_META_KEY = '_localepress_language_id';
+	const LANGUAGE_META_KEY = '_shapetranslate_language_id';
 
 	/**
 	 * Theme-specific location assignment key.
 	 *
 	 * @var string
 	 */
-	const LOCATION_THEME_MOD = 'localepress_nav_menu_locations';
+	const LOCATION_THEME_MOD = 'shapetranslate_nav_menu_locations';
 
 	/**
 	 * Language manager.
@@ -62,7 +62,7 @@ final class MenuLanguageManager {
 		 * @param string $language_id Language identifier, or an empty string.
 		 * @param int    $menu_id     Navigation menu term identifier.
 		 */
-		$filtered = apply_filters( 'localepress_menu_language_id', $language_id, absint( $menu_id ) );
+		$filtered = apply_filters( 'shapetranslate_menu_language_id', $language_id, absint( $menu_id ) );
 
 		return is_string( $filtered ) ? $filtered : $language_id;
 	}
@@ -79,7 +79,7 @@ final class MenuLanguageManager {
 		$language_id = is_scalar( $language_id ) ? sanitize_text_field( (string) $language_id ) : '';
 
 		if ( ! wp_get_nav_menu_object( $menu_id ) ) {
-			return new WP_Error( 'menu_not_found', __( 'The selected navigation menu could not be found.', 'localepress' ) );
+			return new WP_Error( 'menu_not_found', __( 'The selected navigation menu could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( '' === $language_id ) {
@@ -89,7 +89,7 @@ final class MenuLanguageManager {
 		}
 
 		if ( null === $this->language_manager->find( $language_id ) ) {
-			return new WP_Error( 'menu_language_not_found', __( 'The selected menu language is not registered.', 'localepress' ) );
+			return new WP_Error( 'menu_language_not_found', __( 'The selected menu language is not registered.', 'shapetranslate' ) );
 		}
 
 		update_term_meta( $menu_id, self::LANGUAGE_META_KEY, $language_id );
@@ -110,7 +110,7 @@ final class MenuLanguageManager {
 		 *
 		 * @param array<string, array<string, int>> $normalized Assignments by location and language.
 		 */
-		$filtered = apply_filters( 'localepress_menu_location_assignments', $normalized );
+		$filtered = apply_filters( 'shapetranslate_menu_location_assignments', $normalized );
 
 		return is_array( $filtered ) ? $filtered : $normalized;
 	}
@@ -203,7 +203,7 @@ final class MenuLanguageManager {
 			$language_id = is_scalar( $language_id ) ? sanitize_text_field( (string) $language_id ) : '';
 
 			if ( '' !== $language_id && ! isset( $languages_by_id[ $language_id ] ) ) {
-				return new WP_Error( 'menu_language_not_found', __( 'A selected menu language is not registered.', 'localepress' ) );
+				return new WP_Error( 'menu_language_not_found', __( 'A selected menu language is not registered.', 'shapetranslate' ) );
 			}
 
 			$normalized_languages[ $menu_id ] = $language_id;
@@ -230,7 +230,7 @@ final class MenuLanguageManager {
 				}
 
 				if ( ! isset( $menus_by_id[ $menu_id ] ) ) {
-					return new WP_Error( 'menu_not_found', __( 'A selected navigation menu could not be found.', 'localepress' ) );
+					return new WP_Error( 'menu_not_found', __( 'A selected navigation menu could not be found.', 'shapetranslate' ) );
 				}
 
 				$assigned_language = array_key_exists( $menu_id, $normalized_languages )
@@ -240,7 +240,7 @@ final class MenuLanguageManager {
 				if ( $exclusive && '' !== $assigned_language && $language_id !== $assigned_language ) {
 					return new WP_Error(
 						'menu_language_conflict',
-						__( 'A menu cannot be assigned to a location for a different language.', 'localepress' )
+						__( 'A menu cannot be assigned to a location for a different language.', 'shapetranslate' )
 					);
 				}
 
@@ -248,7 +248,7 @@ final class MenuLanguageManager {
 					if ( $exclusive ) {
 						return new WP_Error(
 							'menu_language_conflict',
-							__( 'The same menu cannot be assigned to more than one language.', 'localepress' )
+							__( 'The same menu cannot be assigned to more than one language.', 'shapetranslate' )
 						);
 					}
 
@@ -292,13 +292,13 @@ final class MenuLanguageManager {
 		 * @param array<int, string>                $normalized_languages Menu language assignments.
 		 * @param array<string, array<string, int>> $normalized_locations Location assignments.
 		 */
-		do_action( 'localepress_menu_configuration_updated', $normalized_languages, $normalized_locations );
+		do_action( 'shapetranslate_menu_configuration_updated', $normalized_languages, $normalized_locations );
 
 		return true;
 	}
 
 	/**
-	 * Removes a deleted menu from all LocalePress location mappings.
+	 * Removes a deleted menu from all ShapeTranslate location mappings.
 	 *
 	 * @param int $menu_id Deleted navigation menu term identifier.
 	 * @return void

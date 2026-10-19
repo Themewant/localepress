@@ -2,16 +2,16 @@
 /**
  * Language panel inside the WordPress Site Editor.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Admin\AdminModule;
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Navigation\NavigationMenus;
+use ShapeTranslate\Admin\AdminModule;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Navigation\NavigationMenus;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,7 +37,7 @@ final class SiteEditorSidebar implements ModuleInterface {
 	/**
 	 * Editor script handle.
 	 */
-	const SCRIPT_HANDLE = 'localepress-site-editor';
+	const SCRIPT_HANDLE = 'shapetranslate-site-editor';
 
 	/**
 	 * Template part translation service.
@@ -106,23 +106,23 @@ final class SiteEditorSidebar implements ModuleInterface {
 
 		wp_enqueue_script(
 			self::SCRIPT_HANDLE,
-			LOCALEPRESS_URL . 'assets/js/site-editor.js',
+			SHAPETRANSLATE_URL . 'assets/js/site-editor.js',
 			array( 'wp-plugins', 'wp-element', 'wp-components', 'wp-i18n', 'wp-editor', 'wp-api-fetch', 'wp-data' ),
 			Assets::version( 'assets/js/site-editor.js' ),
 			true
 		);
 
-		wp_set_script_translations( self::SCRIPT_HANDLE, 'localepress', LOCALEPRESS_PATH . 'languages' );
+		wp_set_script_translations( self::SCRIPT_HANDLE, 'shapetranslate', SHAPETRANSLATE_PATH . 'languages' );
 
 		wp_add_inline_script(
 			self::SCRIPT_HANDLE,
-			'window.localePressSiteEditor = ' . wp_json_encode( $this->panel_data() ) . ';',
+			'window.shapeTranslateSiteEditor = ' . wp_json_encode( $this->panel_data() ) . ';',
 			'before'
 		);
 
 		wp_enqueue_style(
 			self::SCRIPT_HANDLE,
-			LOCALEPRESS_URL . 'assets/css/site-editor.css',
+			SHAPETRANSLATE_URL . 'assets/css/site-editor.css',
 			array(),
 			Assets::version( 'assets/css/site-editor.css' )
 		);

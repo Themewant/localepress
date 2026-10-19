@@ -2,12 +2,12 @@
 /**
  * Same-origin module for host-based language routing.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -193,7 +193,7 @@ final class HostOriginModule implements ModuleInterface {
 		 * @param string $host      Host serving this request.
 		 */
 		$rewritten = apply_filters(
-			'localepress_same_origin_url',
+			'shapetranslate_same_origin_url',
 			$this->build_url( $parts ),
 			$url,
 			$host

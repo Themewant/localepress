@@ -2,16 +2,16 @@
 /**
  * Language switcher service and renderer.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Language\LanguageTag;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageTag;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -124,7 +124,7 @@ final class LanguageSwitcher {
 		 */
 		$stored   = $this->settings->get_switcher_defaults();
 		$defaults = wp_parse_args( $stored, self::DEFAULT_ARGS );
-		$defaults = apply_filters( 'localepress_switcher_default_args', $defaults );
+		$defaults = apply_filters( 'shapetranslate_switcher_default_args', $defaults );
 		$defaults = is_array( $defaults ) ? wp_parse_args( $defaults, self::DEFAULT_ARGS ) : self::DEFAULT_ARGS;
 		$args     = wp_parse_args( $args, $defaults );
 
@@ -133,7 +133,7 @@ final class LanguageSwitcher {
 		 *
 		 * @param array<string, mixed> $args Raw merged arguments.
 		 */
-		$filtered = apply_filters( 'localepress_switcher_args', $args );
+		$filtered = apply_filters( 'shapetranslate_switcher_args', $args );
 		$args     = is_array( $filtered ) ? wp_parse_args( $filtered, $defaults ) : $args;
 		$display  = is_scalar( $args['display'] ) ? sanitize_key( (string) $args['display'] ) : '';
 		$layout   = is_scalar( $args['layout'] ) ? sanitize_key( (string) $args['layout'] ) : '';
@@ -158,7 +158,7 @@ final class LanguageSwitcher {
 			? sanitize_text_field( (string) $args['aria_label'] )
 			: '';
 		$args['aria_label']           = '' === $args['aria_label']
-			? __( 'Language selector', 'localepress' )
+			? __( 'Language selector', 'shapetranslate' )
 			: $args['aria_label'];
 		$args['class_name']           = $this->normalize_classes( $args['class_name'] );
 		$args['context']              = is_scalar( $args['context'] )
@@ -192,7 +192,7 @@ final class LanguageSwitcher {
 	 * switcher structure that render() adds.
 	 *
 	 * The flag and the label are handed over as one element rather than two. An
-	 * anchor LocalePress did not write is an anchor it cannot predict: a page
+	 * anchor ShapeTranslate did not write is an anchor it cannot predict: a page
 	 * builder that lays its menu links out as a flex row and spreads their
 	 * children apart — which is how a link gets its label at one end and its
 	 * submenu arrow at the other — would put the flag at one end of the link and
@@ -212,11 +212,11 @@ final class LanguageSwitcher {
 
 		return '' === $content
 			? ''
-			: '<span class="localepress-switcher__content">' . $content . '</span>';
+			: '<span class="shapetranslate-switcher__content">' . $content . '</span>';
 	}
 
 	/**
-	 * Reports whether a switcher can generate LocalePress language URLs.
+	 * Reports whether a switcher can generate ShapeTranslate language URLs.
 	 *
 	 * @return bool
 	 */
@@ -243,16 +243,16 @@ final class LanguageSwitcher {
 			return '';
 		}
 
-		wp_enqueue_style( 'localepress-switcher' );
+		wp_enqueue_style( 'shapetranslate-switcher' );
 
 		if ( 'dropdown' === $args['layout'] ) {
 
-			wp_enqueue_script( 'localepress-switcher' );
+			wp_enqueue_script( 'shapetranslate-switcher' );
 		}
 
 		$classes = array(
-			'localepress-switcher',
-			'localepress-switcher--' . $args['layout'],
+			'shapetranslate-switcher',
+			'shapetranslate-switcher--' . $args['layout'],
 		);
 
 		if ( '' !== $args['class_name'] ) {
@@ -277,7 +277,7 @@ final class LanguageSwitcher {
 			$summary      = null === $current
 				? esc_html( $args['aria_label'] )
 				: $this->render_language_content( $current, $args, $summary_item );
-			$list         = '<details class="localepress-switcher__dropdown"><summary>' . $summary . '</summary>' . $list . '</details>';
+			$list         = '<details class="shapetranslate-switcher__dropdown"><summary>' . $summary . '</summary>' . $list . '</details>';
 		}
 
 		$html = sprintf(
@@ -295,9 +295,90 @@ final class LanguageSwitcher {
 		 * @param array<int, array<string, mixed>> $items Switcher items.
 		 * @param array<string, mixed>              $args  Normalized arguments.
 		 */
-		$filtered = apply_filters( 'localepress_switcher_html', $html, $items, $args );
+		$filtered = apply_filters( 'shapetranslate_switcher_html', $html, $items, $args );
 
-		return is_string( $filtered ) ? $filtered : $html;
+		/*
+		 * Every caller echoes this markup as it is, so it is escaped here once,
+		 * after the filter, rather than at each of those call sites.
+		 */
+		return wp_kses( is_string( $filtered ) ? $filtered : $html, $this->get_allowed_html() );
+	}
+
+	/**
+	 * Returns the markup a rendered switcher may contain.
+	 *
+	 * The post allowlist covers the structure, and the attributes the switcher
+	 * writes itself are listed on top of it so none of them depend on what a
+	 * given WordPress version happens to allow.
+	 *
+	 * @return array<string, array<string, bool>>
+	 */
+	private function get_allowed_html() {
+		$allowed = wp_kses_allowed_html( 'post' );
+		$extra   = array(
+			'nav'     => array(
+				'class'      => true,
+				'aria-label' => true,
+			),
+			'div'     => array( 'class' => true ),
+			'details' => array(
+				'class' => true,
+				'open'  => true,
+			),
+			'summary' => array( 'class' => true ),
+			'ul'      => array(
+				'class' => true,
+				'role'  => true,
+			),
+			'li'      => array(
+				'class' => true,
+				'lang'  => true,
+				'dir'   => true,
+			),
+			'a'       => array(
+				'class'        => true,
+				'href'         => true,
+				'hreflang'     => true,
+				'rel'          => true,
+				'aria-current' => true,
+				'aria-label'   => true,
+			),
+			'span'    => array(
+				'class'         => true,
+				'style'         => true,
+				'aria-disabled' => true,
+				'aria-hidden'   => true,
+			),
+			'img'     => array(
+				'class'    => true,
+				'src'      => true,
+				'srcset'   => true,
+				'alt'      => true,
+				'width'    => true,
+				'height'   => true,
+				'loading'  => true,
+				'decoding' => true,
+				'style'    => true,
+			),
+		);
+
+		foreach ( $extra as $tag => $attributes ) {
+			$allowed[ $tag ] = isset( $allowed[ $tag ] ) && is_array( $allowed[ $tag ] )
+				? array_merge( $allowed[ $tag ], $attributes )
+				: $attributes;
+		}
+
+		/**
+		 * Filters the markup allowed in rendered language switcher HTML.
+		 *
+		 * Code that adds elements through `shapetranslate_switcher_html`, such as
+		 * an inline SVG or a button, allows them here.
+		 *
+		 * @param array<string, array<string, bool>> $allowed Allowed tags and attributes.
+		 */
+		$filtered = apply_filters( 'shapetranslate_switcher_allowed_html', $allowed );
+
+		return is_array( $filtered ) ? $filtered : $allowed;
 	}
 
 	/**
@@ -315,7 +396,7 @@ final class LanguageSwitcher {
 		 * @param array<int, array<string, mixed>> $languages Registered languages.
 		 * @param array<string, mixed>             $args      Normalized arguments.
 		 */
-		$filtered_languages = apply_filters( 'localepress_switcher_languages', $languages, $args );
+		$filtered_languages = apply_filters( 'shapetranslate_switcher_languages', $languages, $args );
 		$languages          = is_array( $filtered_languages ) ? $filtered_languages : $languages;
 		$this->labels       = $this->build_labels( $languages, $args );
 		$preview_post_id    = $this->get_preview_post_id();
@@ -390,7 +471,7 @@ final class LanguageSwitcher {
 				 * @param array<string, mixed> $args     Normalized arguments.
 				 */
 				$url = apply_filters(
-					'localepress_switcher_unavailable_url',
+					'shapetranslate_switcher_unavailable_url',
 					$url,
 					$args['unavailable_behavior'],
 					$language,
@@ -435,7 +516,7 @@ final class LanguageSwitcher {
 			 * @param array<string, mixed> $language Language record.
 			 * @param array<string, mixed> $args     Normalized arguments.
 			 */
-			$item = apply_filters( 'localepress_switcher_item', $item, $language, $args );
+			$item = apply_filters( 'shapetranslate_switcher_item', $item, $language, $args );
 
 			if ( is_array( $item ) ) {
 				$items[] = $item;
@@ -448,7 +529,7 @@ final class LanguageSwitcher {
 		 * @param array<int, array<string, mixed>> $items Switcher items.
 		 * @param array<string, mixed>             $args  Normalized arguments.
 		 */
-		$filtered_items = apply_filters( 'localepress_switcher_items', $items, $args );
+		$filtered_items = apply_filters( 'shapetranslate_switcher_items', $items, $args );
 
 		return is_array( $filtered_items ) ? array_values( $filtered_items ) : $items;
 	}
@@ -497,7 +578,7 @@ final class LanguageSwitcher {
 	 * @return string
 	 */
 	private function render_list( $items, $args ) {
-		$output = '<ul class="localepress-switcher__list" role="list">';
+		$output = '<ul class="shapetranslate-switcher__list" role="list">';
 
 		foreach ( $items as $item ) {
 			if ( ! is_array( $item ) || empty( $item['language'] ) || ! is_array( $item['language'] ) ) {
@@ -523,7 +604,7 @@ final class LanguageSwitcher {
 		$available  = ! empty( $item['available'] );
 		$fallback   = ! empty( $item['fallback'] );
 		$url        = isset( $item['url'] ) && is_string( $item['url'] ) ? $item['url'] : '';
-		$classes    = array( 'localepress-switcher__item' );
+		$classes    = array( 'shapetranslate-switcher__item' );
 
 		if ( $is_current ) {
 			$classes[] = 'is-current';
@@ -554,7 +635,7 @@ final class LanguageSwitcher {
 			 * wording is announced rather than printed: an English word beside a
 			 * translated label reads as a defect on a multilingual site.
 			 */
-			$status = '<span class="localepress-switcher__status">' . esc_html__( 'Translation unavailable', 'localepress' ) . '</span>';
+			$status = '<span class="shapetranslate-switcher__status">' . esc_html__( 'Translation unavailable', 'shapetranslate' ) . '</span>';
 		}
 
 		$attributes = ' lang="' . esc_attr( $language_code ) . '" dir="' . esc_attr( $direction ) . '"';
@@ -571,15 +652,15 @@ final class LanguageSwitcher {
 				$link_attributes .= ' aria-label="' . esc_attr(
 					sprintf(
 						/* translators: %s: language label. */
-						__( '%s (translation unavailable)', 'localepress' ),
+						__( '%s (translation unavailable)', 'shapetranslate' ),
 						$item['label']
 					)
 				) . '"';
 			}
 
-			$content = '<a class="localepress-switcher__link"' . $link_attributes . '>' . $content . $status . '</a>';
+			$content = '<a class="shapetranslate-switcher__link"' . $link_attributes . '>' . $content . $status . '</a>';
 		} else {
-			$content = '<span class="localepress-switcher__unavailable" aria-disabled="true">' . $content . $status . '</span>';
+			$content = '<span class="shapetranslate-switcher__unavailable" aria-disabled="true">' . $content . $status . '</span>';
 		}
 
 		return '<li class="' . esc_attr( implode( ' ', $classes ) ) . '"' . $attributes . '>' . $content . '</li>';
@@ -604,7 +685,7 @@ final class LanguageSwitcher {
 
 		if ( $args['show_flags'] && '' !== $flag_url ) {
 			$flag = sprintf(
-				'<img class="localepress-switcher__flag" src="%1$s" alt="" width="%2$d" height="%3$d" loading="lazy" decoding="async" />',
+				'<img class="shapetranslate-switcher__flag" src="%1$s" alt="" width="%2$d" height="%3$d" loading="lazy" decoding="async" />',
 				esc_url( $flag_url ),
 				FlagRegistry::FLAG_WIDTH,
 				FlagRegistry::FLAG_HEIGHT
@@ -618,7 +699,7 @@ final class LanguageSwitcher {
 		 * @param array<string, mixed> $language Language record.
 		 * @param array<string, mixed> $args     Normalized arguments.
 		 */
-		$flag = apply_filters( 'localepress_switcher_flag_html', $flag, $language, $args );
+		$flag = apply_filters( 'shapetranslate_switcher_flag_html', $flag, $language, $args );
 		$flag = is_string( $flag )
 			? wp_kses(
 				$flag,
@@ -640,7 +721,7 @@ final class LanguageSwitcher {
 			)
 			: '';
 
-		return $flag . '<span class="localepress-switcher__label">' . esc_html( $label ) . '</span>';
+		return $flag . '<span class="shapetranslate-switcher__label">' . esc_html( $label ) . '</span>';
 	}
 
 	/**
@@ -686,7 +767,7 @@ final class LanguageSwitcher {
 		 * @param array<int, array<string, mixed>> $languages Language records.
 		 * @param array<string, mixed>             $args      Normalized arguments.
 		 */
-		$filtered = apply_filters( 'localepress_switcher_labels', $labels, $languages, $args );
+		$filtered = apply_filters( 'shapetranslate_switcher_labels', $labels, $languages, $args );
 
 		return is_array( $filtered ) ? array_map( 'strval', $filtered ) : $labels;
 	}
@@ -783,7 +864,7 @@ final class LanguageSwitcher {
 		 * @param array<string, mixed> $language Language record.
 		 * @param array<string, mixed> $args     Normalized arguments.
 		 */
-		$flag_url = apply_filters( 'localepress_switcher_flag_url', $this->flags->get_flag_url( $language ), $language, $args );
+		$flag_url = apply_filters( 'shapetranslate_switcher_flag_url', $this->flags->get_flag_url( $language ), $language, $args );
 
 		return is_string( $flag_url ) ? esc_url_raw( $flag_url ) : '';
 	}

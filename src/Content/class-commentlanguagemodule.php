@@ -2,13 +2,13 @@
 /**
  * Language constraint for frontend comment queries.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Comment_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -92,7 +92,7 @@ final class CommentLanguageModule implements ModuleInterface {
 			? (string) $query->query_vars['cache_domain']
 			: 'core';
 
-		$query->query_vars['cache_domain'] = $domain . '_localepress_' . $language['id'];
+		$query->query_vars['cache_domain'] = $domain . '_shapetranslate_' . $language['id'];
 	}
 
 	/**
@@ -117,13 +117,13 @@ final class CommentLanguageModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters whether LocalePress constrains one comment query by language.
+		 * Filters whether ShapeTranslate constrains one comment query by language.
 		 *
 		 * @param bool                 $filter   Whether the query should be constrained.
 		 * @param WP_Comment_Query     $query    Comment query.
 		 * @param array<string, mixed> $language Current language record.
 		 */
-		if ( ! apply_filters( 'localepress_filter_comments_by_language', true, $query, $language ) ) {
+		if ( ! apply_filters( 'shapetranslate_filter_comments_by_language', true, $query, $language ) ) {
 			return $clauses;
 		}
 
@@ -133,13 +133,11 @@ final class CommentLanguageModule implements ModuleInterface {
 		 * itself produces avoids joining the same table twice.
 		 */
 		if ( ! preg_match( "#JOIN\s+{$wpdb->posts}\s+ON#i", $clauses['join'] ) ) {
-			// Table names come from $wpdb, never from input.
+			
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$clauses['join'] .= " JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->comments}.comment_post_ID";
 		}
 
-		// A comment query can reach the filter with no conditions at all, and the
-		// constraint appends rather than replaces, so it needs something to follow.
 		if ( '' === trim( $clauses['where'] ) ) {
 			$clauses['where'] = '1=1';
 		}

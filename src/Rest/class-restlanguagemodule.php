@@ -2,18 +2,18 @@
 /**
  * Language-aware REST requests for the block editor.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Rest;
+namespace ShapeTranslate\Rest;
 
-use LocalePress\Assets;
-use LocalePress\Content\LanguageQueryConstraint;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\LanguageQueryConstraint;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,14 +37,14 @@ final class RestLanguageModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const QUERY_VAR = 'localepress_rest_language';
+	const QUERY_VAR = 'shapetranslate_rest_language';
 
 	/**
 	 * Query variable marking a collection that may fall back to the original.
 	 *
 	 * @var string
 	 */
-	const FALLBACK_VAR = 'localepress_rest_language_fallback';
+	const FALLBACK_VAR = 'shapetranslate_rest_language_fallback';
 
 	/**
 	 * Request parameter asking for the fallback.
@@ -58,7 +58,7 @@ final class RestLanguageModule implements ModuleInterface {
 	 *
 	 * @var string
 	 */
-	const SCRIPT_HANDLE = 'localepress-block-editor';
+	const SCRIPT_HANDLE = 'shapetranslate-block-editor';
 
 	/**
 	 * Post translation relationship manager.
@@ -144,9 +144,9 @@ final class RestLanguageModule implements ModuleInterface {
 		add_filter( 'terms_clauses', array( $this, 'filter_terms_by_language' ), 10, 3 );
 		add_filter( 'block_editor_rest_api_preload_paths', array( $this, 'add_language_to_preload_paths' ), 50, 2 );
 
-		add_filter( 'localepress_language_query_fallback', array( $this, 'answer_collection_fallback' ), 10, 2 );
+		add_filter( 'shapetranslate_language_query_fallback', array( $this, 'answer_collection_fallback' ), 10, 2 );
 
-		add_filter( 'localepress_new_term_language_id', array( $this, 'filter_new_term_language' ), 20 );
+		add_filter( 'shapetranslate_new_term_language_id', array( $this, 'filter_new_term_language' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_script' ) );
 	}
 
@@ -185,13 +185,13 @@ final class RestLanguageModule implements ModuleInterface {
 		}
 
 		$params['lang'] = array(
-			'description'       => __( 'Limit results to one language. An unknown language answers in the default language.', 'localepress' ),
+			'description'       => __( 'Limit results to one language. An unknown language answers in the default language.', 'shapetranslate' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 		);
 
 		$params[ self::FALLBACK_PARAM ] = array(
-			'description' => __( 'Include originals that have no translation in the requested language.', 'localepress' ),
+			'description' => __( 'Include originals that have no translation in the requested language.', 'shapetranslate' ),
 			'type'        => 'boolean',
 		);
 
@@ -201,7 +201,7 @@ final class RestLanguageModule implements ModuleInterface {
 	/**
 	 * Makes the language a REST call asked for the language it is answered in.
 	 *
-	 * The language is recorded where every other part of LocalePress already
+	 * The language is recorded where every other part of ShapeTranslate already
 	 * looks for it, so a REST request answers the way a page in that language
 	 * does: its strings, its locale, its home URL, and the listings any block it
 	 * renders builds for itself.
@@ -310,7 +310,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 *
 		 * @param string $language_id Language identifier, empty when cleared.
 		 */
-		do_action( 'localepress_request_language_changed', $language_id );
+		do_action( 'shapetranslate_request_language_changed', $language_id );
 	}
 
 	/**
@@ -339,7 +339,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 * back empty. The language on the request is the explicit one and is the
 		 * only one that may answer here.
 		 */
-		$args['localepress_skip_language_filter'] = true;
+		$args['shapetranslate_skip_language_filter'] = true;
 
 		if ( $this->request_wants_fallback( $request ) ) {
 			$args[ self::FALLBACK_VAR ] = true;
@@ -532,7 +532,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 * @param string $language_id Language identifier, or an empty string.
 		 * @param mixed  $context     Block editor context, where one exists.
 		 */
-		$filtered = apply_filters( 'localepress_editor_language_id', $language_id, $context );
+		$filtered = apply_filters( 'shapetranslate_editor_language_id', $language_id, $context );
 
 		if ( is_string( $filtered ) && '' !== $filtered && null !== $this->language_manager->find( $filtered ) ) {
 			return $filtered;
@@ -563,7 +563,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 * @param bool  $fallback Whether the originals are offered.
 		 * @param mixed $context  Block editor context, where one exists.
 		 */
-		return (bool) apply_filters( 'localepress_editor_language_fallback', false, $context );
+		return (bool) apply_filters( 'shapetranslate_editor_language_fallback', false, $context );
 	}
 
 	/**
@@ -580,7 +580,7 @@ final class RestLanguageModule implements ModuleInterface {
 
 		wp_enqueue_script(
 			self::SCRIPT_HANDLE,
-			LOCALEPRESS_URL . 'assets/js/block-editor.js',
+			SHAPETRANSLATE_URL . 'assets/js/block-editor.js',
 			array( 'wp-api-fetch' ),
 			Assets::version( 'assets/js/block-editor.js' ),
 			true
@@ -588,12 +588,12 @@ final class RestLanguageModule implements ModuleInterface {
 
 		wp_add_inline_script(
 			self::SCRIPT_HANDLE,
-			'window.localePressEditor = ' . wp_json_encode(
+			'window.shapeTranslateEditor = ' . wp_json_encode(
 				array(
 					'routes'          => array_values( $routes ),
 					'defaultLanguage' => $this->language_manager->get_default_id(),
 					'language'        => $this->editor_language_id(),
-					'field'           => 'localepress_language_id',
+					'field'           => 'shapetranslate_language_id',
 					'fallback'        => $this->editor_wants_fallback(),
 					'fallbackParam'   => self::FALLBACK_PARAM,
 				)
@@ -633,7 +633,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 *
 		 * @param array<int, string> $routes Route paths without a leading slash.
 		 */
-		$filtered = apply_filters( 'localepress_language_rest_routes', array_values( array_unique( $routes ) ) );
+		$filtered = apply_filters( 'shapetranslate_language_rest_routes', array_values( array_unique( $routes ) ) );
 
 		return is_array( $filtered ) ? array_values( array_unique( array_filter( $filtered, 'is_string' ) ) ) : $routes;
 	}
@@ -677,7 +677,7 @@ final class RestLanguageModule implements ModuleInterface {
 		 * @param WP_Query|array<string, mixed> $query       Query or arguments being filtered.
 		 * @param string                        $type        Either posts or terms.
 		 */
-		if ( ! apply_filters( 'localepress_filter_rest_query_by_language', true, $language_id, $query, $type ) ) {
+		if ( ! apply_filters( 'shapetranslate_filter_rest_query_by_language', true, $language_id, $query, $type ) ) {
 			return $clauses;
 		}
 
@@ -688,7 +688,7 @@ final class RestLanguageModule implements ModuleInterface {
 		}
 
 		/** This filter is documented in src/Routing/class-routingmodule.php */
-		if ( apply_filters( 'localepress_language_query_fallback', false, $query, $language_id ) ) {
+		if ( apply_filters( 'shapetranslate_language_query_fallback', false, $query, $language_id ) ) {
 			return $this->constraint->apply_to_posts_with_fallback( $clauses, $language_id, $default_id );
 		}
 
@@ -701,7 +701,7 @@ final class RestLanguageModule implements ModuleInterface {
 	 * The editor sends the identifier stored on the post. A URL slug, a language
 	 * code, and a WordPress locale are accepted too, because a client that is
 	 * not the editor holds one of those rather than an identifier only
-	 * LocalePress knows about.
+	 * ShapeTranslate knows about.
 	 *
 	 * @param string $requested Requested language identifier, slug, code, or locale.
 	 * @return string

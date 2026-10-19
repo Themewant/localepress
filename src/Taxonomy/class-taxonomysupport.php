@@ -2,12 +2,12 @@
 /**
  * Translatable taxonomy policy.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Taxonomy;
+namespace ShapeTranslate\Taxonomy;
 
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -135,7 +135,7 @@ final class TaxonomySupport {
 		 * @param array<int, string>       $taxonomies Supported taxonomy names.
 		 * @param array<string, \WP_Taxonomy> $objects Taxonomy objects.
 		 */
-		$filtered  = apply_filters( 'localepress_supported_taxonomies', $taxonomies, $objects );
+		$filtered  = apply_filters( 'shapetranslate_supported_taxonomies', $taxonomies, $objects );
 		$filtered  = is_array( $filtered ) ? $filtered : $taxonomies;
 		$supported = array();
 

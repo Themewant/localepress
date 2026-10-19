@@ -2,14 +2,14 @@
 /**
  * Translation list table integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Post;
 use WP_Query;
 
@@ -129,21 +129,21 @@ final class TranslationListTable {
 	 */
 	public function add_columns( $columns ) {
 		$updated            = array();
-		$language_label     = __( 'Language', 'localepress' );
+		$language_label     = __( 'Language', 'shapetranslate' );
 		$translations_label = $this->get_translations_column_label();
 
 		foreach ( $columns as $key => $label ) {
 			$updated[ $key ] = $label;
 
 			if ( 'title' === $key ) {
-				$updated['localepress_language']     = $language_label;
-				$updated['localepress_translations'] = $translations_label;
+				$updated['shapetranslate_language']     = $language_label;
+				$updated['shapetranslate_translations'] = $translations_label;
 			}
 		}
 
-		if ( ! isset( $updated['localepress_language'] ) ) {
-			$updated['localepress_language']     = $language_label;
-			$updated['localepress_translations'] = $translations_label;
+		if ( ! isset( $updated['shapetranslate_language'] ) ) {
+			$updated['shapetranslate_language']     = $language_label;
+			$updated['shapetranslate_translations'] = $translations_label;
 		}
 
 		return $updated;
@@ -160,7 +160,7 @@ final class TranslationListTable {
 	 * @return string
 	 */
 	private function get_translations_column_label() {
-		$label = __( 'Translations', 'localepress' );
+		$label = __( 'Translations', 'shapetranslate' );
 		$flags = '';
 
 		foreach ( $this->language_manager->get_languages() as $language ) {
@@ -171,11 +171,11 @@ final class TranslationListTable {
 			$flag = $this->flags->get_flag_html( $language );
 
 			$flags .= sprintf(
-				'<span class="localepress-translations-heading-flag" title="%1$s">%2$s</span>',
+				'<span class="shapetranslate-translations-heading-flag" title="%1$s">%2$s</span>',
 				esc_attr( $language['native_name'] ),
 				'' !== $flag
 					? $flag
-					: '<span class="localepress-translation-code">' . esc_html( strtoupper( $language['language_code'] ) ) . '</span>'
+					: '<span class="shapetranslate-translation-code">' . esc_html( strtoupper( $language['language_code'] ) ) . '</span>'
 			);
 		}
 
@@ -184,7 +184,7 @@ final class TranslationListTable {
 		}
 
 		return sprintf(
-			'<span class="screen-reader-text">%1$s</span><span class="localepress-translations-heading" aria-hidden="true">%2$s</span>',
+			'<span class="screen-reader-text">%1$s</span><span class="shapetranslate-translations-heading" aria-hidden="true">%2$s</span>',
 			esc_html( $label ),
 			$flags
 		);
@@ -202,9 +202,9 @@ final class TranslationListTable {
 			return;
 		}
 
-		if ( 'localepress_language' === $column ) {
+		if ( 'shapetranslate_language' === $column ) {
 			$this->render_language_column( $post_id );
-		} elseif ( 'localepress_translations' === $column ) {
+		} elseif ( 'shapetranslate_translations' === $column ) {
 			$this->render_translations_column( $post_id );
 		}
 	}
@@ -317,8 +317,8 @@ final class TranslationListTable {
 		$language = $this->translation_manager->get_post_language( $post_id );
 
 		if ( null === $language ) {
-			echo '<span class="localepress-unassigned">';
-			esc_html_e( 'Not assigned', 'localepress' );
+			echo '<span class="shapetranslate-unassigned">';
+			esc_html_e( 'Not assigned', 'shapetranslate' );
 			echo '</span>';
 			return;
 		}
@@ -330,7 +330,7 @@ final class TranslationListTable {
 		 * since "EN" on its own says very little.
 		 */
 		printf(
-			'<span class="localepress-list-language" title="%3$s">%1$s<strong aria-hidden="true">%2$s</strong><span class="screen-reader-text">%4$s</span></span>',
+			'<span class="shapetranslate-list-language" title="%3$s">%1$s<strong aria-hidden="true">%2$s</strong><span class="screen-reader-text">%4$s</span></span>',
 			$this->flags->get_flag_html( $language ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html().
 			esc_html( strtoupper( $language['language_code'] ) ),
 			esc_attr( $language['native_name'] ),
@@ -350,13 +350,13 @@ final class TranslationListTable {
 		$post         = get_post( $post_id );
 
 		if ( '' === $current_id || ! $post instanceof WP_Post ) {
-			echo '<span class="localepress-unassigned">';
-			esc_html_e( 'Assign language first', 'localepress' );
+			echo '<span class="shapetranslate-unassigned">';
+			esc_html_e( 'Assign language first', 'shapetranslate' );
 			echo '</span>';
 			return;
 		}
 
-		echo '<div class="localepress-list-translations">';
+		echo '<div class="shapetranslate-list-translations">';
 
 		foreach ( $this->language_manager->get_languages() as $language ) {
 			$language_id = $language['id'];
@@ -386,10 +386,10 @@ final class TranslationListTable {
 		$flag   = $this->flags->get_flag_html( $language );
 		$marker = '' !== $flag
 			? $flag
-			: '<span class="localepress-translation-code">' . esc_html( $code ) . '</span>';
+			: '<span class="shapetranslate-translation-code">' . esc_html( $code ) . '</span>';
 		$label  = sprintf(
 			/* translators: %s: native language name. */
-			__( '%s translation', 'localepress' ),
+			__( '%s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
@@ -399,20 +399,20 @@ final class TranslationListTable {
 				: '';
 			$edit_label = sprintf(
 				/* translators: %s: language name. */
-				__( 'Edit %s translation', 'localepress' ),
+				__( 'Edit %s translation', 'shapetranslate' ),
 				$language['native_name']
 			);
 
 			if ( is_string( $edit_url ) && '' !== $edit_url && $language['id'] !== $current_id ) {
 				printf(
-					'<a class="localepress-translation-state has-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="localepress-translation-badge dashicons dashicons-edit" aria-hidden="true"></span></a>',
+					'<a class="shapetranslate-translation-state has-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="shapetranslate-translation-badge dashicons dashicons-edit" aria-hidden="true"></span></a>',
 					esc_url( $edit_url ),
 					esc_attr( $edit_label ),
 					$marker // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Flag markup sanitized by FlagRegistry::get_flag_html(); the code fallback is escaped above.
 				);
 			} else {
 				printf(
-					'<span class="localepress-translation-state has-translation" title="%1$s">%2$s<span class="localepress-translation-badge dashicons dashicons-yes" aria-hidden="true"></span><span class="screen-reader-text">%1$s</span></span>',
+					'<span class="shapetranslate-translation-state has-translation" title="%1$s">%2$s<span class="shapetranslate-translation-badge dashicons dashicons-yes" aria-hidden="true"></span><span class="screen-reader-text">%1$s</span></span>',
 					esc_attr( $label ),
 					$marker // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Flag markup sanitized by FlagRegistry::get_flag_html(); the code fallback is escaped above.
 				);
@@ -427,12 +427,12 @@ final class TranslationListTable {
 
 		$add_label = sprintf(
 			/* translators: %s: native language name. */
-			__( 'Add %s translation', 'localepress' ),
+			__( 'Add %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
 		printf(
-			'<a class="localepress-translation-state missing-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="localepress-translation-badge dashicons dashicons-plus-alt2" aria-hidden="true"></span></a>',
+			'<a class="shapetranslate-translation-state missing-translation" href="%1$s" title="%2$s" aria-label="%2$s">%3$s<span class="shapetranslate-translation-badge dashicons dashicons-plus-alt2" aria-hidden="true"></span></a>',
 			esc_url( $this->actions->get_create_url( $post->ID, $language['id'] ) ),
 			esc_attr( $add_label ),
 			$marker // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Flag markup sanitized by FlagRegistry::get_flag_html(); the code fallback is escaped above.

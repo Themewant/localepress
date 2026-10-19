@@ -2,10 +2,10 @@
 /**
  * Language of a request that has no page address of its own.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Routing;
+namespace ShapeTranslate\Routing;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  * admin-ajax.php is the opposite. It is never called on its own; a page calls
  * it, and that page names a language in its own address. So an explicit
  * argument is read first, and then the page that made the call is asked. That
- * is what lets a theme or plugin which has never heard of LocalePress answer in
+ * is what lets a theme or plugin which has never heard of ShapeTranslate answer in
  * the right language without changing a line.
  *
  * The visitor's language cookie is deliberately not read. It records the last
@@ -57,7 +57,7 @@ final class BackgroundLanguageResolver {
 	 *
 	 * @var string
 	 */
-	const BACKEND_ARGUMENT = 'localepress_ajax_backend';
+	const BACKEND_ARGUMENT = 'shapetranslate_ajax_backend';
 
 	/**
 	 * Language URL service.
@@ -220,7 +220,7 @@ final class BackgroundLanguageResolver {
 		 *
 		 * @param string $language_id Language identifier, or empty when none was named.
 		 */
-		$filtered = apply_filters( 'localepress_background_request_language_id', $language_id );
+		$filtered = apply_filters( 'shapetranslate_background_request_language_id', $language_id );
 
 		if ( ! is_scalar( $filtered ) || '' === (string) $filtered ) {
 			return '';

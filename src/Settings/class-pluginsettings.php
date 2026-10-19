@@ -1,14 +1,14 @@
 <?php
 /**
- * LocalePress plugin settings.
+ * ShapeTranslate plugin settings.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Settings;
+namespace ShapeTranslate\Settings;
 
-use LocalePress\Infrastructure\OptionsLanguageRepository;
-use LocalePress\Routing\LanguageHostResolver;
+use ShapeTranslate\Infrastructure\OptionsLanguageRepository;
+use ShapeTranslate\Routing\LanguageHostResolver;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ final class PluginSettings {
 	 *
 	 * @var string
 	 */
-	const OPTION_NAME = 'localepress_settings';
+	const OPTION_NAME = 'shapetranslate_settings';
 
 	/**
 	 * Current settings schema version.
@@ -188,11 +188,11 @@ final class PluginSettings {
 		$settings = $this->get_stored_settings();
 
 		/**
-		 * Filters the normalized LocalePress configuration.
+		 * Filters the normalized ShapeTranslate configuration.
 		 *
 		 * @param array<string, mixed> $settings Normalized settings.
 		 */
-		$filtered = apply_filters( 'localepress_settings', $settings );
+		$filtered = apply_filters( 'shapetranslate_settings', $settings );
 
 		return is_array( $filtered ) ? $this->normalize( $filtered ) : $settings;
 	}
@@ -298,11 +298,11 @@ final class PluginSettings {
 		++$this->revision;
 
 		/**
-		 * Fires after LocalePress configuration has been stored.
+		 * Fires after ShapeTranslate configuration has been stored.
 		 *
 		 * @param array<string, mixed> $settings Normalized settings.
 		 */
-		do_action( 'localepress_settings_updated', $this->settings );
+		do_action( 'shapetranslate_settings_updated', $this->settings );
 
 		return $result;
 	}
@@ -468,11 +468,11 @@ final class PluginSettings {
 		$defaults = self::default_settings();
 
 		/**
-		 * Filters LocalePress settings defaults before normalization.
+		 * Filters ShapeTranslate settings defaults before normalization.
 		 *
 		 * @param array<string, mixed> $defaults Default settings.
 		 */
-		$filtered_defaults = apply_filters( 'localepress_settings_defaults', $defaults );
+		$filtered_defaults = apply_filters( 'shapetranslate_settings_defaults', $defaults );
 
 		if ( is_array( $filtered_defaults ) ) {
 			foreach ( array( 'url', 'content', 'switcher', 'seo', 'advanced', 'setup' ) as $section ) {

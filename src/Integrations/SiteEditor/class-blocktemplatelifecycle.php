@@ -2,13 +2,13 @@
 /**
  * Keeps block template slugs and translation groups consistent.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\SiteEditor;
+namespace ShapeTranslate\Integrations\SiteEditor;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -81,8 +81,8 @@ final class BlockTemplateLifecycle implements ModuleInterface {
 			return;
 		}
 
-		add_action( 'localepress_post_language_changed', array( $this, 'rename_on_language_change' ), 10, 2 );
-		add_action( 'localepress_default_language_changed', array( $this, 'rename_everything' ), 10, 2 );
+		add_action( 'shapetranslate_post_language_changed', array( $this, 'rename_on_language_change' ), 10, 2 );
+		add_action( 'shapetranslate_default_language_changed', array( $this, 'rename_everything' ), 10, 2 );
 
 		// Before the translation engine forgets the group at priority 10.
 		add_action( 'before_delete_post', array( $this, 'delete_translations' ), 8, 2 );
@@ -216,7 +216,7 @@ final class BlockTemplateLifecycle implements ModuleInterface {
 		 * @param int    $post_id   Template being deleted.
 		 * @param string $post_type Post type it belongs to.
 		 */
-		if ( ! apply_filters( 'localepress_delete_template_part_translations', true, absint( $post_id ), $post->post_type ) ) {
+		if ( ! apply_filters( 'shapetranslate_delete_template_part_translations', true, absint( $post_id ), $post->post_type ) ) {
 			return;
 		}
 
@@ -243,7 +243,7 @@ final class BlockTemplateLifecycle implements ModuleInterface {
 				'post_status'                      => array( 'publish', 'draft' ),
 				'posts_per_page'                   => 200,
 				'no_found_rows'                    => true,
-				'localepress_skip_language_filter' => true,
+				'shapetranslate_skip_language_filter' => true,
 				'tax_query'                        => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					array(
 						'taxonomy' => BlockTemplates::THEME_TAXONOMY,

@@ -1,15 +1,15 @@
 /**
- * LocalePress styles for the Jeg Kit theme builder dashboard.
+ * ShapeTranslate styles for the Jeg Kit theme builder dashboard.
  *
  * Loaded only on the builder's own dashboard screen, for the one element
- * LocalePress writes into its template table: a chip naming the language each
- * template was written in. The selector is prefixed with `localepress` and
+ * ShapeTranslate writes into its template table: a chip naming the language each
+ * template was written in. The selector is prefixed with `shapetranslate` and
  * qualified by the builder's row, so nothing here can reach the rest of the
  * application's markup — the chip inherits its size from the name it sits
  * beside and states everything else for itself.
  */
 
-.sortable-items .item .localepress-jkit-language {
+.sortable-items .item .shapetranslate-jkit-language {
 	display: inline-block;
 	box-sizing: border-box;
 	margin-inline-start: 8px;

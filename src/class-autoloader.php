@@ -1,16 +1,16 @@
 <?php
 /**
- * LocalePress class autoloader.
+ * ShapeTranslate class autoloader.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress;
+namespace ShapeTranslate;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Loads classes from the LocalePress namespace.
+ * Loads classes from the ShapeTranslate namespace.
  */
 final class Autoloader {
 
@@ -19,7 +19,7 @@ final class Autoloader {
 	 *
 	 * @var string
 	 */
-	private $prefix = 'LocalePress\\';
+	private $prefix = 'ShapeTranslate\\';
 
 	/**
 	 * Source directory.

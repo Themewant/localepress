@@ -2,12 +2,12 @@
 /**
  * Registered string lifecycle module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
-use LocalePress\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\ModuleInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,7 +37,7 @@ final class StringModule implements ModuleInterface {
 	 */
 	public function register() {
 		add_action( 'shutdown', array( $this->string_manager, 'flush_registered_strings' ) );
-		add_action( 'localepress_language_deleted', array( $this, 'delete_language_translations' ) );
+		add_action( 'shapetranslate_language_deleted', array( $this, 'delete_language_translations' ) );
 	}
 
 	/**

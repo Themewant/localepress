@@ -2,12 +2,12 @@
 /**
  * Per-user admin language filter state.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Language\LanguageManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * The choice arrives as a `lang` query argument and is stored per user, so it
  * survives navigation between admin screens without every link carrying the
- * argument. It is a display preference for the current user only: it changes
- * nothing another user sees and writes no site state, which is why an
- * unauthenticated form token is not required to change it.
+ * argument. The stored choice also decides the language new posts and terms
+ * are created in, so a change is only accepted from a link carrying a valid
+ * nonce, made by a user who can edit posts.
  */
 final class AdminLanguageFilter {
 
@@ -27,7 +27,7 @@ final class AdminLanguageFilter {
 	 *
 	 * @var string
 	 */
-	const USER_META_KEY = 'localepress_admin_language';
+	const USER_META_KEY = 'shapetranslate_admin_language';
 
 	/**
 	 * Query argument carrying an explicit choice.
@@ -42,6 +42,20 @@ final class AdminLanguageFilter {
 	 * @var string
 	 */
 	const SHOW_ALL = 'all';
+
+	/**
+	 * Nonce action protecting a filter change.
+	 *
+	 * @var string
+	 */
+	const NONCE_ACTION = 'shapetranslate_admin_language_filter';
+
+	/**
+	 * Query argument carrying the filter nonce.
+	 *
+	 * @var string
+	 */
+	const NONCE_ARG = 'shapetranslate_lang_nonce';
 
 	/**
 	 * Language manager.
@@ -130,11 +144,17 @@ final class AdminLanguageFilter {
 		$base = $this->get_current_admin_url();
 
 		$base = remove_query_arg(
-			array( self::QUERY_ARG, 'paged', 'page_number', 'post', 'action', 'action2', '_wpnonce', '_wp_http_referer' ),
+			array( self::QUERY_ARG, self::NONCE_ARG, 'paged', 'page_number', 'post', 'action', 'action2', '_wpnonce', '_wp_http_referer' ),
 			$base
 		);
 
-		return add_query_arg( self::QUERY_ARG, '' === $slug ? self::SHOW_ALL : $slug, $base );
+		return add_query_arg(
+			array(
+				self::QUERY_ARG => '' === $slug ? self::SHOW_ALL : $slug,
+				self::NONCE_ARG => wp_create_nonce( self::NONCE_ACTION ),
+			),
+			$base
+		);
 	}
 
 	/**
@@ -149,11 +169,18 @@ final class AdminLanguageFilter {
 			return null;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Per-user display preference, see the class docblock.
-		$requested = isset( $_GET[ self::QUERY_ARG ] ) && is_scalar( $_GET[ self::QUERY_ARG ] )
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Per-user display preference, see the class docblock.
-			? sanitize_title( wp_unslash( $_GET[ self::QUERY_ARG ] ) )
-			: '';
+		$requested = '';
+
+		// A change without a valid nonce is ignored and the stored choice is used.
+		if (
+			isset( $_GET[ self::QUERY_ARG ], $_GET[ self::NONCE_ARG ] )
+			&& is_scalar( $_GET[ self::QUERY_ARG ] )
+			&& is_scalar( $_GET[ self::NONCE_ARG ] )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET[ self::NONCE_ARG ] ) ), self::NONCE_ACTION )
+			&& current_user_can( 'edit_posts' )
+		) {
+			$requested = sanitize_title( wp_unslash( $_GET[ self::QUERY_ARG ] ) );
+		}
 
 		if ( '' !== $requested ) {
 			$language = self::SHOW_ALL === $requested ? null : $this->find_by_slug( $requested );

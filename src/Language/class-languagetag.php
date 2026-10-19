@@ -2,15 +2,15 @@
 /**
  * Language tag formatting.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Converts LocalePress language records to HTML-compatible language tags.
+ * Converts ShapeTranslate language records to HTML-compatible language tags.
  */
 final class LanguageTag {
 
@@ -66,12 +66,12 @@ final class LanguageTag {
 		$tag = implode( '-', $normalized );
 
 		/**
-		 * Filters the HTML language tag for a LocalePress language.
+		 * Filters the HTML language tag for a ShapeTranslate language.
 		 *
 		 * @param string               $tag      Normalized language tag.
 		 * @param array<string, mixed> $language Language record.
 		 */
-		$filtered = apply_filters( 'localepress_language_tag', $tag, $language );
+		$filtered = apply_filters( 'shapetranslate_language_tag', $tag, $language );
 
 		return is_string( $filtered ) && $this->is_valid( $filtered ) ? $filtered : $tag;
 	}

@@ -3,7 +3,7 @@
 /**
  * Navigation language switcher block editor asset metadata.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +17,7 @@ return array(
 		'wp-i18n',
 	),
 	/** This versioning is explained in blocks/language-switcher/index.asset.php */
-	'version'      => class_exists( 'LocalePress\Assets' )
-		? LocalePress\Assets::version( 'blocks/navigation-language-switcher/index.js' )
+	'version'      => class_exists( 'ShapeTranslate\Assets' )
+		? ShapeTranslate\Assets::version( 'blocks/navigation-language-switcher/index.js' )
 		: '1.0.0',
 );

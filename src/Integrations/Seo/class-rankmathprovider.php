@@ -2,10 +2,10 @@
 /**
  * Rank Math field locations.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Seo;
+namespace ShapeTranslate\Integrations\Seo;
 
 defined( 'ABSPATH' ) || exit;
 

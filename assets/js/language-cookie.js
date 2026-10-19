@@ -8,15 +8,15 @@
  *
  * The cookie this builds is the one PHP would have sent — same name, path,
  * domain, lifetime, and flags — so the two describe one cookie rather than two
- * under the same name. Its values arrive in `window.localePressLanguageCookie`,
+ * under the same name. Its values arrive in `window.shapeTranslateLanguageCookie`,
  * printed by the enqueue that loads this file.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function () {
 	'use strict';
 
-	var cookie = window.localePressLanguageCookie;
+	var cookie = window.shapeTranslateLanguageCookie;
 	var parts;
 
 	if ( ! cookie || ! cookie.name || ! cookie.value ) {

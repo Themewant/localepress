@@ -2,15 +2,15 @@
 /**
  * Jeg Kit theme builder dashboard integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\JegKit;
+namespace ShapeTranslate\Integrations\JegKit;
 
-use LocalePress\Assets;
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
  * in the same order, and writes each answer beside the name it belongs to.
  *
  * Every step fails the same way, by leaving the screen exactly as the builder
- * drew it, because all of this reaches into an application LocalePress does not
+ * drew it, because all of this reaches into an application ShapeTranslate does not
  * own.
  */
 final class JegKitDashboard implements ModuleInterface {
@@ -52,7 +52,7 @@ final class JegKitDashboard implements ModuleInterface {
 	/**
 	 * Key the language is handed back under, beside the builder's own.
 	 */
-	const PAYLOAD_KEY = 'localepress';
+	const PAYLOAD_KEY = 'shapetranslate';
 
 	/**
 	 * Header and footer language resolution service.
@@ -162,30 +162,30 @@ final class JegKitDashboard implements ModuleInterface {
 		}
 
 		wp_enqueue_style(
-			'localepress-jegkit-dashboard',
-			LOCALEPRESS_URL . 'assets/css/jeg-kit-dashboard.css',
+			'shapetranslate-jegkit-dashboard',
+			SHAPETRANSLATE_URL . 'assets/css/jeg-kit-dashboard.css',
 			array(),
 			Assets::version( 'assets/css/jeg-kit-dashboard.css' )
 		);
 
 		wp_enqueue_script(
-			'localepress-jegkit-dashboard',
-			LOCALEPRESS_URL . 'assets/js/jeg-kit-dashboard.js',
+			'shapetranslate-jegkit-dashboard',
+			SHAPETRANSLATE_URL . 'assets/js/jeg-kit-dashboard.js',
 			array( 'wp-api-fetch' ),
 			Assets::version( 'assets/js/jeg-kit-dashboard.js' ),
 			true
 		);
 
 		wp_localize_script(
-			'localepress-jegkit-dashboard',
-			'localePressJegKit',
+			'shapetranslate-jegkit-dashboard',
+			'shapeTranslateJegKit',
 			array(
 				'postTypes'   => JegKitTemplates::post_types(),
 				'listRoute'   => self::TEMPLATE_LIST_ROUTE,
 				'payloadKey'  => self::PAYLOAD_KEY,
 				'templates'   => $this->describe_locations(),
 				/* translators: %s: language name. */
-				'labelFormat' => __( 'Language: %s', 'localepress' ),
+				'labelFormat' => __( 'Language: %s', 'shapetranslate' ),
 			)
 		);
 	}
@@ -353,6 +353,6 @@ final class JegKitDashboard implements ModuleInterface {
 		 *
 		 * @param bool $answer Whether the language is added to the dashboard.
 		 */
-		return (bool) apply_filters( 'localepress_jegkit_dashboard_languages', true );
+		return (bool) apply_filters( 'shapetranslate_jegkit_dashboard_languages', true );
 	}
 }

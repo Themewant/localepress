@@ -1,11 +1,11 @@
 <?php
 /**
- * Catalog of options LocalePress offers for translation on its own.
+ * Catalog of options ShapeTranslate offers for translation on its own.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\StringTranslation;
+namespace ShapeTranslate\StringTranslation;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,9 +14,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * A site owner should not have to write PHP or XML to translate their own site
  * title or a footer widget heading. Those values live in options WordPress
- * itself defines, so LocalePress can name them up front. Everything a plugin or
+ * itself defines, so ShapeTranslate can name them up front. Everything a plugin or
  * theme owns still comes from its own wpml-config.xml, or from
- * `localepress_register_string()`.
+ * `shapetranslate_register_string()`.
  *
  * The shape is the one `OptionStringTranslator` consumes: a context, then the
  * options in it, then the nested keys inside each option. A `*` matches any
@@ -72,13 +72,13 @@ final class CoreStringCatalog {
 		);
 
 		/**
-		 * Filters the options LocalePress registers for translation on its own.
+		 * Filters the options ShapeTranslate registers for translation on its own.
 		 *
 		 * The array is keyed by context, then by option name or wildcard, then by
 		 * the nested keys to translate inside that option. Use `true` to translate
 		 * every plain text value below a key.
 		 *
-		 *     add_filter( 'localepress_core_string_catalog', function ( $catalog ) {
+		 *     add_filter( 'shapetranslate_core_string_catalog', function ( $catalog ) {
 		 *         $catalog['Acme'] = array(
 		 *             'acme_settings' => array( 'header_text' => true ),
 		 *         );
@@ -87,7 +87,7 @@ final class CoreStringCatalog {
 		 *
 		 * @param array<string, array<string, mixed>> $declarations Declarations keyed by context.
 		 */
-		$filtered = apply_filters( 'localepress_core_string_catalog', $declarations );
+		$filtered = apply_filters( 'shapetranslate_core_string_catalog', $declarations );
 
 		return self::normalize( is_array( $filtered ) ? $filtered : $declarations );
 	}

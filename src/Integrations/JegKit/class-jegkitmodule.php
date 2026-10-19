@@ -2,14 +2,14 @@
 /**
  * Jeg Kit for Elementor header and footer integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\JegKit;
+namespace ShapeTranslate\Integrations\JegKit;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
 use WP_Post;
 use WP_Query;
 
@@ -101,13 +101,13 @@ final class JegKitModule implements ModuleInterface {
 		}
 
 		add_filter( 'register_post_type_args', array( $this, 'expose_template_ui' ), 10, 2 );
-		add_filter( 'localepress_settings', array( $this, 'enable_template_translation' ) );
-		add_filter( 'localepress_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
+		add_filter( 'shapetranslate_settings', array( $this, 'enable_template_translation' ) );
+		add_filter( 'shapetranslate_filter_secondary_query_by_language', array( $this, 'skip_template_query' ), 10, 2 );
 
-		add_filter( 'localepress_translation_copy_post_data', array( $this, 'name_translated_template' ), 10, 3 );
-		add_filter( 'localepress_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
-		add_filter( 'localepress_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
-		add_action( 'localepress_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
+		add_filter( 'shapetranslate_translation_copy_post_data', array( $this, 'name_translated_template' ), 10, 3 );
+		add_filter( 'shapetranslate_elementor_copy_meta_keys', array( $this, 'add_copy_meta_keys' ), 10, 2 );
+		add_filter( 'shapetranslate_elementor_copy_meta_value', array( $this, 'translate_copied_conditions' ), 10, 4 );
+		add_action( 'shapetranslate_translation_created', array( $this, 'copy_template_meta' ), 20, 2 );
 
 		add_filter( 'jkit_check_template_conditions', array( $this, 'filter_template_conditions' ), 10, 4 );
 	}
@@ -116,7 +116,7 @@ final class JegKitModule implements ModuleInterface {
 	 * Gives the template post types the administrative UI they are missing.
 	 *
 	 * The builder registers them public but without one, because it manages them
-	 * from a screen of its own and nothing needs a post list. LocalePress will not
+	 * from a screen of its own and nothing needs a post list. ShapeTranslate will not
 	 * translate a post type that has no administrative UI, and for good reason:
 	 * a translation nobody can open is a translation nobody can write. So the UI
 	 * is given rather than the requirement waived — the templates gain a post
@@ -148,7 +148,7 @@ final class JegKitModule implements ModuleInterface {
 		 * @param bool   $expose    Whether the post type gains an administrative UI.
 		 * @param string $post_type Post type being registered.
 		 */
-		if ( ! apply_filters( 'localepress_jegkit_expose_templates', true, (string) $post_type ) ) {
+		if ( ! apply_filters( 'shapetranslate_jegkit_expose_templates', true, (string) $post_type ) ) {
 			return $args;
 		}
 
@@ -169,7 +169,7 @@ final class JegKitModule implements ModuleInterface {
 	 * that would rather keep one header and footer for every language says so
 	 * through the filter below, which leaves the rest of the module inert.
 	 *
-	 * @param mixed $settings Normalized LocalePress configuration.
+	 * @param mixed $settings Normalized ShapeTranslate configuration.
 	 * @return mixed
 	 */
 	public function enable_template_translation( $settings ) {
@@ -267,7 +267,7 @@ final class JegKitModule implements ModuleInterface {
 		$named = '' === $title
 			? $label
 			/* translators: 1: template name, 2: language name. */
-			: sprintf( _x( '%1$s (%2$s)', 'translated template name', 'localepress' ), $title, $label );
+			: sprintf( _x( '%1$s (%2$s)', 'translated template name', 'shapetranslate' ), $title, $label );
 
 		/**
 		 * Filters the name a translated Jeg Kit template is created under.
@@ -280,7 +280,7 @@ final class JegKitModule implements ModuleInterface {
 		 * @param array<string, mixed> $language Target language record.
 		 * @param WP_Post              $source   Source template.
 		 */
-		$named = apply_filters( 'localepress_jegkit_template_title', $named, $title, $language, $source );
+		$named = apply_filters( 'shapetranslate_jegkit_template_title', $named, $title, $language, $source );
 
 		if ( is_string( $named ) && '' !== $named ) {
 			$post_data['post_title'] = $named;
@@ -427,7 +427,7 @@ final class JegKitModule implements ModuleInterface {
 		 */
 		$resolved = absint(
 			apply_filters(
-				'localepress_jegkit_template_id',
+				'shapetranslate_jegkit_template_id',
 				$resolved,
 				$post_type,
 				$post_id,
@@ -558,7 +558,7 @@ final class JegKitModule implements ModuleInterface {
 		 *
 		 * @param bool $translate Whether Jeg Kit templates are translatable.
 		 */
-		return (bool) apply_filters( 'localepress_jegkit_translate_templates', true );
+		return (bool) apply_filters( 'shapetranslate_jegkit_translate_templates', true );
 	}
 
 	/**
@@ -581,7 +581,7 @@ final class JegKitModule implements ModuleInterface {
 		 * @param string $language_id    Target language identifier.
 		 */
 		return (bool) apply_filters(
-			'localepress_jegkit_translate_conditions',
+			'shapetranslate_jegkit_translate_conditions',
 			true,
 			absint( $target_post_id ),
 			(string) $language_id

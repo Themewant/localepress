@@ -1,5 +1,5 @@
 /**
- * Admin behaviour for LocalePress settings and wizard screens.
+ * Admin behaviour for ShapeTranslate settings and wizard screens.
  *
  * Everything here is progressive: each screen renders and saves without this
  * file, so a failure to load costs presentation rather than function.
@@ -9,7 +9,7 @@
  * `Element.scrollIntoView` with an options object, and `navigator.clipboard`.
  * Each is either guarded before use or degrades to plain behaviour.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function () {
 	'use strict';
@@ -76,12 +76,12 @@
 		var wrapper = document.createElement( 'span' );
 		var image;
 
-		wrapper.className = 'localepress-flag-select__flag';
+		wrapper.className = 'shapetranslate-flag-select__flag';
 
 		if ( url ) {
 			image = document.createElement( 'img' );
 
-			image.className = 'localepress-flag';
+			image.className = 'shapetranslate-flag';
 			image.src = url;
 			image.alt = '';
 			image.width = 18;
@@ -198,15 +198,15 @@
 		var list = this.list;
 
 		toggle.type = 'button';
-		toggle.className = 'localepress-flag-select__toggle';
-		toggle.id = ( this.select.id || 'localepress-flag-select' ) + '-toggle';
+		toggle.className = 'shapetranslate-flag-select__toggle';
+		toggle.id = ( this.select.id || 'shapetranslate-flag-select' ) + '-toggle';
 		toggle.setAttribute( 'aria-haspopup', 'listbox' );
 		toggle.setAttribute( 'aria-expanded', 'false' );
 
-		this.panel.className = 'localepress-flag-select__panel';
+		this.panel.className = 'shapetranslate-flag-select__panel';
 		this.panel.hidden = true;
 
-		list.className = 'localepress-flag-select__list';
+		list.className = 'shapetranslate-flag-select__list';
 		list.id = toggle.id + '-list';
 		list.tabIndex = -1;
 		list.setAttribute( 'role', 'listbox' );
@@ -230,12 +230,12 @@
 			var text = document.createElement( 'span' );
 			var name = option.textContent.trim();
 
-			item.className = 'localepress-flag-select__option';
+			item.className = 'shapetranslate-flag-select__option';
 			item.id = self.list.id + '-' + index;
 			item.setAttribute( 'role', 'option' );
 			item.setAttribute( 'aria-selected', 'false' );
 
-			text.className = 'localepress-flag-select__label';
+			text.className = 'shapetranslate-flag-select__label';
 			text.textContent = name;
 
 			item.appendChild( buildFlag( option.dataset.flag ) );
@@ -279,7 +279,7 @@
 		placeholder = this.wrapper.dataset.searchLabel || 'Search';
 
 		this.search.type = 'search';
-		this.search.className = 'localepress-flag-select__search';
+		this.search.className = 'shapetranslate-flag-select__search';
 		this.search.id = this.toggle.id + '-search';
 		this.search.autocomplete = 'off';
 		this.search.placeholder = placeholder;
@@ -289,7 +289,7 @@
 		this.search.setAttribute( 'aria-autocomplete', 'list' );
 		this.search.setAttribute( 'aria-controls', this.list.id );
 
-		this.empty.className = 'localepress-flag-select__empty';
+		this.empty.className = 'shapetranslate-flag-select__empty';
 		this.empty.setAttribute( 'role', 'presentation' );
 		this.empty.textContent = this.wrapper.dataset.emptyText || 'No results found.';
 		this.empty.hidden = true;
@@ -353,7 +353,7 @@
 		var text = document.createElement( 'span' );
 		var fragment = document.createDocumentFragment();
 
-		text.className = 'localepress-flag-select__label';
+		text.className = 'shapetranslate-flag-select__label';
 		text.textContent = option ? option.textContent.trim() : '';
 
 		fragment.appendChild( buildFlag( option ? option.dataset.flag : '' ) );
@@ -708,7 +708,7 @@
 	 * @return {void}
 	 */
 	FlagSelect.prototype.onListClick = function ( event ) {
-		var item = event.target.closest( '.localepress-flag-select__option' );
+		var item = event.target.closest( '.shapetranslate-flag-select__option' );
 
 		if ( item ) {
 			this.choose( this.items.indexOf( item ) );
@@ -722,7 +722,7 @@
 	 * @return {void}
 	 */
 	FlagSelect.prototype.onListMousemove = function ( event ) {
-		var item = event.target.closest( '.localepress-flag-select__option' );
+		var item = event.target.closest( '.shapetranslate-flag-select__option' );
 
 		if ( item ) {
 			this.setActive( this.items.indexOf( item ) );
@@ -756,9 +756,9 @@
 	 * @return {void}
 	 */
 	function onConfirmClick( event ) {
-		var target = event.target.closest( '[data-localepress-confirm]' );
+		var target = event.target.closest( '[data-shapetranslate-confirm]' );
 
-		if ( target && ! window.confirm( target.dataset.localepressConfirm ) ) {
+		if ( target && ! window.confirm( target.dataset.shapetranslateConfirm ) ) {
 			event.preventDefault();
 		}
 	}
@@ -784,7 +784,7 @@
 	 */
 	function initFlagSelects() {
 		Array.prototype.forEach.call(
-			document.querySelectorAll( '[data-localepress-flag-select]' ),
+			document.querySelectorAll( '[data-shapetranslate-flag-select]' ),
 			function ( wrapper ) {
 				var select = wrapper.querySelector( 'select' );
 				var instance;
@@ -809,7 +809,7 @@
 	 * @return {void}
 	 */
 	function initUrlModes() {
-		var urlModes = document.querySelector( '[data-localepress-url-mode]' );
+		var urlModes = document.querySelector( '[data-shapetranslate-url-mode]' );
 		var panels;
 
 		/**
@@ -822,7 +822,7 @@
 			var mode = checked ? checked.value : '';
 
 			Array.prototype.forEach.call( panels, function ( panel ) {
-				panel.hidden = panel.dataset.localepressModePanel !== mode;
+				panel.hidden = panel.dataset.shapetranslateModePanel !== mode;
 			} );
 		}
 
@@ -830,7 +830,7 @@
 			return;
 		}
 
-		panels = document.querySelectorAll( '[data-localepress-mode-panel]' );
+		panels = document.querySelectorAll( '[data-shapetranslate-mode-panel]' );
 
 		urlModes.addEventListener( 'change', syncModePanels );
 		syncModePanels();
@@ -847,7 +847,7 @@
 	 * @return {void}
 	 */
 	function initSwitcherUsage() {
-		var usage = document.querySelector( '[data-localepress-switcher-usage]' );
+		var usage = document.querySelector( '[data-shapetranslate-switcher-usage]' );
 		var options;
 		var shortcodeOutput;
 		var copyTimer = 0;
@@ -872,7 +872,7 @@
 		 * @return {void}
 		 */
 		function render() {
-			var shortcode = '[localepress_switcher';
+			var shortcode = '[shapetranslate_switcher';
 
 			if ( ! shortcodeOutput ) {
 				return;
@@ -892,7 +892,7 @@
 		 * @return {void}
 		 */
 		function onCopyClick( event ) {
-			var button = event.target.closest( '[data-localepress-copy]' );
+			var button = event.target.closest( '[data-shapetranslate-copy]' );
 			var target;
 
 			if ( ! button ) {
@@ -900,7 +900,7 @@
 			}
 
 			target = usage.querySelector(
-				'[data-localepress-usage="' + button.dataset.localepressCopy + '"]'
+				'[data-shapetranslate-usage="' + button.dataset.shapetranslateCopy + '"]'
 			);
 
 			if ( ! target ) {
@@ -927,9 +927,9 @@
 		// The order the options read in, fixed here rather than left to whichever
 		// order the fields happen to be found in.
 		options = [
-			[ 'display', document.getElementById( 'localepress-switcher-display' ) ],
-			[ 'layout', document.getElementById( 'localepress-switcher-layout' ) ],
-			[ 'unavailable_behavior', document.getElementById( 'localepress-unavailable-behavior' ) ],
+			[ 'display', document.getElementById( 'shapetranslate-switcher-display' ) ],
+			[ 'layout', document.getElementById( 'shapetranslate-switcher-layout' ) ],
+			[ 'unavailable_behavior', document.getElementById( 'shapetranslate-unavailable-behavior' ) ],
 			[ 'show_flags', document.querySelector( 'input[name="switcher[show_flags]"]' ) ],
 			[ 'hide_current', document.querySelector( 'input[name="switcher[hide_current]"]' ) ],
 			[ 'hide_missing', document.querySelector( 'input[name="switcher[hide_missing]"]' ) ],
@@ -938,7 +938,7 @@
 			return !! option[ 1 ];
 		} );
 
-		shortcodeOutput = usage.querySelector( '[data-localepress-usage="shortcode"]' );
+		shortcodeOutput = usage.querySelector( '[data-shapetranslate-usage="shortcode"]' );
 
 		options.forEach( function ( option ) {
 			option[ 1 ].addEventListener( 'change', render );
@@ -951,7 +951,7 @@
 			usage.addEventListener( 'click', onCopyClick );
 		} else {
 			Array.prototype.forEach.call(
-				usage.querySelectorAll( '[data-localepress-copy]' ),
+				usage.querySelectorAll( '[data-shapetranslate-copy]' ),
 				function ( button ) {
 					button.hidden = true;
 				}
@@ -967,7 +967,7 @@
 	 * @return {void}
 	 */
 	function initLanguagePreset() {
-		var preset = document.getElementById( 'localepress-language-preset' );
+		var preset = document.getElementById( 'shapetranslate-language-preset' );
 		var fields;
 		var missingField;
 
@@ -996,12 +996,12 @@
 		}
 
 		fields = {
-			name: document.getElementById( 'localepress-name' ),
-			nativeName: document.getElementById( 'localepress-native_name' ),
-			locale: document.getElementById( 'localepress-locale' ),
-			languageCode: document.getElementById( 'localepress-language_code' ),
-			urlSlug: document.getElementById( 'localepress-url_slug' ),
-			isRtl: document.getElementById( 'localepress-is-rtl' )
+			name: document.getElementById( 'shapetranslate-name' ),
+			nativeName: document.getElementById( 'shapetranslate-native_name' ),
+			locale: document.getElementById( 'shapetranslate-locale' ),
+			languageCode: document.getElementById( 'shapetranslate-language_code' ),
+			urlSlug: document.getElementById( 'shapetranslate-url_slug' ),
+			isRtl: document.getElementById( 'shapetranslate-is-rtl' )
 		};
 
 		missingField = Object.keys( fields ).some( function ( key ) {

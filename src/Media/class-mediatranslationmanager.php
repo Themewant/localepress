@@ -2,12 +2,12 @@
 /**
  * Media translation service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Media;
+namespace ShapeTranslate\Media;
 
-use LocalePress\Content\PostTranslationManager;
+use ShapeTranslate\Content\PostTranslationManager;
 use WP_Error;
 use WP_Post;
 
@@ -64,7 +64,7 @@ final class MediaTranslationManager {
 	 */
 	public function insert_translation( array $post_data, WP_Post $source ) {
 		if ( 'attachment' !== $source->post_type ) {
-			return new WP_Error( 'invalid_media_source', __( 'Only attachments can be translated as media.', 'localepress' ) );
+			return new WP_Error( 'invalid_media_source', __( 'Only attachments can be translated as media.', 'shapetranslate' ) );
 		}
 
 		$post_data['post_status']    = 'inherit';
@@ -80,7 +80,7 @@ final class MediaTranslationManager {
 		$translation_id = absint( $translation_id );
 
 		if ( 1 > $translation_id ) {
-			return new WP_Error( 'media_translation_failed', __( 'The media translation could not be created.', 'localepress' ) );
+			return new WP_Error( 'media_translation_failed', __( 'The media translation could not be created.', 'shapetranslate' ) );
 		}
 
 		$this->share_source_file( $translation_id, $source->ID );
@@ -123,7 +123,7 @@ final class MediaTranslationManager {
 		 * @param int $translation_id Media translation identifier.
 		 * @param int $source_id      Source attachment identifier.
 		 */
-		do_action( 'localepress_media_file_shared', $translation_id, $source_id );
+		do_action( 'shapetranslate_media_file_shared', $translation_id, $source_id );
 	}
 
 	/**

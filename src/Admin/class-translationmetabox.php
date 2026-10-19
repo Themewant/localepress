@@ -2,14 +2,14 @@
 /**
  * Post translation meta box.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Language\FlagRegistry;
-use LocalePress\Language\LanguageManager;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Language\FlagRegistry;
+use ShapeTranslate\Language\LanguageManager;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -82,7 +82,7 @@ final class TranslationMetaBox {
 		 * @param WP_Post $post        Post being edited.
 		 */
 		$new_language_id = apply_filters(
-			'localepress_new_post_language_id',
+			'shapetranslate_new_post_language_id',
 			$this->language_manager->get_default_id(),
 			$post
 		);
@@ -92,15 +92,15 @@ final class TranslationMetaBox {
 			: (string) $new_language_id;
 		$translations      = $this->translation_manager->get_translations( $post->ID );
 
-		wp_nonce_field( 'localepress_save_post_language_' . $post->ID, 'localepress_language_nonce' );
+		wp_nonce_field( 'shapetranslate_save_post_language_' . $post->ID, 'shapetranslate_language_nonce' );
 		?>
 		<p>
-			<label class="screen-reader-text" for="localepress-post-language">
-				<?php esc_html_e( 'Post language', 'localepress' ); ?>
+			<label class="screen-reader-text" for="shapetranslate-post-language">
+				<?php esc_html_e( 'Post language', 'shapetranslate' ); ?>
 			</label>
-			<select id="localepress-post-language" name="localepress_language_id" class="widefat">
+			<select id="shapetranslate-post-language" name="shapetranslate_language_id" class="widefat">
 				<?php if ( '' === $selected_language ) : ?>
-					<option value=""><?php esc_html_e( 'Select a language', 'localepress' ); ?></option>
+					<option value=""><?php esc_html_e( 'Select a language', 'shapetranslate' ); ?></option>
 				<?php endif; ?>
 				<?php foreach ( $languages as $language ) : ?>
 					<?php if ( empty( $language['enabled'] ) && $current_language_id !== $language['id'] ) : ?>
@@ -113,14 +113,14 @@ final class TranslationMetaBox {
 			</select>
 		</p>
 
-		<div class="localepress-meta-box-translations">
-			<h4><?php esc_html_e( 'Translations', 'localepress' ); ?></h4>
+		<div class="shapetranslate-meta-box-translations">
+			<h4><?php esc_html_e( 'Translations', 'shapetranslate' ); ?></h4>
 			<?php if ( '' === $current_language_id ) : ?>
 				<p class="description">
-					<?php esc_html_e( 'Save the post to assign its language before adding translations.', 'localepress' ); ?>
+					<?php esc_html_e( 'Save the post to assign its language before adding translations.', 'shapetranslate' ); ?>
 				</p>
 			<?php else : ?>
-				<ul class="localepress-translation-links">
+				<ul class="shapetranslate-translation-links">
 					<?php foreach ( $languages as $language ) : ?>
 						<?php $this->render_language_action( $post, $language, $current_language_id, $translations ); ?>
 					<?php endforeach; ?>
@@ -145,32 +145,32 @@ final class TranslationMetaBox {
 		$target_id   = isset( $translations[ $language_id ] ) ? absint( $translations[ $language_id ] ) : 0;
 		$add_label   = sprintf(
 			/* translators: %s: native language name. */
-			__( 'Add %s translation', 'localepress' ),
+			__( 'Add %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 		?>
 		<li>
-			<span class="localepress-language-code">
+			<span class="shapetranslate-language-code">
 				<?php echo $this->flags->get_flag_html( $language ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized by FlagRegistry::get_flag_html(). ?>
 				<?php echo esc_html( $code ); ?>
 			</span>
-			<span class="localepress-translation-action">
+			<span class="shapetranslate-translation-action">
 				<?php if ( $language_id === $current_language_id ) : ?>
-					<span class="localepress-translation-icon is-current" title="<?php esc_attr_e( 'Current language', 'localepress' ); ?>">
+					<span class="shapetranslate-translation-icon is-current" title="<?php esc_attr_e( 'Current language', 'shapetranslate' ); ?>">
 						<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-						<span class="screen-reader-text"><?php esc_html_e( 'Current language', 'localepress' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Current language', 'shapetranslate' ); ?></span>
 					</span>
 				<?php elseif ( 0 < $target_id ) : ?>
 					<?php $this->render_existing_translation( $target_id, $language ); ?>
 				<?php elseif ( ! empty( $language['enabled'] ) && $this->actions->can_create_translation( $post ) ) : ?>
-					<a class="localepress-translation-icon is-add" href="<?php echo esc_url( $this->actions->get_create_url( $post->ID, $language_id ) ); ?>" title="<?php echo esc_attr( $add_label ); ?>" aria-label="<?php echo esc_attr( $add_label ); ?>">
+					<a class="shapetranslate-translation-icon is-add" href="<?php echo esc_url( $this->actions->get_create_url( $post->ID, $language_id ) ); ?>" title="<?php echo esc_attr( $add_label ); ?>" aria-label="<?php echo esc_attr( $add_label ); ?>">
 						<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php echo esc_html( $add_label ); ?></span>
 					</a>
 				<?php else : ?>
-					<span class="localepress-translation-icon is-unavailable" title="<?php esc_attr_e( 'Unavailable', 'localepress' ); ?>">
+					<span class="shapetranslate-translation-icon is-unavailable" title="<?php esc_attr_e( 'Unavailable', 'shapetranslate' ); ?>">
 						<span class="dashicons dashicons-minus" aria-hidden="true"></span>
-						<span class="screen-reader-text"><?php esc_html_e( 'Unavailable', 'localepress' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Unavailable', 'shapetranslate' ); ?></span>
 					</span>
 				<?php endif; ?>
 			</span>
@@ -187,20 +187,20 @@ final class TranslationMetaBox {
 	 */
 	private function render_existing_translation( $post_id, $language ) {
 		if ( 'trash' === get_post_status( $post_id ) ) {
-			esc_html_e( 'In Trash', 'localepress' );
+			esc_html_e( 'In Trash', 'shapetranslate' );
 			return;
 		}
 
 		$edit_url = current_user_can( 'edit_post', $post_id ) ? get_edit_post_link( $post_id, '' ) : '';
 		$label    = sprintf(
 			/* translators: %s: language name. */
-			__( 'Edit %s translation', 'localepress' ),
+			__( 'Edit %s translation', 'shapetranslate' ),
 			$language['native_name']
 		);
 
 		if ( is_string( $edit_url ) && '' !== $edit_url ) {
 			?>
-			<a class="localepress-translation-icon is-edit" href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_attr( $label ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
+			<a class="shapetranslate-translation-icon is-edit" href="<?php echo esc_url( $edit_url ); ?>" title="<?php echo esc_attr( $label ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
 				<span class="dashicons dashicons-edit" aria-hidden="true"></span>
 				<span class="screen-reader-text"><?php echo esc_html( $label ); ?></span>
 			</a>
@@ -208,6 +208,6 @@ final class TranslationMetaBox {
 			return;
 		}
 
-		esc_html_e( 'Translation exists', 'localepress' );
+		esc_html_e( 'Translation exists', 'shapetranslate' );
 	}
 }

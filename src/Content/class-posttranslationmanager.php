@@ -2,14 +2,14 @@
 /**
  * Post translation relationship manager.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Content;
+namespace ShapeTranslate\Content;
 
-use LocalePress\Contracts\TranslationRepositoryInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\WorkflowSettings;
+use ShapeTranslate\Contracts\TranslationRepositoryInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\WorkflowSettings;
 use WP_Error;
 use WP_Post;
 
@@ -49,7 +49,7 @@ final class PostTranslationManager {
 	private $workflow_settings;
 
 	/**
-	 * Whether LocalePress is inserting a translated copy.
+	 * Whether ShapeTranslate is inserting a translated copy.
 	 *
 	 * @var bool
 	 */
@@ -119,7 +119,7 @@ final class PostTranslationManager {
 		 * @param array<string, mixed>|null $language Language record.
 		 * @param int                       $post_id  Post identifier.
 		 */
-		$filtered = apply_filters( 'localepress_post_language', $language, absint( $post_id ) );
+		$filtered = apply_filters( 'shapetranslate_post_language', $language, absint( $post_id ) );
 
 		return is_array( $filtered ) || null === $filtered ? $filtered : $language;
 	}
@@ -195,7 +195,7 @@ final class PostTranslationManager {
 		 * @param string             $group_id     Translation group identifier.
 		 */
 		$filtered = apply_filters(
-			'localepress_post_translations',
+			'shapetranslate_post_translations',
 			$translations,
 			$post_id,
 			$group_id
@@ -241,7 +241,7 @@ final class PostTranslationManager {
 			if ( $language_id === $member['language_id'] && $post->ID !== $member['post_id'] ) {
 				return new WP_Error(
 					'duplicate_translation_language',
-					__( 'This translation group already contains a post for that language.', 'localepress' )
+					__( 'This translation group already contains a post for that language.', 'shapetranslate' )
 				);
 			}
 		}
@@ -263,7 +263,7 @@ final class PostTranslationManager {
 		 * @param string $group_id       Translation group identifier.
 		 */
 		do_action(
-			'localepress_post_language_changed',
+			'shapetranslate_post_language_changed',
 			$post->ID,
 			$language_id,
 			$old_language_id,
@@ -287,13 +287,13 @@ final class PostTranslationManager {
 		$translations = $this->normalize_translation_map( $translations );
 
 		if ( empty( $translations ) ) {
-			return new WP_Error( 'empty_translation_group', __( 'Provide at least one post to link.', 'localepress' ) );
+			return new WP_Error( 'empty_translation_group', __( 'Provide at least one post to link.', 'shapetranslate' ) );
 		}
 
 		if ( count( $translations ) !== count( array_unique( array_values( $translations ) ) ) ) {
 			return new WP_Error(
 				'conflicting_post_languages',
-				__( 'A post cannot represent more than one language in a translation group.', 'localepress' )
+				__( 'A post cannot represent more than one language in a translation group.', 'shapetranslate' )
 			);
 		}
 
@@ -311,7 +311,7 @@ final class PostTranslationManager {
 			if ( '' !== $post_type && $post_type !== $post->post_type ) {
 				return new WP_Error(
 					'mixed_translation_post_types',
-					__( 'Translations in one group must use the same post type.', 'localepress' )
+					__( 'Translations in one group must use the same post type.', 'shapetranslate' )
 				);
 			}
 
@@ -323,7 +323,7 @@ final class PostTranslationManager {
 				if ( $language_id !== $existing_assignment['language_id'] ) {
 					return new WP_Error(
 						'conflicting_post_language',
-						__( 'A post is already assigned to a different language.', 'localepress' )
+						__( 'A post is already assigned to a different language.', 'shapetranslate' )
 					);
 				}
 
@@ -343,7 +343,7 @@ final class PostTranslationManager {
 		if ( count( $group_ids ) > 1 ) {
 			return new WP_Error(
 				'conflicting_translation_groups',
-				__( 'Posts from different translation groups cannot be linked implicitly.', 'localepress' )
+				__( 'Posts from different translation groups cannot be linked implicitly.', 'shapetranslate' )
 			);
 		}
 
@@ -360,7 +360,7 @@ final class PostTranslationManager {
 			if ( ! in_array( $source_post_id, $translations, true ) ) {
 				return new WP_Error(
 					'invalid_translation_source',
-					__( 'The source post must belong to the new translation group.', 'localepress' )
+					__( 'The source post must belong to the new translation group.', 'shapetranslate' )
 				);
 			}
 		} else {
@@ -374,7 +374,7 @@ final class PostTranslationManager {
 				if ( $language_id === $member['language_id'] && $post_id !== $member['post_id'] ) {
 					return new WP_Error(
 						'duplicate_translation_language',
-						__( 'This translation group already contains a post for that language.', 'localepress' )
+						__( 'This translation group already contains a post for that language.', 'shapetranslate' )
 					);
 				}
 			}
@@ -414,7 +414,7 @@ final class PostTranslationManager {
 		 * @param int                $source_post_id Source post identifier.
 		 */
 		do_action(
-			'localepress_translations_linked',
+			'shapetranslate_translations_linked',
 			$group_id,
 			$result['translations'],
 			$source_post_id
@@ -446,7 +446,7 @@ final class PostTranslationManager {
 		}
 
 		if ( 'trash' === $source->post_status ) {
-			return new WP_Error( 'source_post_trashed', __( 'A trashed post cannot be used as a translation source.', 'localepress' ) );
+			return new WP_Error( 'source_post_trashed', __( 'A trashed post cannot be used as a translation source.', 'shapetranslate' ) );
 		}
 
 		$source_assignment = $this->repository->find_by_post( $source->ID );
@@ -473,7 +473,7 @@ final class PostTranslationManager {
 			if ( isset( $usable_translations[ $language_id ] ) ) {
 				return new WP_Error(
 					'duplicate_translation_language',
-					__( 'This translation group already contains a post for that language.', 'localepress' )
+					__( 'This translation group already contains a post for that language.', 'shapetranslate' )
 				);
 			}
 
@@ -525,7 +525,7 @@ final class PostTranslationManager {
 		 * @param WP_Post              $source     Source post.
 		 * @param array<string, mixed> $language   Target language.
 		 */
-		$filtered_data = apply_filters( 'localepress_translation_copy_post_data', $post_data, $source, $language );
+		$filtered_data = apply_filters( 'shapetranslate_translation_copy_post_data', $post_data, $source, $language );
 		$post_data     = is_array( $filtered_data ) ? $filtered_data : $post_data;
 
 		// The core engine never permits copy filters to change these boundaries.
@@ -549,7 +549,7 @@ final class PostTranslationManager {
 			 * @param WP_Post              $source      Source post.
 			 * @param array<string, mixed> $language    Target language record.
 			 */
-			$new_post_id = apply_filters( 'localepress_insert_translation', null, $post_data, $source, $language );
+			$new_post_id = apply_filters( 'shapetranslate_insert_translation', null, $post_data, $source, $language );
 
 			if ( null === $new_post_id ) {
 				$new_post_id = wp_insert_post( wp_slash( $post_data ), true );
@@ -566,7 +566,7 @@ final class PostTranslationManager {
 		$new_post_id = absint( $new_post_id );
 
 		if ( 1 > $new_post_id ) {
-			return new WP_Error( 'translation_insert_failed', __( 'The translated item could not be created.', 'localepress' ) );
+			return new WP_Error( 'translation_insert_failed', __( 'The translated item could not be created.', 'shapetranslate' ) );
 		}
 
 		$link_result = $this->link_translations(
@@ -597,7 +597,7 @@ final class PostTranslationManager {
 			 * @param int                  $new_post_id  Translated post identifier.
 			 * @param int                  $source_id    Source post identifier.
 			 */
-			$thumbnail_id = absint( apply_filters( 'localepress_translation_featured_image_id', $thumbnail_id, $language, $new_post_id, $source->ID ) );
+			$thumbnail_id = absint( apply_filters( 'shapetranslate_translation_featured_image_id', $thumbnail_id, $language, $new_post_id, $source->ID ) );
 
 			if ( 0 < $thumbnail_id && set_post_thumbnail( $new_post_id, $thumbnail_id ) ) {
 				/**
@@ -607,7 +607,7 @@ final class PostTranslationManager {
 				 * @param int $source_id    Source post identifier.
 				 * @param int $thumbnail_id Shared attachment identifier.
 				 */
-				do_action( 'localepress_translation_featured_image_copied', $new_post_id, $source->ID, $thumbnail_id );
+				do_action( 'shapetranslate_translation_featured_image_copied', $new_post_id, $source->ID, $thumbnail_id );
 			}
 		}
 
@@ -621,7 +621,7 @@ final class PostTranslationManager {
 		 * @param array<string, bool>  $copy_options Applied copy behavior.
 		 */
 		do_action(
-			'localepress_translation_created',
+			'shapetranslate_translation_created',
 			$new_post_id,
 			$source->ID,
 			$language,
@@ -673,7 +673,7 @@ final class PostTranslationManager {
 		if ( '' === $language_id ) {
 			return new WP_Error(
 				'missing_default_language',
-				__( 'Configure an enabled default language before translating content.', 'localepress' )
+				__( 'Configure an enabled default language before translating content.', 'shapetranslate' )
 			);
 		}
 
@@ -681,7 +681,7 @@ final class PostTranslationManager {
 	}
 
 	/**
-	 * Reports whether LocalePress is inserting a translated copy.
+	 * Reports whether ShapeTranslate is inserting a translated copy.
 	 *
 	 * @return bool
 	 */
@@ -729,7 +729,7 @@ final class PostTranslationManager {
 		 * @param int                  $post_id    Removed post identifier.
 		 * @param array<string, mixed> $assignment Previous assignment.
 		 */
-		do_action( 'localepress_post_translation_unlinked', $post_id, $assignment );
+		do_action( 'shapetranslate_post_translation_unlinked', $post_id, $assignment );
 	}
 
 	/**
@@ -777,7 +777,7 @@ final class PostTranslationManager {
 		$this->repair_group( $previous_group_id, $post_id );
 
 		/** This action is documented in src/Content/class-posttranslationmanager.php */
-		do_action( 'localepress_post_translation_unlinked', $post_id, $assignment );
+		do_action( 'shapetranslate_post_translation_unlinked', $post_id, $assignment );
 
 		return true;
 	}
@@ -798,7 +798,7 @@ final class PostTranslationManager {
 
 		if ( empty( $members ) ) {
 			$this->repository->delete_group( $group_id );
-			do_action( 'localepress_translation_group_deleted', $group_id );
+			do_action( 'shapetranslate_translation_group_deleted', $group_id );
 
 			return;
 		}
@@ -878,13 +878,13 @@ final class PostTranslationManager {
 		$post = get_post( absint( $post_id ) );
 
 		if ( ! $post instanceof WP_Post ) {
-			return new WP_Error( 'translation_post_not_found', __( 'The requested post could not be found.', 'localepress' ) );
+			return new WP_Error( 'translation_post_not_found', __( 'The requested post could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( ! $this->post_type_support->supports( $post->post_type ) ) {
 			return new WP_Error(
 				'unsupported_translation_post_type',
-				__( 'That post type is not supported by LocalePress.', 'localepress' )
+				__( 'That post type is not supported by ShapeTranslate.', 'shapetranslate' )
 			);
 		}
 
@@ -899,7 +899,7 @@ final class PostTranslationManager {
 		if ( 'auto-draft' === $post->post_status ) {
 			return new WP_Error(
 				'auto_draft_translation_post',
-				__( 'Save the post before giving it a language.', 'localepress' )
+				__( 'Save the post before giving it a language.', 'shapetranslate' )
 			);
 		}
 
@@ -917,11 +917,11 @@ final class PostTranslationManager {
 		$language    = $this->language_manager->find( $language_id );
 
 		if ( null === $language || 64 < strlen( $language_id ) ) {
-			return new WP_Error( 'translation_language_not_found', __( 'Select a registered language.', 'localepress' ) );
+			return new WP_Error( 'translation_language_not_found', __( 'Select a registered language.', 'shapetranslate' ) );
 		}
 
 		if ( empty( $language['enabled'] ) ) {
-			return new WP_Error( 'translation_language_disabled', __( 'Select an enabled language.', 'localepress' ) );
+			return new WP_Error( 'translation_language_disabled', __( 'Select an enabled language.', 'shapetranslate' ) );
 		}
 
 		return $language;
@@ -1045,7 +1045,7 @@ final class PostTranslationManager {
 	private function storage_error() {
 		return new WP_Error(
 			'translation_storage_error',
-			__( 'LocalePress could not save the translation relationship.', 'localepress' )
+			__( 'ShapeTranslate could not save the translation relationship.', 'shapetranslate' )
 		);
 	}
 }

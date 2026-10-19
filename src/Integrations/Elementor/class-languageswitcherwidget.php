@@ -2,18 +2,18 @@
 /**
  * Elementor language switcher widget.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Elementor;
+namespace ShapeTranslate\Integrations\Elementor;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Typography;
 use Elementor\Widget_Base;
-use LocalePress\Plugin;
-use LocalePress\Switcher\LanguageSwitcher;
+use ShapeTranslate\Plugin;
+use ShapeTranslate\Switcher\LanguageSwitcher;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +36,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	/**
 	 * Elementor category this widget is filed under.
 	 */
-	const CATEGORY = 'localepress';
+	const CATEGORY = 'shapetranslate';
 
 	/**
 	 * {@inheritdoc}
@@ -44,7 +44,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 * @return string
 	 */
 	public function get_name() {
-		return 'localepress-language-switcher';
+		return 'shapetranslate-language-switcher';
 	}
 
 	/**
@@ -53,7 +53,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Language Switcher', 'localepress' );
+		return __( 'Language Switcher', 'shapetranslate' );
 	}
 
 	/**
@@ -80,7 +80,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 * @return array<int, string>
 	 */
 	public function get_keywords() {
-		return array( 'language', 'switcher', 'multilingual', 'translation', 'localepress', 'flag' );
+		return array( 'language', 'switcher', 'multilingual', 'translation', 'shapetranslate', 'flag' );
 	}
 
 	/**
@@ -93,7 +93,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 * @return array<int, string>
 	 */
 	public function get_style_depends() {
-		return array( 'localepress-switcher' );
+		return array( 'shapetranslate-switcher' );
 	}
 
 	/**
@@ -102,12 +102,12 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 * Named unconditionally rather than only for the dropdown layout. Elementor
 	 * reads this list to decide what a page needs, not what one saved widget
 	 * needs, and the script is inert where no dropdown exists: it acts on
-	 * `.localepress-switcher__dropdown` and finds none.
+	 * `.shapetranslate-switcher__dropdown` and finds none.
 	 *
 	 * @return array<int, string>
 	 */
 	public function get_script_depends() {
-		return array( 'localepress-switcher' );
+		return array( 'shapetranslate-switcher' );
 	}
 
 	/**
@@ -130,9 +130,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 */
 	private function register_content_controls() {
 		$this->start_controls_section(
-			'localepress_content',
+			'shapetranslate_content',
 			array(
-				'label' => __( 'Languages', 'localepress' ),
+				'label' => __( 'Languages', 'shapetranslate' ),
 				'tab'   => Controls_Manager::TAB_CONTENT,
 			)
 		);
@@ -140,13 +140,13 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'layout',
 			array(
-				'label'   => __( 'Layout', 'localepress' ),
+				'label'   => __( 'Layout', 'shapetranslate' ),
 				'type'    => Controls_Manager::SELECT,
 				'default' => 'horizontal',
 				'options' => array(
-					'horizontal' => __( 'Horizontal', 'localepress' ),
-					'vertical'   => __( 'Vertical', 'localepress' ),
-					'dropdown'   => __( 'Dropdown', 'localepress' ),
+					'horizontal' => __( 'Horizontal', 'shapetranslate' ),
+					'vertical'   => __( 'Vertical', 'shapetranslate' ),
+					'dropdown'   => __( 'Dropdown', 'shapetranslate' ),
 				),
 			)
 		);
@@ -161,13 +161,13 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'display',
 			array(
-				'label'   => __( 'Label', 'localepress' ),
+				'label'   => __( 'Label', 'shapetranslate' ),
 				'type'    => Controls_Manager::SELECT,
 				'default' => 'native_name',
 				'options' => array(
-					'native_name'   => __( 'Native name', 'localepress' ),
-					'name'          => __( 'Language name', 'localepress' ),
-					'language_code' => __( 'Language code', 'localepress' ),
+					'native_name'   => __( 'Native name', 'shapetranslate' ),
+					'name'          => __( 'Language name', 'shapetranslate' ),
+					'language_code' => __( 'Language code', 'shapetranslate' ),
 				),
 			)
 		);
@@ -175,7 +175,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'show_flags',
 			array(
-				'label'        => __( 'Show flags', 'localepress' ),
+				'label'        => __( 'Show flags', 'shapetranslate' ),
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => '',
@@ -185,20 +185,20 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'languages',
 			array(
-				'label'       => __( 'Languages', 'localepress' ),
+				'label'       => __( 'Languages', 'shapetranslate' ),
 				'type'        => Controls_Manager::SELECT2,
 				'multiple'    => true,
 				'options'     => $this->get_language_options(),
 				'default'     => array(),
 				'label_block' => true,
-				'description' => __( 'Leave empty to show every enabled language. A language added to the site later appears on its own while this is empty, and has to be added here once a selection is made.', 'localepress' ),
+				'description' => __( 'Leave empty to show every enabled language. A language added to the site later appears on its own while this is empty, and has to be added here once a selection is made.', 'shapetranslate' ),
 			)
 		);
 
 		$this->add_control(
 			'hide_current',
 			array(
-				'label'        => __( 'Hide current language', 'localepress' ),
+				'label'        => __( 'Hide current language', 'shapetranslate' ),
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => '',
@@ -208,23 +208,23 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'unavailable_behavior',
 			array(
-				'label'       => __( 'Missing translation', 'localepress' ),
+				'label'       => __( 'Missing translation', 'shapetranslate' ),
 				'type'        => Controls_Manager::SELECT,
 				'default'     => 'hide',
 				'options'     => array(
-					'hide'     => __( 'Hide languages the site has no content in', 'localepress' ),
-					'disabled' => __( 'Show as unavailable', 'localepress' ),
-					'home'     => __( 'Link to language homepage', 'localepress' ),
-					'current'  => __( 'Keep current URL', 'localepress' ),
+					'hide'     => __( 'Hide languages the site has no content in', 'shapetranslate' ),
+					'disabled' => __( 'Show as unavailable', 'shapetranslate' ),
+					'home'     => __( 'Link to language homepage', 'shapetranslate' ),
+					'current'  => __( 'Keep current URL', 'shapetranslate' ),
 				),
-				'description' => __( 'A language stays in the switcher as long as something on the site is published in it, even on a page carrying no translation of its own.', 'localepress' ),
+				'description' => __( 'A language stays in the switcher as long as something on the site is published in it, even on a page carrying no translation of its own.', 'shapetranslate' ),
 			)
 		);
 
 		$this->add_control(
 			'show_disabled',
 			array(
-				'label'        => __( 'Show disabled languages', 'localepress' ),
+				'label'        => __( 'Show disabled languages', 'shapetranslate' ),
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => '',
@@ -234,11 +234,11 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'aria_label',
 			array(
-				'label'       => __( 'Accessible label', 'localepress' ),
+				'label'       => __( 'Accessible label', 'shapetranslate' ),
 				'type'        => Controls_Manager::TEXT,
 				'default'     => '',
-				'placeholder' => __( 'Language selector', 'localepress' ),
-				'description' => __( 'Announced to screen readers in place of the default.', 'localepress' ),
+				'placeholder' => __( 'Language selector', 'shapetranslate' ),
+				'description' => __( 'Announced to screen readers in place of the default.', 'shapetranslate' ),
 			)
 		);
 
@@ -252,9 +252,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 */
 	private function register_language_style_controls() {
 		$this->start_controls_section(
-			'localepress_style_language',
+			'shapetranslate_style_language',
 			array(
-				'label' => __( 'Language', 'localepress' ),
+				'label' => __( 'Language', 'shapetranslate' ),
 				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
@@ -263,25 +263,25 @@ final class LanguageSwitcherWidget extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			array(
 				'name'     => 'language_typography',
-				'selector' => '{{WRAPPER}} .localepress-switcher__link, {{WRAPPER}} .localepress-switcher__unavailable, {{WRAPPER}} .localepress-switcher__dropdown > summary',
+				'selector' => '{{WRAPPER}} .shapetranslate-switcher__link, {{WRAPPER}} .shapetranslate-switcher__unavailable, {{WRAPPER}} .shapetranslate-switcher__dropdown > summary',
 			)
 		);
 
-		$this->start_controls_tabs( 'localepress_language_colors' );
+		$this->start_controls_tabs( 'shapetranslate_language_colors' );
 
 		$this->start_controls_tab(
-			'localepress_language_normal',
-			array( 'label' => __( 'Normal', 'localepress' ) )
+			'shapetranslate_language_normal',
+			array( 'label' => __( 'Normal', 'shapetranslate' ) )
 		);
 
 		$this->add_control(
 			'language_color',
 			array(
-				'label'     => __( 'Text Color', 'localepress' ),
+				'label'     => __( 'Text Color', 'shapetranslate' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array(
-					'{{WRAPPER}} .localepress-switcher__link'            => 'color: {{VALUE}};',
-					'{{WRAPPER}} .localepress-switcher__dropdown > summary' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__link'            => 'color: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__dropdown > summary' => 'color: {{VALUE}};',
 				),
 			)
 		);
@@ -289,18 +289,18 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->end_controls_tab();
 
 		$this->start_controls_tab(
-			'localepress_language_hover',
-			array( 'label' => __( 'Hover', 'localepress' ) )
+			'shapetranslate_language_hover',
+			array( 'label' => __( 'Hover', 'shapetranslate' ) )
 		);
 
 		$this->add_control(
 			'language_hover_color',
 			array(
-				'label'     => __( 'Text Color', 'localepress' ),
+				'label'     => __( 'Text Color', 'shapetranslate' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array(
-					'{{WRAPPER}} .localepress-switcher__link:hover'      => 'color: {{VALUE}};',
-					'{{WRAPPER}} .localepress-switcher__link:focus-visible' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__link:hover'      => 'color: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__link:focus-visible' => 'color: {{VALUE}};',
 				),
 			)
 		);
@@ -308,17 +308,17 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->end_controls_tab();
 
 		$this->start_controls_tab(
-			'localepress_language_current',
-			array( 'label' => __( 'Current', 'localepress' ) )
+			'shapetranslate_language_current',
+			array( 'label' => __( 'Current', 'shapetranslate' ) )
 		);
 
 		$this->add_control(
 			'language_current_color',
 			array(
-				'label'     => __( 'Text Color', 'localepress' ),
+				'label'     => __( 'Text Color', 'shapetranslate' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array(
-					'{{WRAPPER}} .localepress-switcher__item.is-current .localepress-switcher__link' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__item.is-current .shapetranslate-switcher__link' => 'color: {{VALUE}};',
 				),
 			)
 		);
@@ -334,11 +334,11 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'language_unavailable_color',
 			array(
-				'label'     => __( 'Unavailable Color', 'localepress' ),
+				'label'     => __( 'Unavailable Color', 'shapetranslate' ),
 				'type'      => Controls_Manager::COLOR,
 				'separator' => 'before',
 				'selectors' => array(
-					'{{WRAPPER}} .localepress-switcher__unavailable' => 'color: {{VALUE}}; opacity: 1;',
+					'{{WRAPPER}} .shapetranslate-switcher__unavailable' => 'color: {{VALUE}}; opacity: 1;',
 				),
 			)
 		);
@@ -353,9 +353,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 */
 	private function register_flag_style_controls() {
 		$this->start_controls_section(
-			'localepress_style_flag',
+			'shapetranslate_style_flag',
 			array(
-				'label'     => __( 'Flag', 'localepress' ),
+				'label'     => __( 'Flag', 'shapetranslate' ),
 				'tab'       => Controls_Manager::TAB_STYLE,
 				'condition' => array( 'show_flags' => 'yes' ),
 			)
@@ -364,7 +364,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'flag_size',
 			array(
-				'label'      => __( 'Size', 'localepress' ),
+				'label'      => __( 'Size', 'shapetranslate' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', 'em' ),
 				'range'      => array(
@@ -379,7 +379,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 					),
 				),
 				'selectors'  => array(
-					'{{WRAPPER}} .localepress-switcher__flag' => 'width: {{SIZE}}{{UNIT}}; height: auto;',
+					'{{WRAPPER}} .shapetranslate-switcher__flag' => 'width: {{SIZE}}{{UNIT}}; height: auto;',
 				),
 			)
 		);
@@ -387,7 +387,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'flag_spacing',
 			array(
-				'label'      => __( 'Spacing', 'localepress' ),
+				'label'      => __( 'Spacing', 'shapetranslate' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', 'em' ),
 				'range'      => array(
@@ -402,9 +402,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 					),
 				),
 				'selectors'  => array(
-					'{{WRAPPER}} .localepress-switcher__link'               => 'gap: {{SIZE}}{{UNIT}};',
-					'{{WRAPPER}} .localepress-switcher__unavailable'        => 'gap: {{SIZE}}{{UNIT}};',
-					'{{WRAPPER}} .localepress-switcher__dropdown > summary' => 'gap: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__link'               => 'gap: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__unavailable'        => 'gap: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__dropdown > summary' => 'gap: {{SIZE}}{{UNIT}};',
 				),
 			)
 		);
@@ -412,7 +412,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'flag_radius',
 			array(
-				'label'      => __( 'Border Radius', 'localepress' ),
+				'label'      => __( 'Border Radius', 'shapetranslate' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', '%' ),
 				'range'      => array(
@@ -422,7 +422,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 					),
 				),
 				'selectors'  => array(
-					'{{WRAPPER}} .localepress-switcher__flag' => 'border-radius: {{SIZE}}{{UNIT}}; object-fit: cover;',
+					'{{WRAPPER}} .shapetranslate-switcher__flag' => 'border-radius: {{SIZE}}{{UNIT}}; object-fit: cover;',
 				),
 			)
 		);
@@ -437,9 +437,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 */
 	private function register_dropdown_style_controls() {
 		$this->start_controls_section(
-			'localepress_style_dropdown',
+			'shapetranslate_style_dropdown',
 			array(
-				'label'     => __( 'Dropdown', 'localepress' ),
+				'label'     => __( 'Dropdown', 'shapetranslate' ),
 				'tab'       => Controls_Manager::TAB_STYLE,
 				'condition' => array( 'layout' => 'dropdown' ),
 			)
@@ -450,12 +450,12 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		 * because that is what it is: the current language, standing in for the
 		 * list until the list is opened.
 		 */
-		$panel = '{{WRAPPER}} .localepress-switcher__dropdown[open] > .localepress-switcher__list';
+		$panel = '{{WRAPPER}} .shapetranslate-switcher__dropdown[open] > .shapetranslate-switcher__list';
 
 		$this->add_control(
 			'dropdown_background',
 			array(
-				'label'     => __( 'Background', 'localepress' ),
+				'label'     => __( 'Background', 'shapetranslate' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array( $panel => 'background: {{VALUE}};' ),
 			)
@@ -472,7 +472,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_control(
 			'dropdown_radius',
 			array(
-				'label'      => __( 'Border Radius', 'localepress' ),
+				'label'      => __( 'Border Radius', 'shapetranslate' ),
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', '%' ),
 				'selectors'  => array(
@@ -492,7 +492,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'dropdown_padding',
 			array(
-				'label'      => __( 'Padding', 'localepress' ),
+				'label'      => __( 'Padding', 'shapetranslate' ),
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', '%' ),
 				'selectors'  => array(
@@ -511,9 +511,9 @@ final class LanguageSwitcherWidget extends Widget_Base {
 	 */
 	private function register_spacing_style_controls() {
 		$this->start_controls_section(
-			'localepress_style_spacing',
+			'shapetranslate_style_spacing',
 			array(
-				'label' => __( 'Spacing', 'localepress' ),
+				'label' => __( 'Spacing', 'shapetranslate' ),
 				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
@@ -526,7 +526,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'item_gap',
 			array(
-				'label'      => __( 'Gap Between Languages', 'localepress' ),
+				'label'      => __( 'Gap Between Languages', 'shapetranslate' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', 'em' ),
 				'range'      => array(
@@ -541,7 +541,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 					),
 				),
 				'selectors'  => array(
-					'{{WRAPPER}} .localepress-switcher' => '--localepress-switcher-gap: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher' => '--shapetranslate-switcher-gap: {{SIZE}}{{UNIT}};',
 				),
 			)
 		);
@@ -549,13 +549,13 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'item_padding',
 			array(
-				'label'      => __( 'Language Padding', 'localepress' ),
+				'label'      => __( 'Language Padding', 'shapetranslate' ),
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', '%' ),
 				'selectors'  => array(
-					'{{WRAPPER}} .localepress-switcher__link'               => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					'{{WRAPPER}} .localepress-switcher__unavailable'        => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					'{{WRAPPER}} .localepress-switcher__dropdown > summary' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__link'               => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__unavailable'        => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .shapetranslate-switcher__dropdown > summary' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				),
 			)
 		);
@@ -563,25 +563,25 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$this->add_responsive_control(
 			'switcher_alignment',
 			array(
-				'label'     => __( 'Alignment', 'localepress' ),
+				'label'     => __( 'Alignment', 'shapetranslate' ),
 				'type'      => Controls_Manager::CHOOSE,
 				'options'   => array(
 					'flex-start' => array(
-						'title' => __( 'Left', 'localepress' ),
+						'title' => __( 'Left', 'shapetranslate' ),
 						'icon'  => 'eicon-text-align-left',
 					),
 					'center'     => array(
-						'title' => __( 'Center', 'localepress' ),
+						'title' => __( 'Center', 'shapetranslate' ),
 						'icon'  => 'eicon-text-align-center',
 					),
 					'flex-end'   => array(
-						'title' => __( 'Right', 'localepress' ),
+						'title' => __( 'Right', 'shapetranslate' ),
 						'icon'  => 'eicon-text-align-right',
 					),
 				),
 				'selectors' => array(
-					'{{WRAPPER}} .localepress-switcher__list' => 'justify-content: {{VALUE}};',
-					'{{WRAPPER}} .localepress-switcher' => 'display: flex; justify-content: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher__list' => 'justify-content: {{VALUE}};',
+					'{{WRAPPER}} .shapetranslate-switcher' => 'display: flex; justify-content: {{VALUE}};',
 				),
 			)
 		);
@@ -609,7 +609,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		$restrict = $this->language_restriction( $selected );
 
 		if ( null !== $restrict ) {
-			add_filter( 'localepress_switcher_languages', $restrict, 10, 1 );
+			add_filter( 'shapetranslate_switcher_languages', $restrict, 10, 1 );
 		}
 
 		$html = $switcher->render(
@@ -637,7 +637,7 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		);
 
 		if ( null !== $restrict ) {
-			remove_filter( 'localepress_switcher_languages', $restrict, 10 );
+			remove_filter( 'shapetranslate_switcher_languages', $restrict, 10 );
 		}
 
 		if ( '' !== $html ) {
@@ -714,8 +714,8 @@ final class LanguageSwitcherWidget extends Widget_Base {
 		 * ever be shown.
 		 */
 		printf(
-			'<div class="localepress-elementor-placeholder">%1$s</div>',
-			esc_html__( 'No language can be shown here yet. Register a second language, or widen the Missing translation setting.', 'localepress' )
+			'<div class="shapetranslate-elementor-placeholder">%1$s</div>',
+			esc_html__( 'No language can be shown here yet. Register a second language, or widen the Missing translation setting.', 'shapetranslate' )
 		);
 	}
 

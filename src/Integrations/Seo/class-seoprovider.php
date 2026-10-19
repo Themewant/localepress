@@ -2,12 +2,12 @@
 /**
  * Shared behavior for SEO plugin providers.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Seo;
+namespace ShapeTranslate\Integrations\Seo;
 
-use LocalePress\Contracts\SeoProviderInterface;
+use ShapeTranslate\Contracts\SeoProviderInterface;
 
 defined( 'ABSPATH' ) || exit;
 

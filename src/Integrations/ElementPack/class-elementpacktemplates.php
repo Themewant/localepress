@@ -2,13 +2,13 @@
 /**
  * Element Pack Template Builder language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\ElementPack;
+namespace ShapeTranslate\Integrations\ElementPack;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -150,7 +150,7 @@ final class ElementPackTemplates {
 	 * Reports whether Element Pack is present.
 	 *
 	 * The constant, not the builder's classes. Element Pack loads its Template
-	 * Builder once Elementor has initialized, long after LocalePress composes its
+	 * Builder once Elementor has initialized, long after ShapeTranslate composes its
 	 * modules, so asking for a class here answers no on every site that has it.
 	 * can_resolve() asks that later, when the answer is knowable.
 	 *
@@ -164,7 +164,7 @@ final class ElementPackTemplates {
 		 *
 		 * @param bool $available Whether the Element Pack plugin is present.
 		 */
-		return (bool) apply_filters( 'localepress_elementpack_available', $available );
+		return (bool) apply_filters( 'shapetranslate_elementpack_available', $available );
 	}
 
 	/**

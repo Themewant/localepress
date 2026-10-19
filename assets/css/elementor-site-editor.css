@@ -1,10 +1,10 @@
 /**
- * LocalePress styles for the Elementor Theme Builder screen.
+ * ShapeTranslate styles for the Elementor Theme Builder screen.
  *
  * Loaded only on Elementor's own application document, for the one element
- * LocalePress writes into its template cards: a bar naming the language each
+ * ShapeTranslate writes into its template cards: a bar naming the language each
  * template was written in, followed by a flag per language leading to that
- * language's translation. Every selector is prefixed with `localepress` and
+ * language's translation. Every selector is prefixed with `shapetranslate` and
  * qualified by Elementor's card, so nothing here can reach the rest of the
  * application's markup — the bar states everything about itself except the
  * font, which it takes from the card it sits in.
@@ -14,7 +14,7 @@
  * that rather than against the reader's system preference.
  */
 
-.e-site-template .localepress-e-template-languages {
+.e-site-template .shapetranslate-e-template-languages {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -31,7 +31,7 @@
  * one title, one author and one thumbnail. The filled chip is what the eye
  * lands on first, and it is the answer to which of them this card is.
  */
-.e-site-template .localepress-e-template-languages__current {
+.e-site-template .shapetranslate-e-template-languages__current {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
@@ -47,7 +47,7 @@
 	white-space: nowrap;
 }
 
-.e-site-template .localepress-e-template-languages__link {
+.e-site-template .shapetranslate-e-template-languages__link {
 	display: inline-flex;
 	align-items: center;
 	gap: 3px;
@@ -63,7 +63,7 @@
 	white-space: nowrap;
 }
 
-.e-site-template .localepress-e-template-languages__mark {
+.e-site-template .shapetranslate-e-template-languages__mark {
 	display: block;
 	font-size: 11px;
 	line-height: 1;
@@ -74,64 +74,64 @@
  * plus and by the solid border against the dashed one, so the difference
  * survives a reader who cannot tell the two colors apart.
  */
-.e-site-template .localepress-e-template-languages__link.is-translated {
+.e-site-template .shapetranslate-e-template-languages__link.is-translated {
 	border-color: #3c9a5f;
 	background: #eef8f1;
 	color: #26663f;
 }
 
-.e-site-template .localepress-e-template-languages__link.is-missing {
+.e-site-template .shapetranslate-e-template-languages__link.is-missing {
 	border-style: dashed;
 	border-color: #c2cbd2;
 	color: #7b838b;
 }
 
-.e-site-template .localepress-e-template-languages__link.is-missing .localepress-e-template-languages__flag {
+.e-site-template .shapetranslate-e-template-languages__link.is-missing .shapetranslate-e-template-languages__flag {
 	opacity: 0.7;
 }
 
-.e-site-template .localepress-e-template-languages__link:hover,
-.e-site-template .localepress-e-template-languages__link:focus {
+.e-site-template .shapetranslate-e-template-languages__link:hover,
+.e-site-template .shapetranslate-e-template-languages__link:focus {
 	border-color: #93003c;
 	background: #fdf2f6;
 	color: #93003c;
 }
 
-.e-site-template .localepress-e-template-languages__link:hover .localepress-e-template-languages__flag,
-.e-site-template .localepress-e-template-languages__link:focus .localepress-e-template-languages__flag {
+.e-site-template .shapetranslate-e-template-languages__link:hover .shapetranslate-e-template-languages__flag,
+.e-site-template .shapetranslate-e-template-languages__link:focus .shapetranslate-e-template-languages__flag {
 	opacity: 1;
 }
 
-.e-site-template .localepress-e-template-languages__flag {
+.e-site-template .shapetranslate-e-template-languages__flag {
 	display: block;
 	width: 16px;
 	height: auto;
 	border-radius: 2px;
 }
 
-.e-site-template .localepress-e-template-languages__name {
+.e-site-template .shapetranslate-e-template-languages__name {
 	display: block;
 }
 
-.eps-theme-dark .e-site-template .localepress-e-template-languages__current {
+.eps-theme-dark .e-site-template .shapetranslate-e-template-languages__current {
 	border-color: #eceef0;
 	background: #eceef0;
 	color: #1f2124;
 }
 
-.eps-theme-dark .e-site-template .localepress-e-template-languages__link.is-translated {
+.eps-theme-dark .e-site-template .shapetranslate-e-template-languages__link.is-translated {
 	border-color: #4e9e6d;
 	background: #1e2a22;
 	color: #7fd6a0;
 }
 
-.eps-theme-dark .e-site-template .localepress-e-template-languages__link.is-missing {
+.eps-theme-dark .e-site-template .shapetranslate-e-template-languages__link.is-missing {
 	border-color: #4b5058;
 	color: #9aa0a7;
 }
 
-.eps-theme-dark .e-site-template .localepress-e-template-languages__link:hover,
-.eps-theme-dark .e-site-template .localepress-e-template-languages__link:focus {
+.eps-theme-dark .e-site-template .shapetranslate-e-template-languages__link:hover,
+.eps-theme-dark .e-site-template .shapetranslate-e-template-languages__link:focus {
 	border-color: #ff7bac;
 	background: #2a1d24;
 	color: #ff7bac;

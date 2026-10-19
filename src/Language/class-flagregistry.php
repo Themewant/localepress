@@ -2,10 +2,10 @@
 /**
  * Language flag registry.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Flags are resolved from a country code derived from the language locale and
  * served from the bundled `assets/flags` directory. Sites may override a flag
- * per language by placing an image in `uploads/localepress/flags/{locale}.{ext}`
+ * per language by placing an image in `uploads/shapetranslate/flags/{locale}.{ext}`
  * or by filtering the resolved code, URL, or markup.
  */
 final class FlagRegistry {
@@ -94,7 +94,7 @@ final class FlagRegistry {
 		 * @param string $code     Resolved flag code.
 		 * @param mixed  $language Language record.
 		 */
-		$code = apply_filters( 'localepress_flag_code', $code, $language );
+		$code = apply_filters( 'shapetranslate_flag_code', $code, $language );
 
 		return is_string( $code ) && $this->is_flag_code( strtolower( $code ) ) ? strtolower( $code ) : '';
 	}
@@ -133,7 +133,7 @@ final class FlagRegistry {
 		 * @param array<string, mixed> $flag     Flag information.
 		 * @param mixed                $language Language record.
 		 */
-		$flag = apply_filters( 'localepress_flag', $flag, $language );
+		$flag = apply_filters( 'shapetranslate_flag', $flag, $language );
 
 		return $this->normalize_flag( $flag );
 	}
@@ -163,7 +163,7 @@ final class FlagRegistry {
 	/**
 	 * Returns escaped flag markup for a language record.
 	 *
-	 * Flags are decorative by default because LocalePress always renders one
+	 * Flags are decorative by default because ShapeTranslate always renders one
 	 * beside a visible language code or name.
 	 *
 	 * @param array<string, mixed> $language Language record.
@@ -176,7 +176,7 @@ final class FlagRegistry {
 
 		if ( '' !== $flag['url'] ) {
 			$html = sprintf(
-				'<img class="localepress-flag" src="%1$s" alt="%2$s" width="%3$d" height="%4$d" loading="lazy" decoding="async" />',
+				'<img class="shapetranslate-flag" src="%1$s" alt="%2$s" width="%3$d" height="%4$d" loading="lazy" decoding="async" />',
 				esc_url( $flag['url'] ),
 				esc_attr( is_scalar( $alt ) ? (string) $alt : '' ),
 				$flag['width'],
@@ -191,7 +191,7 @@ final class FlagRegistry {
 		 * @param array<string, mixed> $flag     Flag information.
 		 * @param mixed                $language Language record.
 		 */
-		$html = apply_filters( 'localepress_flag_html', $html, $flag, $language );
+		$html = apply_filters( 'shapetranslate_flag_html', $html, $flag, $language );
 
 		return is_string( $html ) ? wp_kses( $html, $this->allowed_flag_html() ) : '';
 	}
@@ -235,7 +235,7 @@ final class FlagRegistry {
 	 */
 	private function bundled_flag_url( $code ) {
 		return $this->has_bundled_flag( $code )
-			? LOCALEPRESS_URL . self::FLAG_DIRECTORY . $code . '.svg'
+			? SHAPETRANSLATE_URL . self::FLAG_DIRECTORY . $code . '.svg'
 			: '';
 	}
 
@@ -251,7 +251,7 @@ final class FlagRegistry {
 		}
 
 		if ( ! isset( self::$bundled_cache[ $code ] ) ) {
-			self::$bundled_cache[ $code ] = is_readable( LOCALEPRESS_PATH . self::FLAG_DIRECTORY . $code . '.svg' );
+			self::$bundled_cache[ $code ] = is_readable( SHAPETRANSLATE_PATH . self::FLAG_DIRECTORY . $code . '.svg' );
 		}
 
 		return self::$bundled_cache[ $code ];
@@ -274,7 +274,7 @@ final class FlagRegistry {
 
 			if ( empty( $uploads['error'] ) && ! empty( $uploads['basedir'] ) && ! empty( $uploads['baseurl'] ) ) {
 				foreach ( self::$custom_extensions as $extension ) {
-					$relative = 'localepress/flags/' . $locale . '.' . $extension;
+					$relative = 'shapetranslate/flags/' . $locale . '.' . $extension;
 
 					if ( is_readable( trailingslashit( $uploads['basedir'] ) . $relative ) ) {
 						$found = trailingslashit( $uploads['baseurl'] ) . $relative;
@@ -292,7 +292,7 @@ final class FlagRegistry {
 		 * @param string $url    Custom flag URL, empty when none was found.
 		 * @param string $locale Language locale.
 		 */
-		$url = apply_filters( 'localepress_custom_flag_url', self::$custom_cache[ $locale ], $locale );
+		$url = apply_filters( 'shapetranslate_custom_flag_url', self::$custom_cache[ $locale ], $locale );
 
 		return is_string( $url ) ? esc_url_raw( $url ) : '';
 	}

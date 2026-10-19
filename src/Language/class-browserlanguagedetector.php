@@ -2,10 +2,10 @@
 /**
  * Accept-Language negotiation.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 defined( 'ABSPATH' ) || exit;
 

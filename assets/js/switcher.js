@@ -23,12 +23,12 @@
  * listeners. Each is guarded or optional, so an engine without one degrades to
  * the stylesheet's own downward panel rather than failing.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 ( function () {
 	'use strict';
 
-	var SELECTOR = '.localepress-switcher__dropdown';
+	var SELECTOR = '.shapetranslate-switcher__dropdown';
 
 	/**
 	 * Room to leave between the panel and the edge of the viewport, in pixels.
@@ -82,8 +82,8 @@
 			openPanels.splice( index, 1 );
 		}
 
-		delete details.dataset.localepressDrop;
-		delete details.dataset.localepressAlign;
+		delete details.dataset.shapetranslateDrop;
+		delete details.dataset.shapetranslateAlign;
 	}
 
 	/**
@@ -98,7 +98,7 @@
 	 * @return {void}
 	 */
 	function place( details ) {
-		var list = details.querySelector( '.localepress-switcher__list' );
+		var list = details.querySelector( '.shapetranslate-switcher__list' );
 		var anchor;
 		var below;
 		var above;
@@ -122,9 +122,9 @@
 		// sides keeps opening the way a reader expects. Where neither side fits,
 		// the roomier one still shows more of the list than the other would.
 		if ( list.offsetHeight + EDGE > below && above > below ) {
-			details.dataset.localepressDrop = 'up';
+			details.dataset.shapetranslateDrop = 'up';
 		} else {
-			details.dataset.localepressDrop = 'down';
+			details.dataset.shapetranslateDrop = 'down';
 		}
 
 		// The same question sideways. A panel wider than the room left of the
@@ -134,7 +134,7 @@
 		width = list.offsetWidth;
 		overflows = rtl ? anchor.right - width < EDGE : anchor.left + width > window.innerWidth - EDGE;
 
-		details.dataset.localepressAlign = overflows ? 'end' : 'start';
+		details.dataset.shapetranslateAlign = overflows ? 'end' : 'start';
 	}
 
 	/**

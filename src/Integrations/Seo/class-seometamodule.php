@@ -2,24 +2,24 @@
 /**
  * SEO plugin field integration module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\Seo;
+namespace ShapeTranslate\Integrations\Seo;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Contracts\SeoProviderInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Settings\WorkflowSettings;
-use LocalePress\StringTranslation\OptionStringTranslator;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Contracts\SeoProviderInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Settings\WorkflowSettings;
+use ShapeTranslate\StringTranslation\OptionStringTranslator;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Carries an SEO plugin's per-post fields into a translation.
  *
- * LocalePress copies public custom fields and leaves protected ones with the
+ * ShapeTranslate copies public custom fields and leaves protected ones with the
  * post that owns them, which is the right default: a protected key usually
  * holds something about that one post. An SEO title is the exception. It is
  * written for a reader, it is different in every language, and every SEO plugin
@@ -114,8 +114,8 @@ final class SeoMetaModule implements ModuleInterface {
 	 * {@inheritdoc}
 	 */
 	public function register() {
-		add_filter( 'localepress_copy_post_meta_keys', array( $this, 'filter_meta_keys' ), 10, 5 );
-		add_filter( 'localepress_translate_post_meta_value', array( $this, 'translate_meta_value' ), 10, 3 );
+		add_filter( 'shapetranslate_copy_post_meta_keys', array( $this, 'filter_meta_keys' ), 10, 5 );
+		add_filter( 'shapetranslate_translate_post_meta_value', array( $this, 'translate_meta_value' ), 10, 3 );
 
 		$this->register_option_strings();
 	}
@@ -131,15 +131,15 @@ final class SeoMetaModule implements ModuleInterface {
 		}
 
 		/**
-		 * Filters the SEO plugin providers LocalePress knows about.
+		 * Filters the SEO plugin providers ShapeTranslate knows about.
 		 *
 		 * A provider is a list of field names implementing SeoProviderInterface.
-		 * Adding one is how a site supports an SEO plugin LocalePress does not
+		 * Adding one is how a site supports an SEO plugin ShapeTranslate does not
 		 * ship a list for.
 		 *
 		 * @param array<int, SeoProviderInterface> $providers Known providers.
 		 */
-		$providers = apply_filters( 'localepress_seo_providers', $this->providers );
+		$providers = apply_filters( 'shapetranslate_seo_providers', $this->providers );
 		$active    = array();
 
 		foreach ( is_array( $providers ) ? $providers : $this->providers as $provider ) {
@@ -201,7 +201,7 @@ final class SeoMetaModule implements ModuleInterface {
 			$keys = array_values( array_diff( $keys, $translatable ) );
 
 			/** This filter is documented in src/Integrations/Seo/class-seometamodule.php */
-			return apply_filters( 'localepress_seo_meta_keys', $keys, $sync, $language_id, $providers );
+			return apply_filters( 'shapetranslate_seo_meta_keys', $keys, $sync, $language_id, $providers );
 		}
 
 		// Deduplicated here rather than left to the engine, because a plugin
@@ -217,7 +217,7 @@ final class SeoMetaModule implements ModuleInterface {
 		 * @param string                           $language_id Target language identifier.
 		 * @param array<int, SeoProviderInterface> $providers   Active providers.
 		 */
-		return apply_filters( 'localepress_seo_meta_keys', $keys, $sync, $language_id, $providers );
+		return apply_filters( 'shapetranslate_seo_meta_keys', $keys, $sync, $language_id, $providers );
 	}
 
 	/**
@@ -297,7 +297,7 @@ final class SeoMetaModule implements ModuleInterface {
 		 *
 		 * @param array<string, array<string, mixed>> $declarations Declarations keyed by context.
 		 */
-		$declarations = apply_filters( 'localepress_seo_option_strings', $declarations );
+		$declarations = apply_filters( 'shapetranslate_seo_option_strings', $declarations );
 
 		if ( is_array( $declarations ) && ! empty( $declarations ) ) {
 			$this->option_strings->register( $declarations );

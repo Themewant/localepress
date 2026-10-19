@@ -2,12 +2,12 @@
 /**
  * Classic navigation menu language switcher integration.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
-use LocalePress\Language\LanguageTag;
+use ShapeTranslate\Language\LanguageTag;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,14 +22,14 @@ final class NavigationMenuIntegration {
 	 *
 	 * @var string
 	 */
-	const MENU_ITEM_URL = '#localepress-language-switcher';
+	const MENU_ITEM_URL = '#shapetranslate-language-switcher';
 
 	/**
 	 * Menu item settings post meta key.
 	 *
 	 * @var string
 	 */
-	const SETTINGS_META_KEY = '_localepress_switcher_settings';
+	const SETTINGS_META_KEY = '_shapetranslate_switcher_settings';
 
 	/**
 	 * Switcher service.
@@ -69,7 +69,7 @@ final class NavigationMenuIntegration {
 	}
 
 	/**
-	 * Adds the LocalePress menu-item selector to Appearance > Menus.
+	 * Adds the ShapeTranslate menu-item selector to Appearance > Menus.
 	 *
 	 * @return void
 	 */
@@ -79,8 +79,8 @@ final class NavigationMenuIntegration {
 		}
 
 		add_meta_box(
-			'add-localepress-language-switcher',
-			__( 'LocalePress', 'localepress' ),
+			'add-shapetranslate-language-switcher',
+			__( 'ShapeTranslate', 'shapetranslate' ),
 			array( $this, 'render_meta_box' ),
 			'nav-menus',
 			'side',
@@ -96,28 +96,28 @@ final class NavigationMenuIntegration {
 	public function render_meta_box() {
 		$item_index = -1;
 		?>
-		<div id="localepress-language-switcher" class="posttypediv">
+		<div id="shapetranslate-language-switcher" class="posttypediv">
 			<div class="tabs-panel tabs-panel-active">
 				<ul class="categorychecklist form-no-clear">
 					<li>
 						<label class="menu-item-title">
 							<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-object-id]" value="-1" />
-							<?php esc_html_e( 'Language switcher', 'localepress' ); ?>
+							<?php esc_html_e( 'Language switcher', 'shapetranslate' ); ?>
 						</label>
-						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-object]" value="localepress_switcher" />
+						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-object]" value="shapetranslate_switcher" />
 						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-parent-id]" value="0" />
 						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-type]" value="custom" />
-						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-title]" value="<?php echo esc_attr__( 'Language switcher', 'localepress' ); ?>" />
+						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-title]" value="<?php echo esc_attr__( 'Language switcher', 'shapetranslate' ); ?>" />
 						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-url]" value="<?php echo esc_attr( self::MENU_ITEM_URL ); ?>" />
 						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-target]" value="" />
-						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-classes]" value="localepress-menu-switcher" />
+						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-classes]" value="shapetranslate-menu-switcher" />
 						<input type="hidden" name="menu-item[<?php echo esc_attr( $item_index ); ?>][menu-item-xfn]" value="" />
 					</li>
 				</ul>
 			</div>
 			<p class="button-controls wp-clearfix">
 				<span class="add-to-menu">
-					<input type="submit" id="submit-localepress-language-switcher" class="button submit-add-to-menu right" value="<?php echo esc_attr__( 'Add to Menu', 'localepress' ); ?>" />
+					<input type="submit" id="submit-shapetranslate-language-switcher" class="button submit-add-to-menu right" value="<?php echo esc_attr__( 'Add to Menu', 'shapetranslate' ); ?>" />
 					<span class="spinner"></span>
 				</span>
 			</p>
@@ -143,47 +143,47 @@ final class NavigationMenuIntegration {
 		}
 
 		$settings = $this->get_item_settings( $item_id );
-		$field    = 'localepress-switcher[' . absint( $item_id ) . ']';
+		$field    = 'shapetranslate-switcher[' . absint( $item_id ) . ']';
 		?>
 		<p class="description description-wide">
-			<label for="edit-menu-item-localepress-display-<?php echo esc_attr( $item_id ); ?>">
-				<?php esc_html_e( 'Display', 'localepress' ); ?><br />
-				<select id="edit-menu-item-localepress-display-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[display]" class="widefat">
-					<option value="native_name" <?php selected( $settings['display'], 'native_name' ); ?>><?php esc_html_e( 'Native name', 'localepress' ); ?></option>
-					<option value="name" <?php selected( $settings['display'], 'name' ); ?>><?php esc_html_e( 'Language name', 'localepress' ); ?></option>
-					<option value="language_code" <?php selected( $settings['display'], 'language_code' ); ?>><?php esc_html_e( 'Language code', 'localepress' ); ?></option>
+			<label for="edit-menu-item-shapetranslate-display-<?php echo esc_attr( $item_id ); ?>">
+				<?php esc_html_e( 'Display', 'shapetranslate' ); ?><br />
+				<select id="edit-menu-item-shapetranslate-display-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[display]" class="widefat">
+					<option value="native_name" <?php selected( $settings['display'], 'native_name' ); ?>><?php esc_html_e( 'Native name', 'shapetranslate' ); ?></option>
+					<option value="name" <?php selected( $settings['display'], 'name' ); ?>><?php esc_html_e( 'Language name', 'shapetranslate' ); ?></option>
+					<option value="language_code" <?php selected( $settings['display'], 'language_code' ); ?>><?php esc_html_e( 'Language code', 'shapetranslate' ); ?></option>
 				</select>
 			</label>
 		</p>
 		<p class="description description-wide">
-			<label for="edit-menu-item-localepress-layout-<?php echo esc_attr( $item_id ); ?>">
-				<?php esc_html_e( 'Layout', 'localepress' ); ?><br />
-				<select id="edit-menu-item-localepress-layout-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[layout]" class="widefat">
-					<option value="dropdown" <?php selected( $settings['layout'], 'dropdown' ); ?>><?php esc_html_e( 'Dropdown', 'localepress' ); ?></option>
-					<option value="horizontal" <?php selected( $settings['layout'], 'horizontal' ); ?>><?php esc_html_e( 'Horizontal list', 'localepress' ); ?></option>
-					<option value="vertical" <?php selected( $settings['layout'], 'vertical' ); ?>><?php esc_html_e( 'Vertical list', 'localepress' ); ?></option>
+			<label for="edit-menu-item-shapetranslate-layout-<?php echo esc_attr( $item_id ); ?>">
+				<?php esc_html_e( 'Layout', 'shapetranslate' ); ?><br />
+				<select id="edit-menu-item-shapetranslate-layout-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[layout]" class="widefat">
+					<option value="dropdown" <?php selected( $settings['layout'], 'dropdown' ); ?>><?php esc_html_e( 'Dropdown', 'shapetranslate' ); ?></option>
+					<option value="horizontal" <?php selected( $settings['layout'], 'horizontal' ); ?>><?php esc_html_e( 'Horizontal list', 'shapetranslate' ); ?></option>
+					<option value="vertical" <?php selected( $settings['layout'], 'vertical' ); ?>><?php esc_html_e( 'Vertical list', 'shapetranslate' ); ?></option>
 				</select>
 			</label>
 		</p>
 		<p class="description description-wide">
-			<label for="edit-menu-item-localepress-unavailable-<?php echo esc_attr( $item_id ); ?>">
-				<?php esc_html_e( 'Unavailable translations', 'localepress' ); ?><br />
-				<select id="edit-menu-item-localepress-unavailable-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[unavailable_behavior]" class="widefat">
-					<option value="hide" <?php selected( $settings['unavailable_behavior'], 'hide' ); ?>><?php esc_html_e( 'Hide languages the site has no content in', 'localepress' ); ?></option>
-					<option value="disabled" <?php selected( $settings['unavailable_behavior'], 'disabled' ); ?>><?php esc_html_e( 'Show unavailable', 'localepress' ); ?></option>
-					<option value="home" <?php selected( $settings['unavailable_behavior'], 'home' ); ?>><?php esc_html_e( 'Link to language home', 'localepress' ); ?></option>
-					<option value="current" <?php selected( $settings['unavailable_behavior'], 'current' ); ?>><?php esc_html_e( 'Keep current URL', 'localepress' ); ?></option>
+			<label for="edit-menu-item-shapetranslate-unavailable-<?php echo esc_attr( $item_id ); ?>">
+				<?php esc_html_e( 'Unavailable translations', 'shapetranslate' ); ?><br />
+				<select id="edit-menu-item-shapetranslate-unavailable-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[unavailable_behavior]" class="widefat">
+					<option value="hide" <?php selected( $settings['unavailable_behavior'], 'hide' ); ?>><?php esc_html_e( 'Hide languages the site has no content in', 'shapetranslate' ); ?></option>
+					<option value="disabled" <?php selected( $settings['unavailable_behavior'], 'disabled' ); ?>><?php esc_html_e( 'Show unavailable', 'shapetranslate' ); ?></option>
+					<option value="home" <?php selected( $settings['unavailable_behavior'], 'home' ); ?>><?php esc_html_e( 'Link to language home', 'shapetranslate' ); ?></option>
+					<option value="current" <?php selected( $settings['unavailable_behavior'], 'current' ); ?>><?php esc_html_e( 'Keep current URL', 'shapetranslate' ); ?></option>
 				</select>
 			</label>
 		</p>
-		<?php $this->render_checkbox( $field, $item_id, 'hide_current', $settings['hide_current'], __( 'Hide current language', 'localepress' ) ); ?>
-		<?php $this->render_checkbox( $field, $item_id, 'hide_missing', $settings['hide_missing'], __( 'Hide languages the site has no content in', 'localepress' ) ); ?>
-		<?php $this->render_checkbox( $field, $item_id, 'show_flags', $settings['show_flags'], __( 'Show flags', 'localepress' ) ); ?>
-		<?php $this->render_checkbox( $field, $item_id, 'show_disabled', $settings['show_disabled'], __( 'Show disabled languages as unavailable', 'localepress' ) ); ?>
+		<?php $this->render_checkbox( $field, $item_id, 'hide_current', $settings['hide_current'], __( 'Hide current language', 'shapetranslate' ) ); ?>
+		<?php $this->render_checkbox( $field, $item_id, 'hide_missing', $settings['hide_missing'], __( 'Hide languages the site has no content in', 'shapetranslate' ) ); ?>
+		<?php $this->render_checkbox( $field, $item_id, 'show_flags', $settings['show_flags'], __( 'Show flags', 'shapetranslate' ) ); ?>
+		<?php $this->render_checkbox( $field, $item_id, 'show_disabled', $settings['show_disabled'], __( 'Show disabled languages as unavailable', 'shapetranslate' ) ); ?>
 		<p class="description description-wide">
-			<label for="edit-menu-item-localepress-label-<?php echo esc_attr( $item_id ); ?>">
-				<?php esc_html_e( 'Accessible label', 'localepress' ); ?><br />
-				<input type="text" id="edit-menu-item-localepress-label-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[aria_label]" class="widefat" value="<?php echo esc_attr( $settings['aria_label'] ); ?>" />
+			<label for="edit-menu-item-shapetranslate-label-<?php echo esc_attr( $item_id ); ?>">
+				<?php esc_html_e( 'Accessible label', 'shapetranslate' ); ?><br />
+				<input type="text" id="edit-menu-item-shapetranslate-label-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[aria_label]" class="widefat" value="<?php echo esc_attr( $settings['aria_label'] ); ?>" />
 			</label>
 		</p>
 		<?php
@@ -216,10 +216,10 @@ final class NavigationMenuIntegration {
 			return;
 		}
 
-		$posted = isset( $_POST['localepress-switcher'][ $menu_item_db_id ] )
-			&& is_array( $_POST['localepress-switcher'][ $menu_item_db_id ] )
+		$posted = isset( $_POST['shapetranslate-switcher'][ $menu_item_db_id ] )
+			&& is_array( $_POST['shapetranslate-switcher'][ $menu_item_db_id ] )
 			? map_deep(
-				wp_unslash( $_POST['localepress-switcher'][ $menu_item_db_id ] ),
+				wp_unslash( $_POST['shapetranslate-switcher'][ $menu_item_db_id ] ),
 				'sanitize_text_field'
 			)
 			: array();
@@ -292,11 +292,11 @@ final class NavigationMenuIntegration {
 	 * @return array<string, string>
 	 */
 	public function menu_link_attributes( $atts, $menu_item ) {
-		if ( ! $menu_item instanceof WP_Post || ! isset( $menu_item->localepress_language ) ) {
+		if ( ! $menu_item instanceof WP_Post || ! isset( $menu_item->shapetranslate_language ) ) {
 			return $atts;
 		}
 
-		$language = $menu_item->localepress_language;
+		$language = $menu_item->shapetranslate_language;
 
 		if ( ! is_array( $language ) ) {
 			return $atts;
@@ -314,7 +314,7 @@ final class NavigationMenuIntegration {
 
 		$atts['dir'] = LanguageTag::direction( $language );
 
-		if ( empty( $menu_item->localepress_available ) && empty( $atts['href'] ) ) {
+		if ( empty( $menu_item->shapetranslate_available ) && empty( $atts['href'] ) ) {
 			$atts['aria-disabled'] = 'true';
 		}
 
@@ -340,7 +340,7 @@ final class NavigationMenuIntegration {
 		 * @param WP_Post              $menu_item Menu item object.
 		 * @param \stdClass             $args      Menu arguments.
 		 */
-		$filtered = apply_filters( 'localepress_switcher_menu_args', $settings, $item, $args );
+		$filtered = apply_filters( 'shapetranslate_switcher_menu_args', $settings, $item, $args );
 		$settings = is_array( $filtered ) ? $this->switcher->normalize_args( $filtered ) : $settings;
 
 		/*
@@ -378,7 +378,7 @@ final class NavigationMenuIntegration {
 		 * through it. Only the flag and label rules apply here; the theme styles
 		 * everything else, so arriving late costs no layout shift.
 		 */
-		wp_enqueue_style( 'localepress-switcher' );
+		wp_enqueue_style( 'shapetranslate-switcher' );
 
 		$dropdown = 'dropdown' === $settings['layout'];
 		$order    = (int) $item->menu_order + (int) $offset;
@@ -406,7 +406,7 @@ final class NavigationMenuIntegration {
 			 */
 			$parent->classes = $this->item_classes(
 				$item,
-				array( 'localepress-switcher-parent', 'menu-item-has-children' )
+				array( 'shapetranslate-switcher-parent', 'menu-item-has-children' )
 			);
 			$built[]         = $parent;
 			++$index;
@@ -416,10 +416,10 @@ final class NavigationMenuIntegration {
 			$language = isset( $language_item['language'] ) && is_array( $language_item['language'] )
 				? $language_item['language']
 				: array();
-			$classes  = array( 'localepress-switcher-language' );
+			$classes  = array( 'shapetranslate-switcher-language' );
 
 			if ( ! empty( $language_item['id'] ) ) {
-				$classes[] = 'localepress-language-' . sanitize_html_class( (string) $language_item['id'] );
+				$classes[] = 'shapetranslate-language-' . sanitize_html_class( (string) $language_item['id'] );
 			}
 
 			if ( ! empty( $language_item['current'] ) ) {
@@ -427,7 +427,7 @@ final class NavigationMenuIntegration {
 			}
 
 			if ( empty( $language_item['available'] ) ) {
-				$classes[] = 'localepress-switcher-unavailable';
+				$classes[] = 'shapetranslate-switcher-unavailable';
 			}
 
 			$language_menu_item = clone $item;
@@ -451,8 +451,8 @@ final class NavigationMenuIntegration {
 			$language_menu_item->classes          = $this->item_classes( $item, $classes );
 
 			// Read back by menu_link_attributes() once the walker builds the anchor.
-			$language_menu_item->localepress_language  = $language;
-			$language_menu_item->localepress_available = ! empty( $language_item['available'] )
+			$language_menu_item->shapetranslate_language  = $language;
+			$language_menu_item->shapetranslate_available = ! empty( $language_item['available'] )
 				|| ! empty( $language_item['fallback'] );
 
 			$built[] = $language_menu_item;
@@ -467,7 +467,7 @@ final class NavigationMenuIntegration {
 		 * @param array<string, mixed> $settings Normalized switcher settings.
 		 * @param \stdClass             $args     Menu arguments.
 		 */
-		$result = apply_filters( 'localepress_switcher_menu_items', $built, $item, $settings, $args );
+		$result = apply_filters( 'shapetranslate_switcher_menu_items', $built, $item, $settings, $args );
 
 		return is_array( $result ) ? array_values( $result ) : $built;
 	}
@@ -496,11 +496,11 @@ final class NavigationMenuIntegration {
 			)
 		);
 
-		return array_values( array_unique( array_merge( $inherited, array( 'menu-item-localepress-switcher' ), $classes ) ) );
+		return array_values( array_unique( array_merge( $inherited, array( 'menu-item-shapetranslate-switcher' ), $classes ) ) );
 	}
 
 	/**
-	 * Reports whether a menu item is the LocalePress virtual item.
+	 * Reports whether a menu item is the ShapeTranslate virtual item.
 	 *
 	 * @param mixed $menu_item Menu item object.
 	 * @return bool
@@ -536,8 +536,8 @@ final class NavigationMenuIntegration {
 	private function render_checkbox( $field, $item_id, $key, $checked, $label ) {
 		?>
 		<p class="description description-wide">
-			<label for="edit-menu-item-localepress-<?php echo esc_attr( $key ); ?>-<?php echo esc_attr( $item_id ); ?>">
-				<input type="checkbox" id="edit-menu-item-localepress-<?php echo esc_attr( $key ); ?>-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $checked ); ?> />
+			<label for="edit-menu-item-shapetranslate-<?php echo esc_attr( $key ); ?>-<?php echo esc_attr( $item_id ); ?>">
+				<input type="checkbox" id="edit-menu-item-shapetranslate-<?php echo esc_attr( $key ); ?>-<?php echo esc_attr( $item_id ); ?>" name="<?php echo esc_attr( $field ); ?>[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $checked ); ?> />
 				<?php echo esc_html( $label ); ?>
 			</label>
 		</p>

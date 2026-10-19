@@ -2,15 +2,15 @@
 /**
  * Term translation admin module.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Admin;
+namespace ShapeTranslate\Admin;
 
-use LocalePress\Assets;
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Language\LanguageManager;
-use LocalePress\Taxonomy\TermTranslationManager;
+use ShapeTranslate\Assets;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Language\LanguageManager;
+use ShapeTranslate\Taxonomy\TermTranslationManager;
 use WP_Error;
 use WP_Term;
 
@@ -81,9 +81,9 @@ final class TermTranslationModule implements ModuleInterface {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_post_screen_assets' ) );
 		add_action( 'created_term', array( $this, 'save_new_term_language' ), 10, 3 );
-		add_filter( 'localepress_new_term_language_id', array( $this, 'filter_request_term_language' ), 20, 2 );
+		add_filter( 'shapetranslate_new_term_language_id', array( $this, 'filter_request_term_language' ), 20, 2 );
 		add_action( 'edited_term', array( $this, 'save_edited_term_language' ), 10, 3 );
-		add_action( 'admin_post_localepress_create_term_translation', array( $this, 'create_translation' ) );
+		add_action( 'admin_post_shapetranslate_create_term_translation', array( $this, 'create_translation' ) );
 		add_action( 'admin_notices', array( $this, 'render_notice' ) );
 	}
 
@@ -117,8 +117,8 @@ final class TermTranslationModule implements ModuleInterface {
 		}
 
 		wp_enqueue_style(
-			'localepress-admin',
-			LOCALEPRESS_URL . 'assets/css/admin.css',
+			'shapetranslate-admin',
+			SHAPETRANSLATE_URL . 'assets/css/admin.css',
 			array(),
 			Assets::version( 'assets/css/admin.css' )
 		);
@@ -145,8 +145,8 @@ final class TermTranslationModule implements ModuleInterface {
 		}
 
 		wp_enqueue_script(
-			'localepress-classic-term-language',
-			LOCALEPRESS_URL . 'assets/js/classic-term-language.js',
+			'shapetranslate-classic-term-language',
+			SHAPETRANSLATE_URL . 'assets/js/classic-term-language.js',
 			array(),
 			Assets::version( 'assets/js/classic-term-language.js' ),
 			true
@@ -191,7 +191,7 @@ final class TermTranslationModule implements ModuleInterface {
 			! $taxonomy_object
 			|| ! $this->translation_manager->supports_taxonomy( $taxonomy )
 			|| ! current_user_can( $taxonomy_object->cap->manage_terms )
-			|| ! $this->verify_term_nonce( 'localepress_add_term_language_' . $taxonomy )
+			|| ! $this->verify_term_nonce( 'shapetranslate_add_term_language_' . $taxonomy )
 		) {
 			return;
 		}
@@ -213,7 +213,7 @@ final class TermTranslationModule implements ModuleInterface {
 		if (
 			! $this->translation_manager->supports_taxonomy( $taxonomy )
 			|| ! current_user_can( 'edit_term', $term_id )
-			|| ! $this->verify_term_nonce( 'localepress_edit_term_language_' . $taxonomy . '_' . absint( $term_id ) )
+			|| ! $this->verify_term_nonce( 'shapetranslate_edit_term_language_' . $taxonomy . '_' . absint( $term_id ) )
 		) {
 			return;
 		}
@@ -241,7 +241,7 @@ final class TermTranslationModule implements ModuleInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		check_admin_referer(
-			'localepress_create_term_translation_' . $source_term_id . '_' . $taxonomy . '_' . $language_id
+			'shapetranslate_create_term_translation_' . $source_term_id . '_' . $taxonomy . '_' . $language_id
 		);
 
 		$term = get_term( $source_term_id, $taxonomy );
@@ -252,7 +252,7 @@ final class TermTranslationModule implements ModuleInterface {
 			|| ! $this->actions->can_create_translation( $term )
 		) {
 			wp_die(
-				esc_html__( 'You are not allowed to create this term translation.', 'localepress' ),
+				esc_html__( 'You are not allowed to create this term translation.', 'shapetranslate' ),
 				'',
 				array( 'response' => 403 )
 			);
@@ -271,7 +271,7 @@ final class TermTranslationModule implements ModuleInterface {
 			$edit_url = add_query_arg( 'taxonomy', $taxonomy, admin_url( 'edit-tags.php' ) );
 		}
 
-		wp_safe_redirect( add_query_arg( 'localepress_notice', 'term_translation_created', $edit_url ) );
+		wp_safe_redirect( add_query_arg( 'shapetranslate_notice', 'term_translation_created', $edit_url ) );
 		exit;
 	}
 
@@ -282,29 +282,29 @@ final class TermTranslationModule implements ModuleInterface {
 	 */
 	public function render_notice() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only, allowlisted notice code.
-		$notice_code = isset( $_GET['localepress_notice'] )
-			? sanitize_key( wp_unslash( $_GET['localepress_notice'] ) )
+		$notice_code = isset( $_GET['shapetranslate_notice'] )
+			? sanitize_key( wp_unslash( $_GET['shapetranslate_notice'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( 'term_translation_created' === $notice_code ) {
 			printf(
-				'<div class="localepress-notice notice notice-success is-dismissible"><p>%s</p></div>',
-				esc_html__( 'Translated term created and linked.', 'localepress' )
+				'<div class="shapetranslate-notice notice notice-success is-dismissible"><p>%s</p></div>',
+				esc_html__( 'Translated term created and linked.', 'shapetranslate' )
 			);
 		}
 
-		$error_code = get_transient( 'localepress_term_error_' . get_current_user_id() );
-		delete_transient( 'localepress_term_error_' . get_current_user_id() );
+		$error_code = get_transient( 'shapetranslate_term_error_' . get_current_user_id() );
+		delete_transient( 'shapetranslate_term_error_' . get_current_user_id() );
 		$errors = $this->error_messages();
 
 		if ( is_string( $error_code ) && '' !== $error_code ) {
 			$error_message = isset( $errors[ $error_code ] )
 				? $errors[ $error_code ]
-				: __( 'LocalePress could not complete the term translation action.', 'localepress' );
+				: __( 'ShapeTranslate could not complete the term translation action.', 'shapetranslate' );
 
 			printf(
-				'<div class="localepress-notice notice notice-error is-dismissible"><p>%s</p></div>',
+				'<div class="shapetranslate-notice notice notice-error is-dismissible"><p>%s</p></div>',
 				esc_html( $error_message )
 			);
 		}
@@ -314,7 +314,7 @@ final class TermTranslationModule implements ModuleInterface {
 	 * Answers the language a term created by the current request starts in.
 	 *
 	 * Two classic-editor paths create a term while a post is being written, and
-	 * neither of them reaches LocalePress through the taxonomy screen. Inline
+	 * neither of them reaches ShapeTranslate through the taxonomy screen. Inline
 	 * category creation posts to admin-ajax, and the request WordPress builds
 	 * for it carries no post identifier at all. Tags typed into the tag box are
 	 * created by wp_insert_post() while it stores the submitted taxonomies,
@@ -363,8 +363,8 @@ final class TermTranslationModule implements ModuleInterface {
 			return '';
 		}
 
-		return isset( $_POST['localepress_term_language_id'] ) && is_scalar( $_POST['localepress_term_language_id'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_term_language_id'] ) )
+		return isset( $_POST['shapetranslate_term_language_id'] ) && is_scalar( $_POST['shapetranslate_term_language_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_term_language_id'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
@@ -379,20 +379,20 @@ final class TermTranslationModule implements ModuleInterface {
 		$post_id = isset( $_POST['post_ID'] ) && is_scalar( $_POST['post_ID'] )
 			? absint( wp_unslash( $_POST['post_ID'] ) )
 			: 0;
-		$nonce   = isset( $_POST['localepress_language_nonce'] ) && is_scalar( $_POST['localepress_language_nonce'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_language_nonce'] ) )
+		$nonce   = isset( $_POST['shapetranslate_language_nonce'] ) && is_scalar( $_POST['shapetranslate_language_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_language_nonce'] ) )
 			: '';
 
 		if (
 			1 > $post_id
 			|| '' === $nonce
-			|| ! wp_verify_nonce( $nonce, 'localepress_save_post_language_' . $post_id )
+			|| ! wp_verify_nonce( $nonce, 'shapetranslate_save_post_language_' . $post_id )
 		) {
 			return '';
 		}
 
-		return isset( $_POST['localepress_language_id'] ) && is_scalar( $_POST['localepress_language_id'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_language_id'] ) )
+		return isset( $_POST['shapetranslate_language_id'] ) && is_scalar( $_POST['shapetranslate_language_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_language_id'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
@@ -406,8 +406,8 @@ final class TermTranslationModule implements ModuleInterface {
 	private function save_language( $term_id, $taxonomy ) {
 		// The calling handler has already verified the add or edit nonce.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$language_id = isset( $_POST['localepress_term_language_id'] ) && is_scalar( $_POST['localepress_term_language_id'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_term_language_id'] ) )
+		$language_id = isset( $_POST['shapetranslate_term_language_id'] ) && is_scalar( $_POST['shapetranslate_term_language_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_term_language_id'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		$result = $this->translation_manager->set_term_language( $term_id, $taxonomy, $language_id );
@@ -425,8 +425,8 @@ final class TermTranslationModule implements ModuleInterface {
 	 */
 	private function verify_term_nonce( $action ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Verification is this method's purpose.
-		$nonce = isset( $_POST['localepress_term_language_nonce'] ) && is_scalar( $_POST['localepress_term_language_nonce'] )
-			? sanitize_text_field( wp_unslash( $_POST['localepress_term_language_nonce'] ) )
+		$nonce = isset( $_POST['shapetranslate_term_language_nonce'] ) && is_scalar( $_POST['shapetranslate_term_language_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['shapetranslate_term_language_nonce'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
@@ -441,7 +441,7 @@ final class TermTranslationModule implements ModuleInterface {
 	 */
 	private function store_error( WP_Error $error ) {
 		set_transient(
-			'localepress_term_error_' . get_current_user_id(),
+			'shapetranslate_term_error_' . get_current_user_id(),
 			sanitize_key( $error->get_error_code() ),
 			MINUTE_IN_SECONDS
 		);
@@ -472,17 +472,17 @@ final class TermTranslationModule implements ModuleInterface {
 	 */
 	private function error_messages() {
 		return array(
-			'translation_term_not_found'          => __( 'The requested term could not be found.', 'localepress' ),
-			'unsupported_translation_taxonomy'    => __( 'That taxonomy is not supported by LocalePress.', 'localepress' ),
-			'term_translation_language_not_found' => __( 'Select a registered language.', 'localepress' ),
-			'term_translation_language_disabled'  => __( 'Select an enabled language.', 'localepress' ),
-			'duplicate_term_translation_language' => __( 'A term translation for that language already exists.', 'localepress' ),
-			'conflicting_term_language'           => __( 'This term is already assigned to a different language.', 'localepress' ),
-			'conflicting_term_translation_groups' => __( 'Terms from different translation groups cannot be linked.', 'localepress' ),
-			'missing_source_term_language'        => __( 'Assign a language to the source term first.', 'localepress' ),
-			'missing_default_language'            => __( 'Configure an enabled default language before translating terms.', 'localepress' ),
-			'term_translation_storage_error'      => __( 'LocalePress could not save the term translation relationship.', 'localepress' ),
-			'term_exists'                         => __( 'A term with that generated name already exists. Rename it or create the translation manually.', 'localepress' ),
+			'translation_term_not_found'          => __( 'The requested term could not be found.', 'shapetranslate' ),
+			'unsupported_translation_taxonomy'    => __( 'That taxonomy is not supported by ShapeTranslate.', 'shapetranslate' ),
+			'term_translation_language_not_found' => __( 'Select a registered language.', 'shapetranslate' ),
+			'term_translation_language_disabled'  => __( 'Select an enabled language.', 'shapetranslate' ),
+			'duplicate_term_translation_language' => __( 'A term translation for that language already exists.', 'shapetranslate' ),
+			'conflicting_term_language'           => __( 'This term is already assigned to a different language.', 'shapetranslate' ),
+			'conflicting_term_translation_groups' => __( 'Terms from different translation groups cannot be linked.', 'shapetranslate' ),
+			'missing_source_term_language'        => __( 'Assign a language to the source term first.', 'shapetranslate' ),
+			'missing_default_language'            => __( 'Configure an enabled default language before translating terms.', 'shapetranslate' ),
+			'term_translation_storage_error'      => __( 'ShapeTranslate could not save the term translation relationship.', 'shapetranslate' ),
+			'term_exists'                         => __( 'A term with that generated name already exists. Rename it or create the translation manually.', 'shapetranslate' ),
 		);
 	}
 }

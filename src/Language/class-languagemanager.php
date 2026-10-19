@@ -2,12 +2,12 @@
 /**
  * Language management service.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
-use LocalePress\Contracts\LanguageRepositoryInterface;
+use ShapeTranslate\Contracts\LanguageRepositoryInterface;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
@@ -56,7 +56,7 @@ final class LanguageManager {
 		 *
 		 * @param array<int, array<string, mixed>> $languages Registered languages.
 		 */
-		$languages = apply_filters( 'localepress_registered_languages', $languages );
+		$languages = apply_filters( 'shapetranslate_registered_languages', $languages );
 
 		if ( ! is_array( $languages ) ) {
 			$languages = array();
@@ -154,7 +154,7 @@ final class LanguageManager {
 		 *
 		 * @param array<string, mixed> $language Registered language.
 		 */
-		do_action( 'localepress_language_registered', $language );
+		do_action( 'shapetranslate_language_registered', $language );
 
 		if ( $default_changed ) {
 			$this->emit_default_changed( $language['id'], '' );
@@ -174,7 +174,7 @@ final class LanguageManager {
 		$existing = $this->repository->find( $language_id );
 
 		if ( null === $existing ) {
-			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'localepress' ) );
+			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'shapetranslate' ) );
 		}
 
 		$input = $this->filter_input( $input, $language_id );
@@ -190,7 +190,7 @@ final class LanguageManager {
 		}
 
 		if ( $language_id === $this->repository->get_default_id() && empty( $language['enabled'] ) ) {
-			return new WP_Error( 'cannot_disable_default', __( 'The default language cannot be disabled.', 'localepress' ) );
+			return new WP_Error( 'cannot_disable_default', __( 'The default language cannot be disabled.', 'shapetranslate' ) );
 		}
 
 		$language['id']         = $language_id;
@@ -206,7 +206,7 @@ final class LanguageManager {
 		 * @param array<string, mixed> $language Updated language.
 		 * @param array<string, mixed> $existing Previous language data.
 		 */
-		do_action( 'localepress_language_updated', $language, $existing );
+		do_action( 'shapetranslate_language_updated', $language, $existing );
 
 		return $language;
 	}
@@ -225,13 +225,13 @@ final class LanguageManager {
 		$language = $this->repository->find( $language_id );
 
 		if ( null === $language ) {
-			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'localepress' ) );
+			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( $language_id === $this->repository->get_default_id() ) {
 			return new WP_Error(
 				'default_language_locked',
-				__( 'The default language cannot be removed. Make another language the default first.', 'localepress' )
+				__( 'The default language cannot be removed. Make another language the default first.', 'shapetranslate' )
 			);
 		}
 
@@ -245,7 +245,7 @@ final class LanguageManager {
 		 * @param string                    $language_id Language identifier.
 		 * @param array<string, mixed>      $language    Language record.
 		 */
-		$can_delete = apply_filters( 'localepress_pre_delete_language', true, $language_id, $language );
+		$can_delete = apply_filters( 'shapetranslate_pre_delete_language', true, $language_id, $language );
 
 		if ( is_wp_error( $can_delete ) ) {
 			return $can_delete;
@@ -254,7 +254,7 @@ final class LanguageManager {
 		if ( true !== $can_delete ) {
 			return new WP_Error(
 				'language_in_use',
-				__( 'This language is assigned to content and cannot be deleted.', 'localepress' )
+				__( 'This language is assigned to content and cannot be deleted.', 'shapetranslate' )
 			);
 		}
 
@@ -268,7 +268,7 @@ final class LanguageManager {
 		 * @param string               $language_id Deleted language identifier.
 		 * @param array<string, mixed> $language    Deleted language data.
 		 */
-		do_action( 'localepress_language_deleted', $language_id, $language );
+		do_action( 'shapetranslate_language_deleted', $language_id, $language );
 
 		if ( $old_default !== $new_default ) {
 			$this->emit_default_changed( $new_default, $old_default );
@@ -287,13 +287,13 @@ final class LanguageManager {
 		$language = $this->repository->find( $language_id );
 
 		if ( null === $language ) {
-			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'localepress' ) );
+			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( empty( $language['enabled'] ) ) {
 			return new WP_Error(
 				'default_must_be_enabled',
-				__( 'Enable a language before making it the default.', 'localepress' )
+				__( 'Enable a language before making it the default.', 'shapetranslate' )
 			);
 		}
 
@@ -317,11 +317,11 @@ final class LanguageManager {
 		$language = $this->repository->find( $language_id );
 
 		if ( null === $language ) {
-			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'localepress' ) );
+			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( $language_id === $this->repository->get_default_id() && ! empty( $language['enabled'] ) ) {
-			return new WP_Error( 'cannot_disable_default', __( 'The default language cannot be disabled.', 'localepress' ) );
+			return new WP_Error( 'cannot_disable_default', __( 'The default language cannot be disabled.', 'shapetranslate' ) );
 		}
 
 		$previous               = $language;
@@ -334,7 +334,7 @@ final class LanguageManager {
 			$this->emit_default_changed( $language_id, '' );
 		}
 
-		do_action( 'localepress_language_updated', $language, $previous );
+		do_action( 'shapetranslate_language_updated', $language, $previous );
 
 		return $language;
 	}
@@ -348,15 +348,15 @@ final class LanguageManager {
 	 */
 	public function move( $language_id, $direction ) {
 		if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
-			return new WP_Error( 'invalid_direction', __( 'Invalid language ordering direction.', 'localepress' ) );
+			return new WP_Error( 'invalid_direction', __( 'Invalid language ordering direction.', 'shapetranslate' ) );
 		}
 
 		if ( null === $this->repository->find( $language_id ) ) {
-			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'localepress' ) );
+			return new WP_Error( 'language_not_found', __( 'The requested language could not be found.', 'shapetranslate' ) );
 		}
 
 		if ( $this->repository->move( $language_id, $direction ) ) {
-			do_action( 'localepress_language_order_changed', $this->repository->all() );
+			do_action( 'shapetranslate_language_order_changed', $this->repository->all() );
 		}
 
 		return true;
@@ -375,7 +375,7 @@ final class LanguageManager {
 		 *
 		 * @param string $default_id Stored default language identifier.
 		 */
-		$filtered_id = apply_filters( 'localepress_default_language_id', $default_id );
+		$filtered_id = apply_filters( 'shapetranslate_default_language_id', $default_id );
 
 		return is_scalar( $filtered_id ) ? (string) $filtered_id : $default_id;
 	}
@@ -393,7 +393,7 @@ final class LanguageManager {
 		 *
 		 * @param array<string, mixed>|null $language Default language.
 		 */
-		$filtered_language = apply_filters( 'localepress_default_language', $language );
+		$filtered_language = apply_filters( 'shapetranslate_default_language', $language );
 
 		return is_array( $filtered_language ) || null === $filtered_language ? $filtered_language : $language;
 	}
@@ -412,10 +412,10 @@ final class LanguageManager {
 		 * @param array<string, mixed> $input       Raw language input.
 		 * @param string               $language_id Existing identifier, or an empty string for a new record.
 		 */
-		$input = apply_filters( 'localepress_pre_validate_language', $input, $language_id );
+		$input = apply_filters( 'shapetranslate_pre_validate_language', $input, $language_id );
 
 		if ( ! is_array( $input ) ) {
-			return new WP_Error( 'invalid_language_data', __( 'Language data must be an array.', 'localepress' ) );
+			return new WP_Error( 'invalid_language_data', __( 'Language data must be an array.', 'shapetranslate' ) );
 		}
 
 		return $input;
@@ -435,6 +435,6 @@ final class LanguageManager {
 		 * @param string $new_default New default language identifier.
 		 * @param string $old_default Previous default language identifier.
 		 */
-		do_action( 'localepress_default_language_changed', $new_default, $old_default );
+		do_action( 'shapetranslate_default_language_changed', $new_default, $old_default );
 	}
 }

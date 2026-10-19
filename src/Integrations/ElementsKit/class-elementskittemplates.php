@@ -2,13 +2,13 @@
 /**
  * ElementsKit header and footer language resolution.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Integrations\ElementsKit;
+namespace ShapeTranslate\Integrations\ElementsKit;
 
-use LocalePress\Content\PostTranslationManager;
-use LocalePress\Integrations\Elementor\ElementorThemeBuilder;
+use ShapeTranslate\Content\PostTranslationManager;
+use ShapeTranslate\Integrations\Elementor\ElementorThemeBuilder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -133,7 +133,7 @@ final class ElementsKitTemplates {
 		/*
 		 * The entry class, not the header and footer builder itself. The builder
 		 * registers its autoloader on `plugins_loaded` at priority 100, long after
-		 * LocalePress composes its modules, so asking for a class of the builder's
+		 * ShapeTranslate composes its modules, so asking for a class of the builder's
 		 * here answers no on every site that has it. The entry class is defined as
 		 * the plugin file is read, which is before any of this; what it cannot
 		 * promise is that the builder loaded, and can_resolve() asks that later,
@@ -146,7 +146,7 @@ final class ElementsKitTemplates {
 		 *
 		 * @param bool $available Whether the ElementsKit plugin is present.
 		 */
-		return (bool) apply_filters( 'localepress_elementskit_available', $available );
+		return (bool) apply_filters( 'shapetranslate_elementskit_available', $available );
 	}
 
 	/**

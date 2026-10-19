@@ -1,37 +1,27 @@
 <?php
 /**
- * Database-backed term translation repository.
+ * Taxonomy-backed term translation repository.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Infrastructure;
+namespace ShapeTranslate\Infrastructure;
 
-use LocalePress\Contracts\TermTranslationRepositoryInterface;
+use ShapeTranslate\Contracts\TermTranslationRepositoryInterface;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Stores term translation groups and memberships in indexed custom tables.
+ * Stores term languages and translation groups as hidden taxonomy terms.
+ *
+ * A translated term is addressed by its term-taxonomy ID, which is the object
+ * ID of its relationships here. Its term ID and taxonomy name are read from
+ * WordPress's own term taxonomy table on every query rather than copied, so
+ * they can never drift from the term they describe.
  */
 final class DatabaseTermTranslationRepository implements TermTranslationRepositoryInterface {
-	// Direct queries are isolated here because this repository owns custom tables.
-	// Every read path uses an explicit request-level cache.
+	// Reads join core term tables directly; each one is prepared and request-cached.
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-	/**
-	 * Translation group table suffix.
-	 *
-	 * @var string
-	 */
-	const GROUPS_TABLE_SUFFIX = 'localepress_term_translation_groups';
-
-	/**
-	 * Translation assignment table suffix.
-	 *
-	 * @var string
-	 */
-	const ASSIGNMENTS_TABLE_SUFFIX = 'localepress_term_translations';
 
 	/**
 	 * Assignment cache keyed by term-taxonomy ID.
@@ -69,74 +59,20 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	private $cache_prefix = '';
 
 	/**
-	 * Creates or upgrades the term relationship tables.
+	 * Returns a derived table of term assignments.
 	 *
-	 * @return void
+	 * Columns: `term_taxonomy_id`, `term_id`, `taxonomy`, `group_id`, `language_id`.
+	 *
+	 * @return string Parenthesized SQL, ready to alias.
 	 */
-	public static function install() {
+	public static function assignments_sql() {
 		global $wpdb;
 
-		if ( ! function_exists( 'dbDelta' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		}
+		$membership = RelationshipTaxonomies::membership_sql( RelationshipTaxonomies::TERM_LANGUAGE, RelationshipTaxonomies::TERM_GROUP, 'term_taxonomy_id' );
 
-		$groups_table      = self::groups_table();
-		$assignments_table = self::assignments_table();
-		$charset_collate   = $wpdb->get_charset_collate();
-
-		$groups_sql = "CREATE TABLE {$groups_table} (
-			group_id char(36) NOT NULL,
-			source_term_taxonomy_id bigint(20) unsigned NOT NULL,
-			taxonomy varchar(32) NOT NULL,
-			created_at datetime NOT NULL,
-			PRIMARY KEY  (group_id),
-			KEY source_term_taxonomy_id (source_term_taxonomy_id),
-			KEY taxonomy (taxonomy)
-		) {$charset_collate};";
-
-		$assignments_sql = "CREATE TABLE {$assignments_table} (
-			term_taxonomy_id bigint(20) unsigned NOT NULL,
-			term_id bigint(20) unsigned NOT NULL,
-			taxonomy varchar(32) NOT NULL,
-			group_id char(36) NOT NULL,
-			language_id varchar(64) NOT NULL,
-			created_at datetime NOT NULL,
-			updated_at datetime NOT NULL,
-			PRIMARY KEY  (term_taxonomy_id),
-			UNIQUE KEY group_language (group_id, language_id),
-			UNIQUE KEY term_taxonomy (term_id, taxonomy),
-			KEY group_id (group_id),
-			KEY language_id (language_id),
-			KEY taxonomy (taxonomy)
-		) {$charset_collate};";
-
-		// Table names and collation are generated exclusively by WordPress.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		dbDelta( $groups_sql );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		dbDelta( $assignments_sql );
-	}
-
-	/**
-	 * Returns the site-specific term group table name.
-	 *
-	 * @return string
-	 */
-	public static function groups_table() {
-		global $wpdb;
-
-		return $wpdb->prefix . self::GROUPS_TABLE_SUFFIX;
-	}
-
-	/**
-	 * Returns the site-specific term assignment table name.
-	 *
-	 * @return string
-	 */
-	public static function assignments_table() {
-		global $wpdb;
-
-		return $wpdb->prefix . self::ASSIGNMENTS_TABLE_SUFFIX;
+		return "(SELECT shapetranslate_tm.term_taxonomy_id, shapetranslate_ott.term_id, shapetranslate_ott.taxonomy, shapetranslate_tm.group_id, shapetranslate_tm.language_id
+			FROM ({$membership}) AS shapetranslate_tm
+			INNER JOIN {$wpdb->term_taxonomy} AS shapetranslate_ott ON shapetranslate_ott.term_taxonomy_id = shapetranslate_tm.term_taxonomy_id)";
 	}
 
 	/**
@@ -159,8 +95,18 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT term_taxonomy_id, term_id, taxonomy, group_id, language_id FROM %i WHERE term_id = %d AND taxonomy = %s',
-				self::assignments_table(),
+				"SELECT lr.object_id AS term_taxonomy_id, ott.term_id, ott.taxonomy, gt.slug AS group_id, lt.slug AS language_id
+				FROM {$wpdb->term_relationships} AS lr
+				INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS gt ON gt.term_id = gtt.term_id
+				INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+				WHERE ott.term_id = %d AND ott.taxonomy = %s
+				LIMIT 1",
+				RelationshipTaxonomies::TERM_LANGUAGE,
+				RelationshipTaxonomies::TERM_GROUP,
 				$term_id,
 				$taxonomy
 			),
@@ -193,8 +139,18 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT term_taxonomy_id, term_id, taxonomy, group_id, language_id FROM %i WHERE term_taxonomy_id = %d',
-				self::assignments_table(),
+				"SELECT lr.object_id AS term_taxonomy_id, ott.term_id, ott.taxonomy, gt.slug AS group_id, lt.slug AS language_id
+				FROM {$wpdb->term_relationships} AS lr
+				INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS gt ON gt.term_id = gtt.term_id
+				INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+				WHERE lr.object_id = %d
+				LIMIT 1",
+				RelationshipTaxonomies::TERM_LANGUAGE,
+				RelationshipTaxonomies::TERM_GROUP,
 				$term_taxonomy_id
 			),
 			ARRAY_A
@@ -215,14 +171,23 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 		global $wpdb;
 		$this->ensure_site_context();
 
+		$group_id = (string) $group_id;
+
 		if ( array_key_exists( $group_id, $this->groups ) ) {
 			return $this->groups[ $group_id ];
 		}
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT group_id, source_term_taxonomy_id, taxonomy, created_at FROM %i WHERE group_id = %s',
-				self::groups_table(),
+				"SELECT grp.slug AS group_id, CAST(COALESCE(src.meta_value, 0) AS UNSIGNED) AS source_term_taxonomy_id, COALESCE(stt.taxonomy, '') AS taxonomy
+				FROM {$wpdb->terms} AS grp
+				INNER JOIN {$wpdb->term_taxonomy} AS grptt ON grptt.term_id = grp.term_id AND grptt.taxonomy = %s
+				LEFT JOIN {$wpdb->termmeta} AS src ON src.term_id = grp.term_id AND src.meta_key = %s
+				LEFT JOIN {$wpdb->term_taxonomy} AS stt ON stt.term_taxonomy_id = CAST(COALESCE(src.meta_value, 0) AS UNSIGNED)
+				WHERE grp.slug = %s
+				LIMIT 1",
+				RelationshipTaxonomies::TERM_GROUP,
+				RelationshipTaxonomies::SOURCE_META,
 				$group_id
 			),
 			ARRAY_A
@@ -242,14 +207,26 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 		global $wpdb;
 		$this->ensure_site_context();
 
+		$group_id = (string) $group_id;
+
 		if ( isset( $this->members[ $group_id ] ) ) {
 			return $this->members[ $group_id ];
 		}
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT term_taxonomy_id, term_id, taxonomy, group_id, language_id FROM %i WHERE group_id = %s ORDER BY term_taxonomy_id ASC',
-				self::assignments_table(),
+				"SELECT lr.object_id AS term_taxonomy_id, ott.term_id, ott.taxonomy, gt.slug AS group_id, lt.slug AS language_id
+				FROM {$wpdb->term_relationships} AS lr
+				INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS gt ON gt.term_id = gtt.term_id
+				INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+				WHERE gt.slug = %s
+				ORDER BY lr.object_id ASC",
+				RelationshipTaxonomies::TERM_LANGUAGE,
+				RelationshipTaxonomies::TERM_GROUP,
 				$group_id
 			),
 			ARRAY_A
@@ -257,7 +234,7 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 
 		$this->members[ $group_id ] = array();
 
-		foreach ( $rows as $row ) {
+		foreach ( (array) $rows as $row ) {
 			$assignment                   = $this->normalize_assignment( $row );
 			$this->members[ $group_id ][] = $assignment;
 			$this->cache_assignment( $assignment );
@@ -269,36 +246,23 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	/**
 	 * {@inheritdoc}
 	 *
+	 * The taxonomy is not stored: a group's taxonomy is its source term's.
+	 *
 	 * @param string $group_id                Translation group identifier.
 	 * @param int    $source_term_taxonomy_id Source term-taxonomy identifier.
 	 * @param string $taxonomy                Taxonomy name.
 	 */
 	public function create_group( $group_id, $source_term_taxonomy_id, $taxonomy ) {
-		global $wpdb;
 		$this->ensure_site_context();
 
-		$created_at = current_time( 'mysql', true );
-		$taxonomy   = sanitize_key( $taxonomy );
-		$inserted   = $wpdb->insert(
-			self::groups_table(),
-			array(
-				'group_id'                => $group_id,
-				'source_term_taxonomy_id' => absint( $source_term_taxonomy_id ),
-				'taxonomy'                => $taxonomy,
-				'created_at'              => $created_at,
-			),
-			array( '%s', '%d', '%s', '%s' )
-		);
-
-		if ( false === $inserted ) {
+		if ( ! RelationshipTaxonomies::create_group_term( RelationshipTaxonomies::TERM_GROUP, $group_id, $source_term_taxonomy_id ) ) {
 			return false;
 		}
 
-		$this->groups[ $group_id ] = array(
-			'group_id'                => $group_id,
+		$this->groups[ (string) $group_id ] = array(
+			'group_id'                => (string) $group_id,
 			'source_term_taxonomy_id' => absint( $source_term_taxonomy_id ),
-			'taxonomy'                => $taxonomy,
-			'created_at'              => $created_at,
+			'taxonomy'                => sanitize_key( $taxonomy ),
 		);
 
 		return true;
@@ -307,6 +271,9 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	/**
 	 * {@inheritdoc}
 	 *
+	 * A term holds one assignment, and a group one term per language. The
+	 * term API enforces neither, so both are checked here.
+	 *
 	 * @param int    $term_taxonomy_id Term-taxonomy identifier.
 	 * @param int    $term_id          Term identifier.
 	 * @param string $taxonomy         Taxonomy name.
@@ -314,41 +281,38 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	 * @param string $language_id      Language identifier.
 	 */
 	public function add_assignment( $term_taxonomy_id, $term_id, $taxonomy, $group_id, $language_id ) {
-		global $wpdb;
 		$this->ensure_site_context();
 
 		$term_taxonomy_id = absint( $term_taxonomy_id );
-		$term_id          = absint( $term_id );
-		$taxonomy         = sanitize_key( $taxonomy );
-		$now              = current_time( 'mysql', true );
-		$inserted         = $wpdb->insert(
-			self::assignments_table(),
-			array(
-				'term_taxonomy_id' => $term_taxonomy_id,
-				'term_id'          => $term_id,
-				'taxonomy'         => $taxonomy,
-				'group_id'         => $group_id,
-				'language_id'      => $language_id,
-				'created_at'       => $now,
-				'updated_at'       => $now,
-			),
-			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
-		);
 
-		if ( false === $inserted ) {
+		if (
+			0 === $term_taxonomy_id
+			|| null !== $this->find_by_term_taxonomy( $term_taxonomy_id )
+			|| $this->group_has_language( $group_id, $language_id, $term_taxonomy_id )
+		) {
+			return false;
+		}
+
+		if ( ! RelationshipTaxonomies::set_object_term( $term_taxonomy_id, RelationshipTaxonomies::TERM_LANGUAGE, $language_id ) ) {
+			return false;
+		}
+
+		if ( ! RelationshipTaxonomies::set_object_term( $term_taxonomy_id, RelationshipTaxonomies::TERM_GROUP, $group_id ) ) {
+			RelationshipTaxonomies::clear_object_terms( $term_taxonomy_id, array( RelationshipTaxonomies::TERM_LANGUAGE ) );
+
 			return false;
 		}
 
 		$this->cache_assignment(
 			array(
 				'term_taxonomy_id' => $term_taxonomy_id,
-				'term_id'          => $term_id,
-				'taxonomy'         => $taxonomy,
-				'group_id'         => $group_id,
-				'language_id'      => $language_id,
+				'term_id'          => absint( $term_id ),
+				'taxonomy'         => sanitize_key( $taxonomy ),
+				'group_id'         => (string) $group_id,
+				'language_id'      => (string) $language_id,
 			)
 		);
-		unset( $this->members[ $group_id ] );
+		unset( $this->members[ (string) $group_id ] );
 
 		return true;
 	}
@@ -360,8 +324,6 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	 * @param string $language_id      Language identifier.
 	 */
 	public function update_assignment_language( $term_taxonomy_id, $language_id ) {
-		global $wpdb;
-
 		$assignment = $this->find_by_term_taxonomy( $term_taxonomy_id );
 
 		if ( null === $assignment ) {
@@ -372,22 +334,14 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 			return true;
 		}
 
-		$updated = $wpdb->update(
-			self::assignments_table(),
-			array(
-				'language_id' => $language_id,
-				'updated_at'  => current_time( 'mysql', true ),
-			),
-			array( 'term_taxonomy_id' => absint( $term_taxonomy_id ) ),
-			array( '%s', '%s' ),
-			array( '%d' )
-		);
-
-		if ( false === $updated ) {
+		if (
+			$this->group_has_language( $assignment['group_id'], $language_id, $assignment['term_taxonomy_id'] )
+			|| ! RelationshipTaxonomies::set_object_term( $assignment['term_taxonomy_id'], RelationshipTaxonomies::TERM_LANGUAGE, $language_id )
+		) {
 			return false;
 		}
 
-		$assignment['language_id'] = $language_id;
+		$assignment['language_id'] = (string) $language_id;
 		$this->cache_assignment( $assignment );
 		unset( $this->members[ $assignment['group_id'] ] );
 
@@ -397,12 +351,13 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	/**
 	 * {@inheritdoc}
 	 *
+	 * A move onto a language the target group already holds is refused rather
+	 * than producing a group that answers twice for one language.
+	 *
 	 * @param int    $term_taxonomy_id Term-taxonomy identifier.
 	 * @param string $group_id         Target translation group identifier.
 	 */
 	public function update_assignment_group( $term_taxonomy_id, $group_id ) {
-		global $wpdb;
-
 		$assignment = $this->find_by_term_taxonomy( $term_taxonomy_id );
 
 		if ( null === $assignment ) {
@@ -413,28 +368,17 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 			return true;
 		}
 
-		// The group and language pair is unique in storage, so a move onto a
-		// language the target group already holds is refused here rather than
-		// producing a group that answers twice for one language.
-		$updated = $wpdb->update(
-			self::assignments_table(),
-			array(
-				'group_id'   => $group_id,
-				'updated_at' => current_time( 'mysql', true ),
-			),
-			array( 'term_taxonomy_id' => absint( $term_taxonomy_id ) ),
-			array( '%s', '%s' ),
-			array( '%d' )
-		);
-
-		if ( false === $updated ) {
+		if (
+			$this->group_has_language( $group_id, $assignment['language_id'], $assignment['term_taxonomy_id'] )
+			|| ! RelationshipTaxonomies::set_object_term( $assignment['term_taxonomy_id'], RelationshipTaxonomies::TERM_GROUP, $group_id )
+		) {
 			return false;
 		}
 
 		$previous_group_id      = $assignment['group_id'];
 		$assignment['group_id'] = (string) $group_id;
 		$this->cache_assignment( $assignment );
-		unset( $this->members[ $previous_group_id ], $this->members[ $group_id ] );
+		unset( $this->members[ $previous_group_id ], $this->members[ (string) $group_id ] );
 
 		return true;
 	}
@@ -445,8 +389,6 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	 * @param int $term_taxonomy_id Term-taxonomy identifier.
 	 */
 	public function remove_assignment( $term_taxonomy_id ) {
-		global $wpdb;
-
 		$term_taxonomy_id = absint( $term_taxonomy_id );
 		$assignment       = $this->find_by_term_taxonomy( $term_taxonomy_id );
 
@@ -454,15 +396,7 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 			return false;
 		}
 
-		$deleted = $wpdb->delete(
-			self::assignments_table(),
-			array( 'term_taxonomy_id' => $term_taxonomy_id ),
-			array( '%d' )
-		);
-
-		if ( false === $deleted ) {
-			return false;
-		}
+		RelationshipTaxonomies::clear_object_terms( $term_taxonomy_id, array( RelationshipTaxonomies::TERM_LANGUAGE, RelationshipTaxonomies::TERM_GROUP ) );
 
 		$this->assignments[ $term_taxonomy_id ] = null;
 		$this->terms[ $this->term_cache_key( $assignment['term_id'], $assignment['taxonomy'] ) ] = null;
@@ -478,22 +412,13 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	 * @param int    $source_term_taxonomy_id Source term-taxonomy identifier.
 	 */
 	public function update_group_source( $group_id, $source_term_taxonomy_id ) {
-		global $wpdb;
 		$this->ensure_site_context();
 
-		$updated = $wpdb->update(
-			self::groups_table(),
-			array( 'source_term_taxonomy_id' => absint( $source_term_taxonomy_id ) ),
-			array( 'group_id' => $group_id ),
-			array( '%d' ),
-			array( '%s' )
-		);
-
-		if ( false === $updated ) {
+		if ( ! RelationshipTaxonomies::update_group_source( RelationshipTaxonomies::TERM_GROUP, $group_id, $source_term_taxonomy_id ) ) {
 			return false;
 		}
 
-		unset( $this->groups[ $group_id ] );
+		unset( $this->groups[ (string) $group_id ] );
 
 		return true;
 	}
@@ -504,18 +429,13 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 	 * @param string $group_id Translation group identifier.
 	 */
 	public function delete_group( $group_id ) {
-		global $wpdb;
 		$this->ensure_site_context();
 
-		$deleted = $wpdb->delete(
-			self::groups_table(),
-			array( 'group_id' => $group_id ),
-			array( '%s' )
-		);
+		$deleted = RelationshipTaxonomies::delete_term( RelationshipTaxonomies::TERM_GROUP, $group_id );
 
-		unset( $this->groups[ $group_id ], $this->members[ $group_id ] );
+		unset( $this->groups[ (string) $group_id ], $this->members[ (string) $group_id ] );
 
-		return false !== $deleted;
+		return $deleted;
 	}
 
 	/**
@@ -529,9 +449,17 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT COUNT(*) FROM %i WHERE language_id = %s',
-				self::assignments_table(),
-				$language_id
+				"SELECT COUNT(*)
+				FROM {$wpdb->term_relationships} AS lr
+				INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+				INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+				WHERE lt.slug = %s",
+				RelationshipTaxonomies::TERM_LANGUAGE,
+				RelationshipTaxonomies::TERM_GROUP,
+				(string) $language_id
 			)
 		);
 	}
@@ -560,15 +488,23 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 				$this->assignments[ $term_taxonomy_id ] = null;
 			}
 
-			$placeholders = implode( ', ', array_fill( 0, count( $uncached ), '%d' ) );
-			$query        = "SELECT term_taxonomy_id, term_id, taxonomy, group_id, language_id FROM %i WHERE term_taxonomy_id IN ({$placeholders})";
-			$values       = array_merge( array( self::assignments_table() ), $uncached );
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT lr.object_id AS term_taxonomy_id, ott.term_id, ott.taxonomy, gt.slug AS group_id, lt.slug AS language_id
+					FROM {$wpdb->term_relationships} AS lr
+					INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+					INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+					INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+					INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+					INNER JOIN {$wpdb->terms} AS gt ON gt.term_id = gtt.term_id
+					INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+					WHERE lr.object_id IN (" . implode( ', ', array_fill( 0, count( $uncached ), '%d' ) ) . ')',
+					array_merge( array( RelationshipTaxonomies::TERM_LANGUAGE, RelationshipTaxonomies::TERM_GROUP ), $uncached )
+				),
+				ARRAY_A
+			);
 
-			// Placeholder count is generated from sanitized integer identifiers above.
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$rows = $wpdb->get_results( $wpdb->prepare( $query, $values ), ARRAY_A );
-
-			foreach ( $rows as $row ) {
+			foreach ( (array) $rows as $row ) {
 				$this->cache_assignment( $this->normalize_assignment( $row ) );
 			}
 		}
@@ -589,23 +525,50 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 			return;
 		}
 
-		$placeholders = implode( ', ', array_fill( 0, count( $group_ids ), '%s' ) );
-		$query        = "SELECT term_taxonomy_id, term_id, taxonomy, group_id, language_id FROM %i WHERE group_id IN ({$placeholders}) ORDER BY term_taxonomy_id ASC";
-		$values       = array_merge( array( self::assignments_table() ), $group_ids );
-
 		foreach ( $group_ids as $group_id ) {
 			$this->members[ $group_id ] = array();
 		}
 
-		// Placeholder count is generated from stored group identifiers above.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( $query, $values ), ARRAY_A );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT lr.object_id AS term_taxonomy_id, ott.term_id, ott.taxonomy, gt.slug AS group_id, lt.slug AS language_id
+				FROM {$wpdb->term_relationships} AS lr
+				INNER JOIN {$wpdb->term_taxonomy} AS ltt ON ltt.term_taxonomy_id = lr.term_taxonomy_id AND ltt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS lt ON lt.term_id = ltt.term_id
+				INNER JOIN {$wpdb->term_relationships} AS gr ON gr.object_id = lr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS gtt ON gtt.term_taxonomy_id = gr.term_taxonomy_id AND gtt.taxonomy = %s
+				INNER JOIN {$wpdb->terms} AS gt ON gt.term_id = gtt.term_id
+				INNER JOIN {$wpdb->term_taxonomy} AS ott ON ott.term_taxonomy_id = lr.object_id
+				WHERE gt.slug IN (" . implode( ', ', array_fill( 0, count( $group_ids ), '%s' ) ) . ')
+				ORDER BY lr.object_id ASC',
+				array_merge( array( RelationshipTaxonomies::TERM_LANGUAGE, RelationshipTaxonomies::TERM_GROUP ), $group_ids )
+			),
+			ARRAY_A
+		);
 
-		foreach ( $rows as $row ) {
+		foreach ( (array) $rows as $row ) {
 			$assignment                                 = $this->normalize_assignment( $row );
 			$this->members[ $assignment['group_id'] ][] = $assignment;
 			$this->cache_assignment( $assignment );
 		}
+	}
+
+	/**
+	 * Reports whether another term already answers for a language in a group.
+	 *
+	 * @param string $group_id         Translation group identifier.
+	 * @param string $language_id      Language identifier.
+	 * @param int    $term_taxonomy_id Term that may hold the slot itself.
+	 * @return bool
+	 */
+	private function group_has_language( $group_id, $language_id, $term_taxonomy_id ) {
+		foreach ( $this->get_group_members( $group_id ) as $member ) {
+			if ( (string) $language_id === $member['language_id'] && absint( $term_taxonomy_id ) !== $member['term_taxonomy_id'] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -671,7 +634,6 @@ final class DatabaseTermTranslationRepository implements TermTranslationReposito
 			'group_id'                => (string) $row['group_id'],
 			'source_term_taxonomy_id' => absint( $row['source_term_taxonomy_id'] ),
 			'taxonomy'                => sanitize_key( $row['taxonomy'] ),
-			'created_at'              => (string) $row['created_at'],
 		);
 	}
 

@@ -2,10 +2,10 @@
 /**
  * Language input validation.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Language;
+namespace ShapeTranslate\Language;
 
 use WP_Error;
 
@@ -39,35 +39,35 @@ final class LanguageValidator {
 		$language['locale'] = str_replace( '-', '_', $language['locale'] );
 
 		if ( '' === $language['name'] ) {
-			return new WP_Error( 'missing_name', __( 'Language name is required.', 'localepress' ) );
+			return new WP_Error( 'missing_name', __( 'Language name is required.', 'shapetranslate' ) );
 		}
 
 		if ( '' === $language['native_name'] ) {
-			return new WP_Error( 'missing_native_name', __( 'Native name is required.', 'localepress' ) );
+			return new WP_Error( 'missing_native_name', __( 'Native name is required.', 'shapetranslate' ) );
 		}
 
 		if ( $this->is_too_long( $language['name'], 100 ) || $this->is_too_long( $language['native_name'], 100 ) ) {
-			return new WP_Error( 'name_too_long', __( 'Language names must be 100 characters or fewer.', 'localepress' ) );
+			return new WP_Error( 'name_too_long', __( 'Language names must be 100 characters or fewer.', 'shapetranslate' ) );
 		}
 
 		if ( ! preg_match( '/^[A-Za-z]{2,3}(?:_[A-Za-z0-9]{2,12}){0,3}$/', $language['locale'] ) ) {
 			return new WP_Error(
 				'invalid_locale',
-				__( 'Enter a valid WordPress locale, such as en_US or pt_BR.', 'localepress' )
+				__( 'Enter a valid WordPress locale, such as en_US or pt_BR.', 'shapetranslate' )
 			);
 		}
 
 		if ( ! preg_match( '/^[a-z]{2,3}$/', $language['language_code'] ) ) {
 			return new WP_Error(
 				'invalid_language_code',
-				__( 'Language code must contain two or three lowercase letters.', 'localepress' )
+				__( 'Language code must contain two or three lowercase letters.', 'shapetranslate' )
 			);
 		}
 
 		if ( '' === $language['url_slug'] || $this->is_too_long( $language['url_slug'], 80 ) ) {
 			return new WP_Error(
 				'invalid_url_slug',
-				__( 'URL slug is required and must be 80 characters or fewer.', 'localepress' )
+				__( 'URL slug is required and must be 80 characters or fewer.', 'shapetranslate' )
 			);
 		}
 
@@ -79,7 +79,7 @@ final class LanguageValidator {
 		if ( '' !== $this->scalar_value( $input, 'domain' ) && '' === $language['domain'] ) {
 			return new WP_Error(
 				'invalid_domain',
-				__( 'Enter a valid domain, such as example.fr.', 'localepress' )
+				__( 'Enter a valid domain, such as example.fr.', 'shapetranslate' )
 			);
 		}
 
@@ -96,11 +96,11 @@ final class LanguageValidator {
 			}
 
 			if ( 0 === strcasecmp( $language['locale'], $existing_language['locale'] ) ) {
-				return new WP_Error( 'duplicate_locale', __( 'That locale is already registered.', 'localepress' ) );
+				return new WP_Error( 'duplicate_locale', __( 'That locale is already registered.', 'shapetranslate' ) );
 			}
 
 			if ( 0 === strcasecmp( $language['url_slug'], $existing_language['url_slug'] ) ) {
-				return new WP_Error( 'duplicate_url_slug', __( 'That URL slug is already in use.', 'localepress' ) );
+				return new WP_Error( 'duplicate_url_slug', __( 'That URL slug is already in use.', 'shapetranslate' ) );
 			}
 
 			if (
@@ -108,7 +108,7 @@ final class LanguageValidator {
 				&& isset( $existing_language['domain'] )
 				&& 0 === strcasecmp( $language['domain'], (string) $existing_language['domain'] )
 			) {
-				return new WP_Error( 'duplicate_domain', __( 'That domain is already in use.', 'localepress' ) );
+				return new WP_Error( 'duplicate_domain', __( 'That domain is already in use.', 'shapetranslate' ) );
 			}
 		}
 

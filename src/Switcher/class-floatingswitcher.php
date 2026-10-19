@@ -2,14 +2,14 @@
 /**
  * Floating language switcher pinned to a corner of the viewport.
  *
- * @package LocalePress
+ * @package ShapeTranslate
  */
 
-namespace LocalePress\Switcher;
+namespace ShapeTranslate\Switcher;
 
-use LocalePress\Contracts\ModuleInterface;
-use LocalePress\Routing\LanguageUrlManager;
-use LocalePress\Settings\PluginSettings;
+use ShapeTranslate\Contracts\ModuleInterface;
+use ShapeTranslate\Routing\LanguageUrlManager;
+use ShapeTranslate\Settings\PluginSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -93,11 +93,11 @@ final class FloatingSwitcher implements ModuleInterface {
 
 		$config = $this->settings->get_floater_settings();
 
-		wp_enqueue_style( 'localepress-switcher' );
-		wp_enqueue_style( 'localepress-floating-switcher' );
+		wp_enqueue_style( 'shapetranslate-switcher' );
+		wp_enqueue_style( 'shapetranslate-floating-switcher' );
 
 		if ( 'dropdown' === $config['layout'] ) {
-			wp_enqueue_script( 'localepress-switcher' );
+			wp_enqueue_script( 'shapetranslate-switcher' );
 		}
 	}
 
@@ -126,7 +126,7 @@ final class FloatingSwitcher implements ModuleInterface {
 			array(
 				'layout'     => $config['layout'],
 				'show_flags' => ! empty( $config['show_flags'] ),
-				'class_name' => 'localepress-switcher--floating localepress-switcher--at-' . $position,
+				'class_name' => 'shapetranslate-switcher--floating shapetranslate-switcher--at-' . $position,
 				'context'    => 'floater',
 			)
 		);
@@ -161,7 +161,7 @@ final class FloatingSwitcher implements ModuleInterface {
 		 * @param bool                 $enabled Whether the floater renders.
 		 * @param array<string, mixed> $config  Floating switcher settings.
 		 */
-		return (bool) apply_filters( 'localepress_render_floating_switcher', $enabled, $config );
+		return (bool) apply_filters( 'shapetranslate_render_floating_switcher', $enabled, $config );
 	}
 
 	/**
